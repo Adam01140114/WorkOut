@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workout Tracker</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore-compat.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Add Workout Form (Now at the Top) -->
+  <div class="add-workout-container">
+    <h2>Add Workout</h2>
+    <form id="custom-workout-form">
+      <input type="text" id="custom-workout-name" placeholder="Workout name" required>
+      <button type="submit">Create Workout</button>
+    </form>
+  </div>
+
+  <h1>Workout Tracker</h1>
+
+  <div class="custom-workout-container" id="custom-workout-container"></div>
+<center></center>
+  <!-- Chart Section -->
+  <div class="chart-container">
+    <canvas id="workoutChart"></canvas>
+    <div class="chart-controls">
+      <button id="prev-chart-btn">Back</button>
+      <span id="chart-mode-label">Total Weight Lifted</span>
+      <button id="next-chart-btn">Next</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
