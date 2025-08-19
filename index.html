@@ -1,40 +1,1100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Workout Tracker</title>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore-compat.js"></script>
-  <!-- Chart.js -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+     <title>WorkSmart - BMR & Calorie Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --card: #121821;
+      --muted: #8aa0b4;
+      --text: #e9f0f6;
+      --accent: #6ee7b7;
+      --accent-2: #60a5fa;
+      --danger: #f87171;
+      --ring: rgba(110,231,183,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui;-webkit-font-smoothing:antialiased;color:var(--text);background:var(--bg);padding:24px}
+    .wrap{max-width:880px;margin:0 auto}
+    h1,h2,h3{text-align:center}
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:18px}
+    .field{margin-bottom:12px;text-align:left}
+    .label{font-size:14px;color:var(--muted);margin-bottom:4px;display:block;text-align:left}
+    input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0e141b;color:var(--text)}
+    button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;display:block;margin:8px auto}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#081018}
+    .ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.2)}
+    .result{margin-top:10px;min-height:38px;text-align:left}
+    .math{background:#0c1218;border:1px dashed rgba(255,255,255,.2);padding:8px;border-radius:10px;font-family:monospace;white-space:pre-wrap}
+    canvas{background:#0e141b;border-radius:10px;padding:10px}
+    .hidden{display:none}
+    .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .menu-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:#0e141b;cursor:pointer}
+    .menu-emoji{font-size:28px}
+    .row{display:flex;gap:8px;justify-content:flex-start}
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-icon {
+      font-size: 24px;
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .modal-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 4px 0 0 0;
+    }
+    .auth-toggle {
+      text-align: center;
+      margin-top: 16px;
+      color: var(--muted);
+    }
+    .auth-toggle a {
+      color: var(--accent-2);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .error-message {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .success-message {
+      color: var(--accent);
+      font-size: 14px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    
+    /* Profile Setup Styles */
+    .profile-setup {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .profile-setup h3 {
+      margin-bottom: 16px;
+    }
+    
+         /* Settings and Logout Section */
+     .user-actions {
+       display: flex;
+       flex-direction: column;
+       gap: 8px;
+       margin-top: 16px;
+       align-items: center;
+     }
+     .user-actions button {
+       margin: 0;
+       width: auto;
+       min-width: 120px;
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+     .settings-btn {
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+     .logout-btn {
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+  </style>
 </head>
 <body>
-  <!-- Add Workout Form (Now at the Top) -->
-  <div class="add-workout-container">
-    <h2>Add Workout</h2>
-    <form id="custom-workout-form">
-      <input type="text" id="custom-workout-name" placeholder="Workout name" required>
-      <button type="submit">Create Workout</button>
-    </form>
-  </div>
+  <div class="wrap">
+         <h1>WorkSmart - BMR & Calorie Tracker</h1>
 
-  <h1>Workout Tracker</h1>
+    <!-- Authentication Modal -->
+    <div id="authModal" class="modal-overlay hidden">
+      <div class="modal">
+        <!-- Login Form -->
+        <div id="loginForm">
+          <div class="modal-header">
+            <div class="modal-icon">🔓</div>
+                         <div>
+               <h3 class="modal-title">Welcome Back</h3>
+               <p class="modal-subtitle">Sign in to access your workout tracker</p>
+             </div>
+          </div>
+          <div class="field">
+            <label class="label">EMAIL ADDRESS</label>
+            <input id="loginEmail" type="email" placeholder="Enter your email" />
+          </div>
+          <div class="field">
+            <label class="label">PASSWORD</label>
+            <input id="loginPassword" type="password" placeholder="Enter your password" />
+          </div>
+                     <button class="primary" id="loginBtn">Sign In</button>
+           <div class="auth-toggle">
+             Don't have an account? <a id="showSignup">Create one here</a>
+           </div>
+                       <div id="loginError" class="error-message hidden"></div>
+        </div>
 
-  <div class="custom-workout-container" id="custom-workout-container"></div>
-<center></center>
-  <!-- Chart Section -->
-  <div class="chart-container">
-    <canvas id="workoutChart"></canvas>
-    <div class="chart-controls">
-      <button id="prev-chart-btn">Back</button>
-      <span id="chart-mode-label">Total Weight Lifted</span>
-      <button id="next-chart-btn">Next</button>
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+          <div class="modal-header">
+            <div class="modal-icon">🚀</div>
+                         <div>
+               <h3 class="modal-title">Create Account</h3>
+               <p class="modal-subtitle">Join WorkSmart and track your fitness journey</p>
+             </div>
+          </div>
+          <div class="field">
+            <label class="label">EMAIL ADDRESS</label>
+            <input id="signupEmail" type="email" placeholder="Enter your email" />
+          </div>
+          <div class="field">
+            <label class="label">PASSWORD</label>
+            <input id="signupPassword" type="password" placeholder="Enter your password" />
+            <small style="color: var(--muted); font-size: 12px;">Minimum 6 characters</small>
+          </div>
+          <div class="field">
+            <label class="label">CONFIRM PASSWORD</label>
+            <input id="confirmPassword" type="password" placeholder="Confirm your password" />
+          </div>
+          <button class="primary" id="signupBtn">Create Account</button>
+          <div class="auth-toggle">
+            Already have an account? <a id="showLogin">Sign in here</a>
+          </div>
+          <div id="signupError" class="error-message hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Setup Modal -->
+    <div id="profileModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="profile-setup">
+          <h3>Complete Your Profile</h3>
+          <p>Let's calculate your BMR to get started</p>
+        </div>
+        <div class="field">
+          <label class="label" for="setupAge">Age</label>
+          <input id="setupAge" type="number" placeholder="22" />
+        </div>
+        <div class="field">
+          <label class="label">Height</label>
+          <div class="row">
+            <input id="setupHeightFt" type="number" placeholder="5" />
+            <input id="setupHeightIn" type="number" placeholder="9" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="setupWeight">Weight (lb)</label>
+          <input id="setupWeight" type="number" placeholder="170" />
+        </div>
+        <div class="result" id="setupResult"></div>
+        <button class="primary" id="saveProfileBtn">Save Profile</button>
+        <div id="profileError" class="error-message hidden"></div>
+      </div>
+    </div>
+
+         <!-- Settings Modal -->
+     <div id="settingsModal" class="modal-overlay hidden" style="display: none !important;">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚙️</div>
+           <div>
+             <h3 class="modal-title">User Settings</h3>
+             <p class="modal-subtitle">Update your profile information</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="settingsAge">Age</label>
+           <input id="settingsAge" type="number" />
+         </div>
+         <div class="field">
+           <label class="label">Height</label>
+           <div class="row">
+             <input id="settingsHeightFt" type="number" />
+             <input id="settingsHeightIn" type="number" />
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="settingsWeight">Weight (lb)</label>
+           <input id="settingsWeight" type="number" />
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="cancelSettings">Back</button>
+           <button class="primary" id="saveSettings">Save</button>
+         </div>
+         <div id="settingsError" class="error-message hidden"></div>
+         <div id="settingsSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Add Calories Modal -->
+     <div id="addCaloriesModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🔥</div>
+           <div>
+             <h3 class="modal-title">Add Calories</h3>
+             <p class="modal-subtitle">Log your activity calories</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="caloriesAmount">Calories</label>
+           <input id="caloriesAmount" type="number" placeholder="Enter calories (positive or negative)" />
+           <small style="color: var(--muted); font-size: 12px;">Use negative values to subtract calories</small>
+         </div>
+         <div class="field">
+           <label class="label" for="caloriesDate">Date</label>
+           <input id="caloriesDate" type="date" />
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="cancelAddCalories">Cancel</button>
+           <button class="primary" id="submitAddCalories">Submit</button>
+         </div>
+         <div id="addCaloriesError" class="error-message hidden"></div>
+         <div id="addCaloriesSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+         <!-- Main App Content (hidden until authenticated) -->
+     <div id="appContent" class="hidden">
+
+      <!-- Total Burned -->
+      <section class="card">
+        <h2>Total Calories Burned (Basal + Activity)</h2>
+        <canvas id="totalChart" height="200"></canvas>
+        <button class="ghost" id="toggleFat">Show Fat Loss</button>
+        <button class="primary" id="addCaloriesBtn">Add Calories</button>
+      </section>
+
+      <!-- Weight Trajectory -->
+      <section class="card">
+        <h2>Estimate Weight Trajectory</h2>
+        <canvas id="weightChart" height="200"></canvas>
+      </section>
+
+      <!-- Workouts Menu (hidden by default) -->
+      <section class="card hidden" id="workoutMenu">
+        <h2>Choose a Workout</h2>
+        <div class="menu-grid">
+          <div class="menu-tile" id="openTreadmill">
+            <div class="menu-emoji">🏃‍♂️</div>
+            <div>Treadmill</div>
+          </div>
+          <div class="menu-tile" id="openStairs">
+            <div class="menu-emoji">🧗</div>
+            <div>Stair Master</div>
+          </div>
+        </div>
+        <button class="ghost" id="hideWorkouts">Hide Workouts</button>
+      </section>
+
+      <!-- Show/Hide Workouts Button -->
+      <section class="card" id="workoutToggleSection">
+      <h2>Count Calories With Workouts</h2>
+        <button class="primary" id="showWorkouts">Show Workouts</button>
+      </section>
+
+          <!-- Settings and Logout Section -->
+    <section class="card">
+      <div class="user-actions">
+        <button class="settings-btn" id="openSettings" disabled>Settings</button>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+      </div>
+    </section>
+
+      <!-- Treadmill Section -->
+      <section class="card hidden" id="treadmillSection">
+        <h2>Treadmill Calories · ACSM Walking Equation</h2>
+        <div class="field">
+          <label class="label" for="tspeed">Speed (mph)</label>
+          <input id="tspeed" type="number" step="0.1" placeholder="3.5" />
+        </div>
+        <div class="field">
+          <label class="label" for="tgrade">Incline (%)</label>
+          <input id="tgrade" type="number" step="0.1" placeholder="7.5" />
+        </div>
+        <div class="field">
+          <label class="label" for="tdur">Duration (min)</label>
+          <input id="tdur" type="number" placeholder="30" />
+        </div>
+        <div class="result" id="tresult"></div>
+        <button class="primary" id="tcalc">Calculate Calories</button>
+        <button class="ghost" id="tclear">Clear</button>
+        <canvas id="tchart" height="200"></canvas>
+        <button class="ghost" id="backFromTreadmill">Back</button>
+      </section>
+
+      <!-- Stair Master Section -->
+      <section class="card hidden" id="stairSection">
+        <h2>Stair Master Calories · MET Method</h2>
+        <div class="field">
+          <label class="label" for="sdur">Duration (min)</label>
+          <input id="sdur" type="number" placeholder="20" />
+        </div>
+        <div class="field">
+          <label class="label" for="sintensity">Intensity</label>
+          <select id="sintensity">
+            <option value="6">Easy · 6 MET</option>
+            <option value="8.8" selected>Moderate · 8.8 MET</option>
+            <option value="10.3">Hard · 10.3 MET</option>
+            <option value="custom">Custom MET</option>
+          </select>
+        </div>
+        <div class="field hidden" id="customMetField">
+          <label class="label" for="scustom">Custom MET</label>
+          <input id="scustom" type="number" step="0.1" placeholder="9.5" />
+        </div>
+        <div class="result" id="sresult"></div>
+        <button class="primary" id="scalc">Calculate Calories</button>
+        <button class="ghost" id="sclear">Clear</button>
+        <canvas id="schart" height="200"></canvas>
+        <button class="ghost" id="backFromStairs">Back</button>
+      </section>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    // ===== Firebase Configuration =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgu5VzQcD0hPEpcslrizbiat_Q8VKPa3I",
+      authDomain: "workout-b4051.firebaseapp.com",
+      projectId: "workout-b4051",
+      storageBucket: "workout-b4051.firebasestorage.app",
+      messagingSenderId: "162149362879",
+      appId: "1:162149362879:web:7db78878fa79bf9b4eea0a",
+      measurementId: "G-6Y3WBWFE98"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ===== Authentication State Management =====
+    let currentUser = null;
+    let userProfile = null;
+    let authStateInitialized = false;
+
+    auth.onAuthStateChanged(async (user) => {
+      console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+      
+      if (user) {
+        currentUser = user;
+        console.log('User signed in:', user.email);
+        
+        // Check if user has profile
+        try {
+          const profileDoc = await db.collection('users').doc(user.uid).get();
+          if (profileDoc.exists) {
+            userProfile = profileDoc.data();
+            console.log('Profile found, showing app');
+            showApp();
+            loadUserData();
+          } else {
+            console.log('No profile found, showing profile setup');
+            showProfileSetup();
+          }
+        } catch (error) {
+          console.error('Error checking profile:', error);
+          showAuthModal();
+        }
+      } else {
+        currentUser = null;
+        userProfile = null;
+        console.log('No user, showing auth modal');
+        // Ensure all modals are hidden first
+        hideAllModals();
+        // Double-check that profile modal is hidden
+        const profileModal = document.getElementById('profileModal');
+        profileModal.style.display = 'none';
+        profileModal.classList.add('hidden');
+        showAuthModal();
+      }
+      
+      // Mark auth state as initialized
+      authStateInitialized = true;
+    });
+
+    // ===== UI State Management =====
+         function hideAllModals() {
+       console.log('Hiding all modals');
+       document.getElementById('authModal').classList.add('hidden');
+       document.getElementById('profileModal').classList.add('hidden');
+       const settingsModal = document.getElementById('settingsModal');
+       settingsModal.classList.add('hidden');
+       settingsModal.style.display = 'none';
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.classList.add('hidden');
+       addCaloriesModal.style.display = 'none';
+       document.getElementById('appContent').classList.add('hidden');
+       
+       // Force hide profile modal with inline styles as backup
+       const profileModal = document.getElementById('profileModal');
+       profileModal.style.display = 'none';
+     }
+
+    function showAuthModal() {
+      console.log('showAuthModal called');
+      
+      // Ensure all other modals are hidden first
+      hideAllModals();
+      
+      document.getElementById('authModal').classList.remove('hidden');
+      showLoginForm();
+    }
+
+    function hideAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    function showLoginForm() {
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('signupForm').classList.add('hidden');
+    }
+
+    function showSignupForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('signupForm').classList.remove('hidden');
+    }
+
+    function showProfileSetup() {
+      // Only show profile setup if user is authenticated
+      if (!currentUser) {
+        console.log('Cannot show profile setup - no authenticated user');
+        showAuthModal();
+        return;
+      }
+      
+      console.log('Showing profile setup for user:', currentUser.email);
+      document.getElementById('authModal').classList.add('hidden');
+      const authModal = document.getElementById('authModal');
+      authModal.style.display = 'none';
+      const profileModal = document.getElementById('profileModal');
+      profileModal.classList.remove('hidden');
+      profileModal.style.display = 'flex';
+      document.getElementById('appContent').classList.add('hidden');
+    }
+
+    function hideProfileSetup() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+         function showApp() {
+       document.getElementById('authModal').classList.add('hidden');
+       document.getElementById('profileModal').classList.add('hidden');
+       document.getElementById('appContent').classList.remove('hidden');
+       
+       // Enable settings button when user is authenticated
+       document.getElementById('openSettings').disabled = false;
+       
+       // Ensure auth modal is completely hidden
+       const authModal = document.getElementById('authModal');
+       authModal.style.display = 'none';
+     }
+
+     function showAddCaloriesModal() {
+       // Set today's date as default
+       const today = new Date().toISOString().split('T')[0];
+       document.getElementById('caloriesDate').value = today;
+       document.getElementById('caloriesAmount').value = '';
+       
+       // Clear any previous messages
+       document.getElementById('addCaloriesError').classList.add('hidden');
+       document.getElementById('addCaloriesSuccess').classList.add('hidden');
+       
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.style.display = 'flex';
+       addCaloriesModal.classList.remove('hidden');
+     }
+
+     function hideAddCaloriesModal() {
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.classList.add('hidden');
+       addCaloriesModal.style.display = 'none';
+     }
+
+    function showSettings() {
+      // Only show settings if user is authenticated
+      if (!currentUser || !userProfile) {
+        console.log('User not authenticated or profile not loaded');
+        return;
+      }
+      
+      // Populate settings with current values
+      document.getElementById('settingsAge').value = userProfile.age || '';
+      document.getElementById('settingsHeightFt').value = userProfile.heightFt || '';
+      document.getElementById('settingsHeightIn').value = userProfile.heightIn || '';
+      document.getElementById('settingsWeight').value = userProfile.weight || '';
+      
+      const settingsModal = document.getElementById('settingsModal');
+      settingsModal.style.display = 'flex';
+      settingsModal.classList.remove('hidden');
+    }
+
+    function hideSettings() {
+      const settingsModal = document.getElementById('settingsModal');
+      settingsModal.classList.add('hidden');
+      settingsModal.style.display = 'none';
+    }
+
+    // ===== Authentication Event Listeners =====
+    document.getElementById('showSignup').addEventListener('click', showSignupForm);
+    document.getElementById('showLogin').addEventListener('click', showLoginForm);
+
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const errorDiv = document.getElementById('loginError');
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        errorDiv.classList.add('hidden');
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorDiv = document.getElementById('signupError');
+
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      if (password.length < 6) {
+        errorDiv.textContent = 'Password must be at least 6 characters';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        errorDiv.classList.add('hidden');
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+      }
+    });
+
+    // ===== Profile Setup =====
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+      const age = +document.getElementById('setupAge').value;
+      const heightFt = +document.getElementById('setupHeightFt').value;
+      const heightIn = +document.getElementById('setupHeightIn').value;
+      const weight = +document.getElementById('setupWeight').value;
+      const errorDiv = document.getElementById('profileError');
+
+      if (!age || !heightFt || !weight) {
+        errorDiv.textContent = 'Please fill in all fields';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const bmr = calcBMR(age, weight, heightFt, heightIn);
+        userProfile = { age, heightFt, heightIn, weight, bmr };
+        
+        await db.collection('users').doc(currentUser.uid).set(userProfile);
+        
+        hideProfileSetup();
+        showApp();
+        loadUserData();
+        errorDiv.classList.add('hidden');
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+      }
+    });
+
+    // ===== Settings Management =====
+    document.getElementById('openSettings').addEventListener('click', () => {
+      // Double-check authentication before showing settings
+      if (!currentUser || !userProfile) {
+        console.log('Settings access denied - user not authenticated');
+        return;
+      }
+      showSettings();
+    });
+    document.getElementById('cancelSettings').addEventListener('click', hideSettings);
+    
+    // Prevent any direct access to settings modal
+    document.addEventListener('DOMContentLoaded', () => {
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal) {
+        settingsModal.style.display = 'none';
+        settingsModal.classList.add('hidden');
+      }
+      
+      // Prevent any direct access to profile modal
+      const profileModal = document.getElementById('profileModal');
+      if (profileModal) {
+        profileModal.style.display = 'none';
+        profileModal.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('saveSettings').addEventListener('click', async () => {
+      // Check if user is authenticated
+      if (!currentUser) {
+        const errorDiv = document.getElementById('settingsError');
+        errorDiv.textContent = 'Please log in to save settings';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const age = +document.getElementById('settingsAge').value;
+      const heightFt = +document.getElementById('settingsHeightFt').value;
+      const heightIn = +document.getElementById('settingsHeightIn').value;
+      const weight = +document.getElementById('settingsWeight').value;
+      const errorDiv = document.getElementById('settingsError');
+      const successDiv = document.getElementById('settingsSuccess');
+
+      if (!age || !heightFt || !weight) {
+        errorDiv.textContent = 'Please fill in all fields';
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const bmr = calcBMR(age, weight, heightFt, heightIn);
+        userProfile = { ...userProfile, age, heightFt, heightIn, weight, bmr };
+        
+        await db.collection('users').doc(currentUser.uid).update(userProfile);
+        
+                 // Update BMR calculation
+         renderBMR(age, weight, heightFt, heightIn);
+        
+        errorDiv.classList.add('hidden');
+        successDiv.textContent = 'Settings saved successfully!';
+        successDiv.classList.remove('hidden');
+        
+        setTimeout(() => {
+          successDiv.classList.add('hidden');
+          hideSettings();
+        }, 2000);
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+      }
+    });
+
+    // ===== Logout =====
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    // ===== Data Management =====
+    async function loadUserData() {
+      if (!currentUser) return;
+
+      try {
+        // Load user's progress data
+        const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
+        if (progressDoc.exists) {
+          const data = progressDoc.data();
+          basalByDate = data.basalByDate || {};
+          activityByDate = data.activityByDate || {};
+          updateCharts();
+        }
+
+                 // Calculate and display BMR from user profile
+         if (userProfile) {
+           renderBMR(userProfile.age, userProfile.weight, userProfile.heightFt, userProfile.heightIn);
+         }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+
+    async function saveUserData() {
+      if (!currentUser) return;
+
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
+          basalByDate,
+          activityByDate,
+          lastUpdated: new Date()
+        });
+      } catch (error) {
+        console.error('Error saving user data:', error);
+      }
+    }
+
+    // ===== Helper Functions =====
+    function todayStr(){return new Date().toISOString().split('T')[0];}
+    function mphToMmin(mph){return mph*26.8224}
+    function calcTreadmillKcal(lbs,mph,gradePct,minutes){
+      const kg=lbs/2.2046;const speed=mphToMmin(mph);const grade=gradePct/100;
+      const vo2=0.1*speed+1.8*speed*grade+3.5;
+      const kcalPerMin=(vo2*kg)/200;return kcalPerMin*minutes;
+    }
+    function calcStairKcal(lbs, minutes, met){
+      const kg=lbs/2.2046;const kcalPerMin=(met*3.5*kg)/200;return kcalPerMin*minutes;
+    }
+
+    // ===== State =====
+    let bmr=0;
+    let basalByDate={};     // date -> BMR for that date
+    let activityByDate={};  // date -> sum of activity kcal for that date
+
+    // ===== BMR =====
+    function toKg(lbs){return lbs/2.2046}
+    function toCm(ft,inch){return ft*30.48+inch*2.54}
+    function calcBMR(age,lbs,ft,inch){
+      const kg=toKg(lbs),cm=toCm(ft,inch);
+      return 10*kg+6.25*cm-5*age+5;
+    }
+    function setBasalForToday(value){
+      basalByDate[todayStr()]=Math.round(value);
+      updateCharts();
+      saveUserData();
+    }
+    function addActivityForToday(value){
+      const d=todayStr();
+      if(!activityByDate[d]) activityByDate[d]=0;
+      activityByDate[d]+=Math.round(value);
+      updateCharts();
+      saveUserData();
+    }
+         function renderBMR(age,lbs,ft,inch){
+       bmr=Math.round(calcBMR(age,lbs,ft,inch));
+       setBasalForToday(bmr); // auto include BMR in daily total for the day
+     }
+
+         // BMR calculation is now handled automatically from user profile
+
+    // ===== Charts =====
+    let totalCtx=document.getElementById('totalChart').getContext('2d');
+    let totalChart=new Chart(totalCtx,{
+      type:'line',
+      data:{labels:[],datasets:[
+        {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+      ]},
+      options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+    });
+
+    let weightCtx=document.getElementById('weightChart').getContext('2d');
+    let weightChart=new Chart(weightCtx,{
+      type:'line',
+      data:{labels:[],datasets:[
+        {label:'Weight Trajectory',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
+        {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
+      ]},
+      options:{responsive:true,scales:{y:{beginAtZero:false}}}
+    });
+
+    function getAllDates(){
+      const set=new Set([...Object.keys(basalByDate),...Object.keys(activityByDate)]);
+      return Array.from(set).sort();
+    }
+
+         function updateCharts(){
+       const labels=getAllDates();
+       const daily=labels.map(d=> (basalByDate[d]||0) + (activityByDate[d]||0));
+       let cumulative=[];let sum=0;daily.forEach(v=>{sum+=v;cumulative.push(sum)});
+
+       totalChart.data.labels=labels;
+       const isFat = totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       totalChart.data.datasets[0].data = isFat ? daily.map(v=>v/3500) : daily;
+       totalChart.update();
+
+       if(userProfile && userProfile.weight){
+         const baseWeight=+userProfile.weight;
+         
+         // Calculate average daily calories burned over the past week
+         const today = new Date();
+         const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+         const weekLabels = labels.filter(date => {
+           const dateObj = new Date(date);
+           return dateObj >= oneWeekAgo && dateObj <= today;
+         });
+         
+         let weeklyTotal = 0;
+         let weeklyDays = 0;
+         weekLabels.forEach(date => {
+           const dailyCalories = (basalByDate[date]||0) + (activityByDate[date]||0);
+           if (dailyCalories > 0) {
+             weeklyTotal += dailyCalories;
+             weeklyDays++;
+           }
+         });
+         
+         const avgDailyCalories = weeklyDays > 0 ? weeklyTotal / weeklyDays : 0;
+         const avgDailyFatLoss = avgDailyCalories / 3500; // Convert calories to lbs of fat
+         
+         // Green line: Actual weight (starts at base weight and decreases based on actual cumulative fat loss)
+         const actualWeight = cumulative.map(v => baseWeight - (v/3500));
+         
+         // Blue dotted line: Projected weight based on average daily fat loss
+         const projectedWeight = [];
+         const futureDays = 7; // Project 7 days into the future
+         
+         for (let i = 0; i < actualWeight.length + futureDays; i++) {
+           if (i < actualWeight.length) {
+             // Use actual weight for past days
+             projectedWeight.push(actualWeight[i]);
+           } else {
+             // Project future weight based on average daily fat loss
+             const daysFromStart = i;
+             const projectedFatLoss = avgDailyFatLoss * daysFromStart;
+             projectedWeight.push(baseWeight - projectedFatLoss);
+           }
+         }
+         
+         const projLabels = [...labels];
+         for (let i = 1; i <= futureDays; i++) {
+           const futureDate = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+           projLabels.push(futureDate.toISOString().split('T')[0]);
+         }
+         
+         weightChart.data.labels = projLabels;
+         weightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
+         weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+         weightChart.update();
+       }
+     }
+
+    // ===== Treadmill =====
+    let tctx=document.getElementById('tchart').getContext('2d');
+    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
+
+    function treadmillInputs(){
+      return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
+    }
+    function previewTreadmill(){
+      const {w,s,g,m}=treadmillInputs();
+      if(w>0 && s>0 && g>=0 && m>0){
+        const total=calcTreadmillKcal(w,s,g,m);
+        tresult.innerHTML=`<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+      } else {
+        tresult.innerHTML='';
+      }
+    }
+    function renderTreadmill(lbs,mph,gradePct,minutes){
+      const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
+      tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+      addActivityForToday(total);
+      const today=todayStr();
+      tchart.data.labels.push(today);
+      tchart.data.datasets[0].data.push(Math.round(total));
+      tchart.update();
+    }
+    ['input','change'].forEach(evt=>{
+      tspeed.addEventListener(evt,previewTreadmill);
+      tgrade.addEventListener(evt,previewTreadmill);
+      tdur.addEventListener(evt,previewTreadmill);
+    });
+    tcalc.addEventListener('click',()=>{
+      const {w,s,g,m}=treadmillInputs();
+      if(!w||!s||!g||!m){tresult.innerHTML='<p>Please enter all values</p>';return;}
+      renderTreadmill(w,s,g,m);
+    });
+    tclear.addEventListener('click',()=>{
+      ['tspeed','tgrade','tdur'].forEach(id=>document.getElementById(id).value='');
+      tresult.innerHTML='';
+    });
+
+    // ===== Stairs =====
+    let sctx=document.getElementById('schart').getContext('2d');
+    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
+
+    sintensity.addEventListener('change',()=>{
+      const isCustom = sintensity.value==='custom';
+      document.getElementById('customMetField').classList.toggle('hidden', !isCustom);
+    });
+    function renderStairs(lbs, minutes, met){
+      const total=calcStairKcal(lbs, minutes, met);
+      sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+      addActivityForToday(total);
+      const today=todayStr();
+      schart.data.labels.push(today);
+      schart.data.datasets[0].data.push(Math.round(total));
+      schart.update();
+    }
+    scalc.addEventListener('click',()=>{
+      const w=userProfile?.weight||170, m=+sdur.value;
+      let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
+      if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
+      renderStairs(w, m, met);
+    });
+    sclear.addEventListener('click',()=>{
+      ['sdur','scustom'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+      sresult.innerHTML='';
+      sintensity.value='8.8';
+      document.getElementById('customMetField').classList.add('hidden');
+    });
+
+    // ===== Workouts Menu Show/Hide =====
+    const workoutMenu=document.getElementById('workoutMenu');
+    const showBtn=document.getElementById('showWorkouts');
+    const toggleSection=document.getElementById('workoutToggleSection');
+
+    function setShowBtnVisible(vis){ toggleSection.style.display = vis ? '' : 'none'; }
+    function setMenuVisible(vis){ workoutMenu.classList.toggle('hidden', !vis); }
+
+         showBtn.addEventListener('click',()=>{
+       const willShow = workoutMenu.classList.contains('hidden');
+       setMenuVisible(willShow);
+       showBtn.textContent = willShow ? 'Hide Workouts' : 'Show Workouts';
+       // Hide the toggle button when workouts are shown
+       setShowBtnVisible(!willShow);
+     });
+
+         document.getElementById('hideWorkouts').addEventListener('click',()=>{
+       setMenuVisible(false);
+       showBtn.textContent = 'Show Workouts';
+       // Show the toggle button when workouts are hidden
+       setShowBtnVisible(true);
+     });
+
+    document.getElementById('openTreadmill').addEventListener('click',()=>{
+      setMenuVisible(false);
+      document.getElementById('treadmillSection').classList.remove('hidden');
+      setShowBtnVisible(false);
+    });
+    document.getElementById('openStairs').addEventListener('click',()=>{
+      setMenuVisible(false);
+      document.getElementById('stairSection').classList.remove('hidden');
+      setShowBtnVisible(false);
+    });
+         document.getElementById('backFromTreadmill').addEventListener('click',()=>{
+       document.getElementById('treadmillSection').classList.add('hidden');
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+       showBtn.textContent='Hide Workouts';
+     });
+     document.getElementById('backFromStairs').addEventListener('click',()=>{
+       document.getElementById('stairSection').classList.add('hidden');
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+       showBtn.textContent='Hide Workouts';
+     });
+
+    // ===== Fat Loss Toggle =====
+    document.getElementById('toggleFat').addEventListener('click',()=>{
+      const isFat=totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+      totalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+      updateCharts();
+    });
+
+         // ===== Manual Add Calories =====
+     document.getElementById('addCaloriesBtn').addEventListener('click', showAddCaloriesModal);
+     
+     // Add Calories Modal Event Listeners
+     document.getElementById('cancelAddCalories').addEventListener('click', hideAddCaloriesModal);
+     document.getElementById('submitAddCalories').addEventListener('click', () => {
+       const calories = Number(document.getElementById('caloriesAmount').value);
+       const date = document.getElementById('caloriesDate').value;
+       const errorDiv = document.getElementById('addCaloriesError');
+       const successDiv = document.getElementById('addCaloriesSuccess');
+       
+       if (!calories || !date) {
+         errorDiv.textContent = 'Please fill in all fields';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       if (isNaN(calories)) {
+         errorDiv.textContent = 'Please enter a valid number';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       try {
+         // Add calories for the specific date
+         const d = date;
+         if (!activityByDate[d]) activityByDate[d] = 0;
+         activityByDate[d] += Math.round(calories);
+         updateCharts();
+         saveUserData();
+         
+         errorDiv.classList.add('hidden');
+         successDiv.textContent = 'Calories updated successfully!';
+         successDiv.classList.remove('hidden');
+         
+         setTimeout(() => {
+           hideAddCaloriesModal();
+         }, 1500);
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+       }
+     });
+
+    // Initialize app
+    window.addEventListener('DOMContentLoaded',()=>{
+      console.log('DOM loaded, initializing app...');
+      
+      // Ensure all modals are hidden by default
+      hideAllModals();
+      
+      // Prefill example values for profile setup
+      document.getElementById('setupAge').value=22;
+      document.getElementById('setupHeightFt').value=5;
+      document.getElementById('setupHeightIn').value=9;
+      document.getElementById('setupWeight').value=170;
+      
+      // Prefill treadmill preview with defaults
+      tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
+      
+      // Force show auth modal initially, then let Firebase auth state take over
+      setTimeout(() => {
+        console.log('Initial timeout - authStateInitialized:', authStateInitialized);
+        if (!authStateInitialized) {
+          console.log('Showing auth modal initially');
+          showAuthModal();
+        }
+      }, 500);
+    });
+  </script>
 </body>
 </html>
