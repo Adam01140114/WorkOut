@@ -694,6 +694,7 @@
            </div>
          </div>
          <div class="user-actions">
+           <button class="primary" id="mobileAddCustomFood" style="background: #60a5fa; color: white;">Add Foods</button>
            <button class="ghost" id="closeMobileFoodMenu">Close</button>
          </div>
        </div>
@@ -755,6 +756,30 @@
          <div class="user-actions">
            <button class="primary" id="mobileBurgerCalc">Calculate Calories</button>
            <button class="ghost" id="closeMobileBurger">Close</button>
+         </div>
+       </div>
+     <!-- Mobile Custom Food Modal -->
+     <div id="mobileCustomFoodModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="customFoodIcon">🍽️</div>
+           <div>
+             <h3 class="modal-title">Add Custom Food</h3>
+             <p class="modal-subtitle">Create your own food entry</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileCustomFoodName">Food Name</label>
+           <input id="mobileCustomFoodName" type="text" placeholder="e.g., Chicken Salad" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileCustomFoodCalories">Calories</label>
+           <input id="mobileCustomFoodCalories" type="number" placeholder="350" />
+         </div>
+         <div class="result" id="mobileCustomFoodResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileCustomFoodCalc">Add Food</button>
+           <button class="ghost" id="closeMobileCustomFood">Close</button>
          </div>
        </div>
      </div>
@@ -897,7 +922,8 @@
         'mobileStairsModal',
         'mobileFoodModal',
         'mobileTacosModal',
-        'mobileBurgerModal'
+        'mobileBurgerModal',
+        'mobileCustomFoodModal'
       ];
       ids.forEach(id => {
         const el = document.getElementById(id);
@@ -1334,6 +1360,7 @@
            weightByDate = data.weightByDate || {};
            workoutDataByDate = data.workoutDataByDate || {};
            foodDataByDate = data.foodDataByDate || {};
+           customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
            updateCharts();
          }
@@ -1346,6 +1373,9 @@
          // Load workout charts with saved data
          loadTreadmillChart();
          loadStairsChart();
+
+         // Update food menu with custom foods
+         updateFoodMenu();
 
          // Check for daily weight logging only if user has a profile
          if (userProfile) {
@@ -1366,6 +1396,7 @@
            weightByDate,
            workoutDataByDate,
            foodDataByDate,
+           customFoods,
            weightLoggingClosed,
            lastUpdated: new Date()
          });
@@ -1506,6 +1537,79 @@
        mobileBurgerModal.classList.add('hidden');
      }
 
+     function showMobileCustomFoodModal(existingFood = null) {
+       const mobileCustomFoodModal = document.getElementById('mobileCustomFoodModal');
+       mobileCustomFoodModal.classList.remove('hidden');
+       mobileCustomFoodModal.style.zIndex = '2000';
+       
+       if (existingFood) {
+         // Editing existing food
+         document.getElementById('mobileCustomFoodName').value = existingFood.name;
+         document.getElementById('mobileCustomFoodCalories').value = existingFood.calories;
+         document.getElementById('customFoodIcon').textContent = existingFood.icon;
+         document.getElementById('mobileCustomFoodCalc').textContent = 'Update Food';
+       } else {
+         // Adding new food
+         document.getElementById('mobileCustomFoodName').value = '';
+         document.getElementById('mobileCustomFoodCalories').value = '';
+         document.getElementById('customFoodIcon').textContent = '🍽️';
+         document.getElementById('mobileCustomFoodCalc').textContent = 'Add Food';
+       }
+       document.getElementById('mobileCustomFoodResult').innerHTML = '';
+     }
+
+     function hideMobileCustomFoodModal() {
+       const mobileCustomFoodModal = document.getElementById('mobileCustomFoodModal');
+       mobileCustomFoodModal.classList.add('hidden');
+     }
+
+     function updateCustomFoodIcon() {
+       const foodName = document.getElementById('mobileCustomFoodName').value;
+       const icon = pickEmoji(foodName);
+       document.getElementById('customFoodIcon').textContent = icon;
+     }
+
+     function updateFoodMenu() {
+       const foodMenu = document.getElementById('mobileFoodModal');
+       const menuGrid = foodMenu.querySelector('.menu-grid');
+       
+       // Start with default foods
+       let menuHTML = `
+         <div class="menu-tile" id="mobileOpenTacos">
+           <div class="menu-emoji">🌮</div>
+           <div>Tacos</div>
+         </div>
+         <div class="menu-tile" id="mobileOpenBurger">
+           <div class="menu-emoji">🍔</div>
+           <div>Burger</div>
+         </div>
+       `;
+       
+       // Add custom foods
+       Object.values(customFoods).forEach(food => {
+         menuHTML += `
+           <div class="menu-tile" id="mobileOpenCustom_${food.name.replace(/\s+/g, '_')}">
+             <div class="menu-emoji">${food.icon}</div>
+             <div>${food.name}</div>
+           </div>
+         `;
+       });
+       
+       menuGrid.innerHTML = menuHTML;
+       
+       // Re-attach event listeners for custom foods
+       Object.values(customFoods).forEach(food => {
+         const elementId = `mobileOpenCustom_${food.name.replace(/\s+/g, '_')}`;
+         const element = document.getElementById(elementId);
+         if (element) {
+           element.addEventListener('click', () => {
+             hideMobileFoodMenu();
+             showMobileCustomFoodModal(food);
+           });
+         }
+       });
+     }
+
      function previewMobileTacos() {
        const calories = +document.getElementById('mobileTacoCalories').value;
        const quantity = +document.getElementById('mobileTacoQuantity').value;
@@ -1568,6 +1672,7 @@
      let weightByDate={};    // date -> weight for that date
      let workoutDataByDate={}; // date -> workout data for that date
      let foodDataByDate={};  // date -> food data for that date
+     let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
 
     // ===== BMR =====
@@ -1807,6 +1912,83 @@
          mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
        }
      }
+
+         // Food icon mapping
+         const FOOD_MAP = new Map([
+           // drinks
+           ["milk","🥛"], ["glass of milk","🥛"], ["oat milk","🥛"], ["soy milk","🥛"], ["milk tea","🧋"],
+           ["water","💧"], ["juice","🧃"], ["apple juice","🧃"], ["orange juice","🧃"],
+           ["soda","🥤"], ["cola","🥤"], ["soft drink","🥤"], ["milkshake","🥤"],
+           ["coffee","☕"], ["latte","☕"], ["espresso","☕"], ["tea","🍵"], ["green tea","🍵"], ["teapot","🫖"],
+           ["boba","🧋"], ["bubble tea","🧋"], ["smoothie","🥤"],
+           ["beer","🍺"], ["beers","🍻"], ["wine","🍷"], ["champagne","🍾"], ["sake","🍶"], ["cocktail","🍸"], ["tropical drink","🍹"], ["mate","🧉"],
+
+           // mains and fast food
+           ["burger","🍔"], ["hamburger","🍔"], ["cheeseburger","🍔"],
+           ["pizza","🍕"], ["slice","🍕"],
+           ["hot dog","🌭"], ["hotdog","🌭"],
+           ["taco","🌮"], ["burrito","🌯"], ["tamale","🫔"],
+           ["sandwich","🥪"], ["wrap","🌯"], ["flatbread","🫓"],
+           ["fries","🍟"], ["french fries","🍟"], ["pizza fries","🍟"],
+           ["dumpling","🥟"], ["gyoza","🥟"], ["bao","🥟"], ["bento","🍱"], ["takeout","🥡"],
+           ["sushi","🍣"], ["ramen","🍜"], ["noodles","🍜"], ["pho","🍜"], ["spaghetti","🍝"], ["pasta","🍝"],
+           ["curry","🍛"], ["curry rice","🍛"], ["rice","🍚"], ["rice ball","🍙"], ["rice cracker","🍘"],
+           ["soup","🍲"], ["stew","🍲"], ["bowl","🥣"], ["fondue","🫕"],
+           ["bbq","🍖"], ["steak","🥩"], ["meat","🥩"], ["bacon","🥓"], ["chicken","🍗"], ["drumstick","🍗"], ["wings","🍗"],
+           ["fried shrimp","🍤"], ["shrimp","🍤"], ["lobster","🦞"], ["crab","🦀"], ["oyster","🦪"], ["canned food","🥫"],
+           ["egg","🥚"], ["omelet","🍳"], ["omelette","🍳"],
+           ["salad","🥗"], ["taco salad","🥗"],
+
+           // breads and breakfast
+           ["bread","🍞"], ["baguette","🥖"], ["croissant","🥐"], ["bagel","🥯"], ["pancakes","🥞"], ["waffle","🧇"],
+
+           // sweets
+           ["donut","🍩"], ["doughnut","🍩"], ["ice cream","🍨"], ["soft serve","🍦"], ["shaved ice","🍧"],
+           ["cake","🍰"], ["birthday cake","🎂"], ["cupcake","🧁"], ["pie","🥧"],
+           ["cookie","🍪"], ["candy","🍬"], ["lollipop","🍭"], ["chocolate","🍫"], ["honey","🍯"],
+
+           // cheese and pantry
+           ["cheese","🧀"], ["butter","🧈"], ["salt","🧂"], ["jar","🫙"],
+
+           // produce
+           ["apple","🍎"], ["green apple","🍏"], ["banana","🍌"], ["strawberry","🍓"], ["blueberries","🫐"],
+           ["grapes","🍇"], ["orange","🍊"], ["lemon","🍋"], ["pear","🍐"], ["peach","🍑"], ["mango","🥭"],
+           ["pineapple","🍍"], ["melon","🍈"], ["watermelon","🍉"], ["kiwi","🥝"], ["coconut","🥥"],
+           ["avocado","🥑"], ["tomato","🍅"], ["corn","🌽"], ["carrot","🥕"], ["potato","🥔"], ["sweet potato","🍠"],
+           ["mushroom","🍄"], ["eggplant","🍆"], ["cucumber","🥒"], ["pickle","🥒"], ["broccoli","🥦"], ["leafy greens","🥬"], ["lettuce","🥬"],
+           ["bell pepper","🫑"], ["pepper","🌶️"], ["garlic","🧄"], ["onion","🧅"], ["beans","🫘"], ["peanuts","🥜"], ["chestnut","🌰"], ["olive","🫒"],
+
+           // misc
+           ["popcorn","🍿"], ["coffee beans","☕"], ["bento box","🍱"], ["takeout box","🥡"]
+         ]);
+
+         // Food icon helper functions
+         function normalizeTerm(s) {
+           return s.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+         }
+
+         function pickEmoji(input) {
+           const hasEmoji = /\p{Extended_Pictographic}/u.test(input);
+           if (hasEmoji) {
+             // Return the first emoji char
+             const match = input.match(/\p{Extended_Pictographic}(\uFE0F\u20E3|\uFE0F|\u200D\p{Extended_Pictographic})*/u);
+             if (match) return match[0];
+           }
+           const t = normalizeTerm(input);
+           if (FOOD_MAP.has(t)) return FOOD_MAP.get(t);
+           // Try simple plural trim
+           if (t.endsWith('es') && FOOD_MAP.has(t.slice(0, -2))) return FOOD_MAP.get(t.slice(0, -2));
+           if (t.endsWith('s') && FOOD_MAP.has(t.slice(0, -1))) return FOOD_MAP.get(t.slice(0, -1));
+           // Try removing common words
+           const simplified = t.replace(/^(a|an|the)\s+/g, '').replace(/\s+emoji$/g, '');
+           if (FOOD_MAP.has(simplified)) return FOOD_MAP.get(simplified);
+           // Light fuzzy fallback
+           const keys = Array.from(FOOD_MAP.keys()).sort((a,b)=>b.length - a.length);
+           for (const k of keys) {
+             if (simplified.includes(k) || k.includes(simplified)) return FOOD_MAP.get(k);
+           }
+           return '🍽️'; // Default food emoji
+         }
 
          // Put this helper above updateCharts()
          function computeWeightSeries(weightByDate, futureDays = 3) {
@@ -2351,6 +2533,10 @@
      
      // Mobile food menu event listeners
      document.getElementById('closeMobileFoodMenu').addEventListener('click', hideMobileFoodMenu);
+     document.getElementById('mobileAddCustomFood').addEventListener('click', () => {
+       hideMobileFoodMenu();
+       showMobileCustomFoodModal();
+     });
      document.getElementById('mobileOpenTacos').addEventListener('click', () => {
        hideMobileFoodMenu();
        showMobileTacosModal();
@@ -2529,9 +2715,49 @@
        document.getElementById('mobileBurgerQuantity').addEventListener(evt, previewMobileBurger);
      });
      
+     // Mobile custom food event listeners
+     document.getElementById('mobileCustomFoodCalc').addEventListener('click', () => {
+       const name = document.getElementById('mobileCustomFoodName').value;
+       const calories = +document.getElementById('mobileCustomFoodCalories').value;
+       
+       if (!name || !calories) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter both name and calories</p>';
+         return;
+       }
+       
+       if (calories <= 0) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter a valid calorie amount</p>';
+         return;
+       }
+       
+       // Save custom food to Firebase
+       const icon = pickEmoji(name);
+       customFoods[name] = {
+         name: name,
+         calories: calories,
+         icon: icon
+       };
+       saveUserData();
+       
+       // Update food menu to show new custom food
+       updateFoodMenu();
+       
+       const isUpdate = document.getElementById('mobileCustomFoodCalc').textContent === 'Update Food';
+       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>${isUpdate ? 'Updated' : 'Added'}: ${name} (${calories} kcal)</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileCustomFoodModal();
+       }, 2000);
+     });
+     
+     // Mobile custom food input event listeners
+     document.getElementById('mobileCustomFoodName').addEventListener('input', updateCustomFoodIcon);
+     
      // Mobile food modal close event listeners
      document.getElementById('closeMobileTacos').addEventListener('click', hideMobileTacosModal);
      document.getElementById('closeMobileBurger').addEventListener('click', hideMobileBurgerModal);
+     document.getElementById('closeMobileCustomFood').addEventListener('click', hideMobileCustomFoodModal);
      
      // Add Calories Modal Event Listeners
      document.getElementById('cancelAddCalories').addEventListener('click', hideAddCaloriesModal);
@@ -2592,11 +2818,14 @@
        // Prefill treadmill preview with defaults
        tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
        
-       // Initialize mobile swipe functionality
+                // Initialize mobile swipe functionality
        initMobileSwipe();
        
        // Initialize mobile slides
        showSlide(0);
+       
+       // Initialize food menu
+       updateFoodMenu();
        
        // Ensure auth modal shows for new users
        if (!currentUser) {

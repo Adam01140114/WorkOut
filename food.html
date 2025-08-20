@@ -3,11 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Food Icon Finder — Flaticon Uicons</title>
-
-  <!-- Flaticon Uicons: all families and weights via jsDelivr -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@flaticon/flaticon-uicons@3.3.1/css/all/all.css">
-
+  <title>Food Icon Finder</title>
   <style>
     :root {
       --bg: #0b0f14;
@@ -57,19 +53,16 @@
       cursor: pointer;
     }
     .btn:active { transform: translateY(1px); }
-    .canvas { margin-top: 18px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .canvas {
+      margin-top: 18px;
+      display: grid; grid-template-columns: 1fr; gap: 12px;
+    }
     .stage {
       background: repeating-conic-gradient(#1b2430 0% 25%, #1c2834 0% 50%) 50% / 24px 24px;
       border: 1px solid rgba(255,255,255,.08);
       border-radius: 14px; padding: 20px; display: grid; place-items: center; min-height: 260px;
     }
-    /* Uicons render via ::before. Size by font-size. */
-    .stage .uicon {
-      font-size: var(--size, 192px);
-      line-height: 1;
-      display: inline-block;
-      width: 1em; height: 1em;
-    }
+    .stage img, .stage svg { width: var(--size, 192px); height: var(--size, 192px); object-fit: contain; }
     .controls {
       display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
       background: var(--card);
@@ -85,18 +78,17 @@
     .error { color: #ff8b8b; }
     .row2 { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
-    footer { margin-top: 8px; color: var(--muted); font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="app">
     <h1>Food Icon Finder</h1>
-    <p class="sub">Type a food name. This version uses <strong>Flaticon Uicons</strong> and renders a crisp vector with a transparent background.</p>
+    <p class="sub">Type a food name or paste an emoji. You will get a crisp SVG icon on a transparent background.</p>
 
     <form id="search" class="row" autocomplete="off">
       <div class="input">
         <label for="term" class="sr-only">Food name</label>
-        <input id="term" name="term" placeholder="Try milk, burger, pizza, ramen, taco, sushi..." required />
+        <input id="term" name="term" placeholder="Try burger, pizza, ramen, taco, sushi..." required />
       </div>
       <button class="btn" type="submit">Show icon</button>
     </form>
@@ -114,13 +106,59 @@
         </div>
         <div class="meta" id="sourceMeta"></div>
       </div>
-      <footer>
-        Uicons by <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener">Flaticon</a>.
-      </footer>
     </div>
   </div>
 
   <script>
+    // Basic food term to emoji map
+    const FOOD_MAP = new Map([
+  // drinks
+  ["milk","🥛"], ["glass of milk","🥛"], ["oat milk","🥛"], ["soy milk","🥛"], ["milk tea","🧋"],
+  ["water","💧"], ["juice","🧃"], ["apple juice","🧃"], ["orange juice","🧃"],
+  ["soda","🥤"], ["cola","🥤"], ["soft drink","🥤"], ["milkshake","🥤"],
+  ["coffee","☕"], ["latte","☕"], ["espresso","☕"], ["tea","🍵"], ["green tea","🍵"], ["teapot","🫖"],
+  ["boba","🧋"], ["bubble tea","🧋"], ["smoothie","🥤"],
+  ["beer","🍺"], ["beers","🍻"], ["wine","🍷"], ["champagne","🍾"], ["sake","🍶"], ["cocktail","🍸"], ["tropical drink","🍹"], ["mate","🧉"],
+
+  // mains and fast food
+  ["burger","🍔"], ["hamburger","🍔"], ["cheeseburger","🍔"],
+  ["pizza","🍕"], ["slice","🍕"],
+  ["hot dog","🌭"], ["hotdog","🌭"],
+  ["taco","🌮"], ["burrito","🌯"], ["tamale","🫔"],
+  ["sandwich","🥪"], ["wrap","🌯"], ["flatbread","🫓"],
+  ["fries","🍟"], ["french fries","🍟"], ["pizza fries","🍟"],
+  ["dumpling","🥟"], ["gyoza","🥟"], ["bao","🥟"], ["bento","🍱"], ["takeout","🥡"],
+  ["sushi","🍣"], ["ramen","🍜"], ["noodles","🍜"], ["pho","🍜"], ["spaghetti","🍝"], ["pasta","🍝"],
+  ["curry","🍛"], ["curry rice","🍛"], ["rice","🍚"], ["rice ball","🍙"], ["rice cracker","🍘"],
+  ["soup","🍲"], ["stew","🍲"], ["bowl","🥣"], ["fondue","🫕"],
+  ["bbq","🍖"], ["steak","🥩"], ["meat","🥩"], ["bacon","🥓"], ["chicken","🍗"], ["drumstick","🍗"], ["wings","🍗"],
+  ["fried shrimp","🍤"], ["shrimp","🍤"], ["lobster","🦞"], ["crab","🦀"], ["oyster","🦪"], ["canned food","🥫"],
+  ["egg","🥚"], ["omelet","🍳"], ["omelette","🍳"],
+  ["salad","🥗"], ["taco salad","🥗"],
+
+  // breads and breakfast
+  ["bread","🍞"], ["baguette","🥖"], ["croissant","🥐"], ["bagel","🥯"], ["pancakes","🥞"], ["waffle","🧇"],
+
+  // sweets
+  ["donut","🍩"], ["doughnut","🍩"], ["ice cream","🍨"], ["soft serve","🍦"], ["shaved ice","🍧"],
+  ["cake","🍰"], ["birthday cake","🎂"], ["cupcake","🧁"], ["pie","🥧"],
+  ["cookie","🍪"], ["candy","🍬"], ["lollipop","🍭"], ["chocolate","🍫"], ["honey","🍯"],
+
+  // cheese and pantry
+  ["cheese","🧀"], ["butter","🧈"], ["salt","🧂"], ["jar","🫙"],
+
+  // produce
+  ["apple","🍎"], ["green apple","🍏"], ["banana","🍌"], ["strawberry","🍓"], ["blueberries","🫐"],
+  ["grapes","🍇"], ["orange","🍊"], ["lemon","🍋"], ["pear","🍐"], ["peach","🍑"], ["mango","🥭"],
+  ["pineapple","🍍"], ["melon","🍈"], ["watermelon","🍉"], ["kiwi","🥝"], ["coconut","🥥"],
+  ["avocado","🥑"], ["tomato","🍅"], ["corn","🌽"], ["carrot","🥕"], ["potato","🥔"], ["sweet potato","🍠"],
+  ["mushroom","🍄"], ["eggplant","🍆"], ["cucumber","🥒"], ["pickle","🥒"], ["broccoli","🥦"], ["leafy greens","🥬"], ["lettuce","🥬"],
+  ["bell pepper","🫑"], ["pepper","🌶️"], ["garlic","🧄"], ["onion","🧅"], ["beans","🫘"], ["peanuts","🥜"], ["chestnut","🌰"], ["olive","🫒"],
+
+  // misc
+  ["popcorn","🍿"], ["coffee beans","☕"], ["bento box","🍱"], ["takeout box","🥡"]
+]);
+
     const SAMPLE_CHIPS = ["milk","burger","pizza","ramen","taco","sushi","fries","burrito","salad","donut","coffee","boba","pie","broccoli"];
 
     const form = document.getElementById('search');
@@ -130,7 +168,7 @@
     const size = document.getElementById('size');
     const sourceMeta = document.getElementById('sourceMeta');
 
-    // chips
+    // Build chips
     chips.innerHTML = SAMPLE_CHIPS.map(t => `<span class="chip" data-term="${t}">${t}</span>`).join('');
     chips.addEventListener('click', (e) => {
       const target = e.target.closest('.chip');
@@ -139,153 +177,101 @@
       form.dispatchEvent(new Event('submit', { cancelable: true }));
     });
 
-    // size
+    // Handle size slider
     size.addEventListener('input', () => {
       stage.style.setProperty('--size', size.value + 'px');
     });
 
-    // synonyms to improve hits
-    const SYNONYMS = new Map([
-      ["boba", ["bubble-tea"]],
-      ["bubble tea", ["bubble-tea"]],
-      ["ramen", ["noodles"]],
-      ["fries", ["french-fries","fries"]],
-      ["hot dog", ["hot-dog","hotdog"]],
-      ["hamburger", ["hamburger","burger","burger-fries"]],
-      ["burger", ["hamburger","burger","burger-fries"]],
-      ["pizza", ["pizza-slice","holding-hand-pizza-box"]],
-      ["sushi", ["sushi"]],
-      ["milk", ["milk","milk-alt","bottle-baby"]],
-      ["tea", ["bubble-tea","tea","teapot"]],
-      ["coffee", ["coffee","coffee-cup"]],
-      ["donut", ["donut","doughnut"]],
-      ["noodles", ["noodles"]],
-      ["sandwich", ["sandwich"]],
-      ["ice cream", ["ice-cream"]],
-      ["soft serve", ["ice-cream"]],
-      ["cake", ["cake"]],
-      ["cookie", ["cookie"]],
-      ["bread", ["bread"]],
-      ["cheese", ["cheese","cheese-alt"]],
-      ["salad", ["salad"]],
-      ["taco", ["taco"]],
-      ["burrito", ["burrito"]],
-    ]);
-
-    // known-good classes for speed
-    const DIRECT_CLASS = new Map([
-      ["pizza-slice", "fi fi-rr-pizza-slice"],
-      ["noodles", "fi fi-tr-noodles"],
-      ["bubble-tea", "fi fi-rr-bubble-tea"],
-      ["hamburger", "fi fi-rc-hamburger"],
-      ["burger-fries", "fi fi-rr-burger-fries"],
-      ["sandwich", "fi fi-rr-sandwich"],
-      ["milk", "fi fi-bs-milk"],
-      ["milk-alt", "fi fi-rr-milk-alt"],
-      ["bottle-baby", "fi fi-tr-bottle-baby"],
-      ["sushi", "fi fi-tr-sushi"],
-    ]);
-
-    // prefixes to probe
-    const PREFIXES = [
-      'fi fi-rr', // rounded regular
-      'fi fi-sr', // rounded solid
-      'fi fi-br', // rounded bold
-      'fi fi-tr', // rounded thin
-      'fi fi-rs', // straight regular
-      'fi fi-ss', // straight solid
-      'fi fi-bs', // straight bold
-      'fi fi-ts', // straight thin
-      'fi fi-rc', // rounded colored
-    ];
-
+    // Main search
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const raw = termEl.value.trim();
       if (!raw) return;
-      const cls = await pickUiconClass(raw);
-      if (!cls) {
-        renderError(`No Flaticon Uicon found for “${escapeHtml(raw)}”. Try pizza, burger, milk, ramen, taco or paste a Uicons class like <code>fi fi-rr-pizza-slice</code>.`);
+      const emoji = pickEmoji(raw);
+      if (!emoji) {
+        renderError(`Could not find an icon for “${escapeHtml(raw)}”. Try another word or paste an emoji.`);
         return;
       }
-      renderUicon(cls, raw);
+      await renderEmojiIcon(emoji);
     });
 
     function normalizeTerm(s) {
       return s.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
     }
-    function toSlug(s) {
-      return normalizeTerm(s).replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, '-');
-    }
 
-    async function pickUiconClass(input) {
-      // user pasted a class already
-      if (/^fi\s+fi-[a-z]{2}-[a-z0-9-]+$/.test(input.trim())) return input.trim();
-
+    function pickEmoji(input) {
+      const hasEmoji = /\p{Extended_Pictographic}/u.test(input);
+      if (hasEmoji) {
+        // Return the first emoji char
+        const match = input.match(/\p{Extended_Pictographic}(\uFE0F\u20E3|\uFE0F|\u200D\p{Extended_Pictographic})*/u);
+        if (match) return match[0];
+      }
       const t = normalizeTerm(input);
-      const candidates = new Set();
-
-      if (SYNONYMS.has(t)) {
-        for (const slug of SYNONYMS.get(t)) candidates.add(slug);
-      }
-
-      const slug = toSlug(t);
-      candidates.add(slug);
-      if (!slug.endsWith('-alt')) candidates.add(slug + '-alt');
-
-      // fast path for known classes
-      for (const c of candidates) {
-        const direct = DIRECT_CLASS.get(c);
-        if (direct) return direct;
-      }
-
-      // probe prefixes for a valid glyph
-      for (const c of candidates) {
-        const cls = await probePrefixes(c);
-        if (cls) return cls;
-      }
-
-      // last resort: try each word
-      for (const part of t.split(' ')) {
-        const s = toSlug(part);
-        const cls = await probePrefixes(s);
-        if (cls) return cls;
-      }
-      return null;
+      if (FOOD_MAP.has(t)) return FOOD_MAP.get(t);
+      // Try simple plural trim
+      if (t.endsWith('es') && FOOD_MAP.has(t.slice(0, -2))) return FOOD_MAP.get(t.slice(0, -2));
+      if (t.endsWith('s') && FOOD_MAP.has(t.slice(0, -1))) return FOOD_MAP.get(t.slice(0, -1));
+      // Try removing common words
+      const simplified = t.replace(/^(a|an|the)\s+/g, '').replace(/\s+emoji$/g, '');
+      if (FOOD_MAP.has(simplified)) return FOOD_MAP.get(simplified);
+  // Light fuzzy fallback
+  const keys = Array.from(FOOD_MAP.keys()).sort((a,b)=>b.length - a.length);
+  for (const k of keys) {
+    if (simplified.includes(k) || k.includes(simplified)) return FOOD_MAP.get(k);
+  }
+  return null;
     }
 
-    async function probePrefixes(slug) {
-      for (const pre of PREFIXES) {
-        const cls = `${pre}-${slug}`;
-        if (await hasGlyph(cls)) return cls;
+    function toCodepoints(emoji, upper = true) {
+      const codes = [];
+      for (const ch of [...emoji]) {
+        const code = ch.codePointAt(0).toString(16);
+        codes.push(upper ? code.toUpperCase() : code);
       }
-      return null;
+      return codes.join('-');
     }
 
-    function hasGlyph(className) {
-      return new Promise((resolve) => {
-        const el = document.createElement('i');
-        el.className = `uicon ${className}`;
-        el.style.position = 'absolute';
-        el.style.left = '-9999px';
-        el.style.top = '-9999px';
-        document.body.appendChild(el);
-        requestAnimationFrame(() => {
-          const content = getComputedStyle(el, '::before').getPropertyValue('content');
-          document.body.removeChild(el);
-          resolve(content && content !== 'none' && content !== 'normal' && content !== '""');
+    async function renderEmojiIcon(emoji) {
+      const openMojiBase = 'https://cdn.jsdelivr.net/npm/openmoji/color/svg/';
+      const twemojiBase = 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/';
+      const codeU = toCodepoints(emoji, true);    // for OpenMoji
+      const codeL = toCodepoints(emoji, false);   // for Twemoji
+
+      // helper that returns a promise that resolves if the image loads, rejects if it errors
+      function trySrc(url, label) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve({ img, label, url });
+          img.onerror = () => reject(new Error('not found'));
+          img.decoding = 'async';
+          img.alt = `Icon for ${emoji}`;
+          img.src = url;
         });
-      });
-    }
+      }
 
-    function renderUicon(className, rawTerm) {
+      // Try OpenMoji with and without FE0F, then Twemoji with and without FE0F
+      const noFE0F_U = codeU.replace(/-FE0F/gi, '');
+      const noFE0F_L = codeL.replace(/-fe0f/gi, '');
+      const candidates = [
+        { url: openMojiBase + codeU + '.svg', label: 'OpenMoji' },
+        { url: openMojiBase + noFE0F_U + '.svg', label: 'OpenMoji' },
+        { url: twemojiBase + codeL + '.svg', label: 'Twemoji' },
+        { url: twemojiBase + noFE0F_L + '.svg', label: 'Twemoji' },
+      ];
+
+      let loaded = null;
+      for (const c of candidates) {
+        try { loaded = await trySrc(c.url, c.label); break; } catch {}
+      }
+
+      if (!loaded) {
+        renderError('Icon image not available from free CDNs. Try another food.');
+        return;
+      }
+
       stage.innerHTML = '';
-      const i = document.createElement('i');
-      i.className = `uicon ${className}`;
-      i.setAttribute('role', 'img');
-      i.setAttribute('aria-label', rawTerm);
-      stage.appendChild(i);
-      sourceMeta.textContent = `Source: Flaticon Uicons • ${className}`;
+      stage.appendChild(loaded.img);
+      sourceMeta.textContent = `Source: ${loaded.label} • ${emojiToName(emoji)} (${toCodepoints(emoji, true)})`;
     }
 
     function renderError(message) {
@@ -293,11 +279,17 @@
       sourceMeta.textContent = '';
     }
 
+    function emojiToName(emoji) {
+      // Very simple name hint for a few common emoji
+      const reverse = new Map(Array.from(FOOD_MAP.entries()).map(([k, v]) => [v, k]));
+      return reverse.get(emoji) || 'emoji';
+    }
+
     function escapeHtml(s) {
       return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    // demo
+    // Submit on load with a default example
     window.addEventListener('DOMContentLoaded', () => {
       stage.style.setProperty('--size', size.value + 'px');
       termEl.value = 'milk';
