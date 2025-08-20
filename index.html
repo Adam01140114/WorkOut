@@ -1951,21 +1951,21 @@
            projLabels.push(futureDate.toISOString().split('T')[0]);
          }
          
+         // Use actual logged weight data if available, otherwise use calculated weight
+         const loggedWeightData = projLabels.map(date => {
+           return weightByDate[date] || null;
+         });
+         
+         // Filter out null values and create actual weight line
+         const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
+         const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
+         
          weightChart.data.labels = projLabels;
          const isWeightFat = weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
          if (isWeightFat) {
            weightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
            weightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
          } else {
-           // Use actual logged weight data if available, otherwise use calculated weight
-           const loggedWeightData = projLabels.map(date => {
-             return weightByDate[date] || null;
-           });
-           
-           // Filter out null values and create actual weight line
-           const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
-           const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
-           
            weightChart.data.datasets[0].data = actualLoggedWeight; // Green line: Actual logged weight
            weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
            
@@ -1978,19 +1978,11 @@
 
          // Mobile weight chart
          mobileWeightChart.data.labels = projLabels;
-         if (isWeightFat) {
+         const isMobileWeightFat = mobileWeightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+         if (isMobileWeightFat) {
            mobileWeightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
            mobileWeightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
          } else {
-           // Use actual logged weight data if available, otherwise use calculated weight
-           const loggedWeightData = projLabels.map(date => {
-             return weightByDate[date] || null;
-           });
-           
-           // Filter out null values and create actual weight line
-           const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
-           const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
-           
            // Get the last actual weight as starting point for projection
            const lastActualWeight = actualLoggedWeight.length > 0 ? 
              actualLoggedWeight[actualLoggedWeight.length - 1] : baseWeight;
