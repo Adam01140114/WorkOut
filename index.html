@@ -54,6 +54,7 @@
       justify-content: center;
       z-index: 1000;
       padding: 20px;
+      overflow-y: auto;
     }
     .modal {
       background: var(--card);
@@ -285,6 +286,12 @@
        
        .mobile-slide.active {
          overflow-y: auto;
+         -webkit-overflow-scrolling: touch;
+       }
+       
+       .modal-overlay {
+         overflow-y: auto;
+         -webkit-overflow-scrolling: touch;
        }
      }
   </style>
@@ -2185,14 +2192,14 @@
        // Initialize mobile slides
        showSlide(0);
        
-       // Force show auth modal initially, then let Firebase auth state take over
+                // Force show auth modal initially, then let Firebase auth state take over
        setTimeout(() => {
          console.log('Initial timeout - authStateInitialized:', authStateInitialized);
          if (!authStateInitialized) {
            console.log('Showing auth modal initially');
            showAuthModal();
          }
-       }, 500);
+       }, 100);
      });
   </script>
 </body>
