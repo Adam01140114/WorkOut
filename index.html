@@ -317,16 +317,18 @@
        
        <!-- Slide 1: Total Calories Burned -->
        <div class="mobile-slide active" id="mobile-slide-1">
+         <br>
          <div class="mobile-slide-content">
-           <h2>Total Calories Burned</h2>
+           <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleFat">Show Fat Loss</button>
+           <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
          </div>
        </div>
 
        <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
+         <br>
          <div class="mobile-slide-content">
            <h2>Calories Burnt With Workouts</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
@@ -337,6 +339,7 @@
 
        <!-- Slide 3: Foods Eaten -->
        <div class="mobile-slide next" id="mobile-slide-3">
+         <br>
          <div class="mobile-slide-content">
            <h2>Foods Eaten</h2>
            <canvas id="mobileFoodChart" height="200"></canvas>
@@ -347,6 +350,7 @@
 
        <!-- Slide 4: Weight Trajectory -->
        <div class="mobile-slide next" id="mobile-slide-4">
+         <br>
          <div class="mobile-slide-content">
            <h2>Weight Trajectory</h2>
            <canvas id="mobileWeightChart" height="200"></canvas>
@@ -357,6 +361,7 @@
 
        <!-- Slide 5: User Profile -->
        <div class="mobile-slide next" id="mobile-slide-5">
+         <br>
          <div class="mobile-slide-content">
            <h2>User Profile</h2>
            <div class="user-actions">
@@ -759,9 +764,9 @@
 
       <!-- Total Burned -->
       <section class="card">
-        <h2>Total Calories Burned</h2>
+        <h2>Total Calorie Deficit</h2>
         <canvas id="totalChart" height="200"></canvas>
-        <button class="ghost" id="toggleFat">Show Fat Loss</button>
+        <button class="ghost" id="toggleFat">Show More</button>
         <button class="primary" id="addCaloriesBtn">Add Calories</button>
       </section>
 
@@ -1596,7 +1601,7 @@
      let totalChart=new Chart(totalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
@@ -1606,7 +1611,7 @@
      let mobileTotalChart=new Chart(mobileTotalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
@@ -1808,16 +1813,49 @@
        const daily=labels.map(d=> (basalByDate[d]||0) + (activityByDate[d]||0));
        let cumulative=[];let sum=0;daily.forEach(v=>{sum+=v;cumulative.push(sum)});
 
-       // Total calories chart
+       // Calculate food calories eaten per day
+       const foodCalories = labels.map(d => {
+         let total = 0;
+         if (foodDataByDate[d]) {
+           if (foodDataByDate[d].tacos && foodDataByDate[d].tacos.totalCalories) {
+             total += foodDataByDate[d].tacos.totalCalories;
+           }
+           if (foodDataByDate[d].burger && foodDataByDate[d].burger.totalCalories) {
+             total += foodDataByDate[d].burger.totalCalories;
+           }
+         }
+         return total;
+       });
+
+       // Calculate calorie deficit (calories burned - calories eaten)
+       const calorieDeficit = labels.map((d, i) => daily[i] - foodCalories[i]);
+
+       // Total calories chart - check if showing detailed view
        totalChart.data.labels=labels;
-       const isFat = totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       totalChart.data.datasets[0].data = isFat ? daily.map(v=>v/3500) : daily;
+       const isDetailed = totalChart.data.datasets.length > 1;
+       
+       if (isDetailed) {
+         // Show detailed view with both calories burned and eaten
+         totalChart.data.datasets[0].data = daily; // Calories burned
+         totalChart.data.datasets[1].data = foodCalories; // Calories eaten
+       } else {
+         // Show calorie deficit
+         totalChart.data.datasets[0].data = calorieDeficit;
+       }
        totalChart.update();
 
-       // Mobile total calories chart
+       // Mobile total calories chart - check if showing detailed view
        mobileTotalChart.data.labels=labels;
-       const isMobileFat = mobileTotalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileTotalChart.data.datasets[0].data = isMobileFat ? daily.map(v=>v/3500) : daily;
+       const isMobileDetailed = mobileTotalChart.data.datasets.length > 1;
+       
+       if (isMobileDetailed) {
+         // Show detailed view with both calories burned and eaten
+         mobileTotalChart.data.datasets[0].data = daily; // Calories burned
+         mobileTotalChart.data.datasets[1].data = foodCalories; // Calories eaten
+       } else {
+         // Show calorie deficit
+         mobileTotalChart.data.datasets[0].data = calorieDeficit;
+       }
        mobileTotalChart.update();
 
        // Workout calories chart
@@ -1845,19 +1883,7 @@
        mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
        mobileWorkoutChart.update();
 
-       // Food calories chart
-       const foodCalories = labels.map(d => {
-         let total = 0;
-         if (foodDataByDate[d]) {
-           if (foodDataByDate[d].tacos && foodDataByDate[d].tacos.calories) {
-             total += foodDataByDate[d].tacos.calories;
-           }
-           if (foodDataByDate[d].burger && foodDataByDate[d].burger.calories) {
-             total += foodDataByDate[d].burger.calories;
-           }
-         }
-         return total;
-       });
+       // Food calories chart (using existing foodCalories variable)
        
        // Mobile food calories chart
        mobileFoodChart.data.labels = labels;
@@ -2220,17 +2246,81 @@
        showBtn.textContent='Hide Workouts';
      });
 
-         // ===== Fat Loss Toggle =====
+         // ===== Show More Toggle =====
      document.getElementById('toggleFat').addEventListener('click',()=>{
-       const isFat=totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       totalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       const isDetailed = totalChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to deficit view
+         totalChart.data.datasets = [{
+           label: 'Calorie Deficit',
+           data: [],
+           borderColor: '#6ee7b7',
+           backgroundColor: 'rgba(110,231,183,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('toggleFat').textContent = 'Show More';
+       } else {
+         // Switch to detailed view
+         totalChart.data.datasets = [
+           {
+             label: 'Calories Burned',
+             data: [],
+             borderColor: '#6ee7b7',
+             backgroundColor: 'rgba(110,231,183,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Calories Eaten',
+             data: [],
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           }
+         ];
+         document.getElementById('toggleFat').textContent = 'Show Deficit';
+       }
        updateCharts();
      });
 
-     // Mobile fat loss toggles
+     // Mobile show more toggles
      document.getElementById('mobileToggleFat').addEventListener('click',()=>{
-       const isFat=mobileTotalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileTotalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       const isDetailed = mobileTotalChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to deficit view
+         mobileTotalChart.data.datasets = [{
+           label: 'Calorie Deficit',
+           data: [],
+           borderColor: '#6ee7b7',
+           backgroundColor: 'rgba(110,231,183,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('mobileToggleFat').textContent = 'Show More';
+       } else {
+         // Switch to detailed view
+         mobileTotalChart.data.datasets = [
+           {
+             label: 'Calories Burned',
+             data: [],
+             borderColor: '#6ee7b7',
+             backgroundColor: 'rgba(110,231,183,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Calories Eaten',
+             data: [],
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           }
+         ];
+         document.getElementById('mobileToggleFat').textContent = 'Show Deficit';
+       }
        updateCharts();
      });
 
