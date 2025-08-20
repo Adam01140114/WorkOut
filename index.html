@@ -150,30 +150,49 @@
        position: relative;
        width: 100%;
        height: 100vh;
+       padding-top: 60px; /* Add space for title */
+     }
+     
+     .mobile-title {
+       position: fixed;
+       top: 0;
+       left: 0;
+       right: 0;
+       background: var(--bg);
+       padding: 16px;
+       text-align: center;
+       font-size: 18px;
+       font-weight: bold;
+       z-index: 200;
+       border-bottom: 1px solid rgba(255,255,255,0.1);
      }
      
      .mobile-slide {
        position: absolute;
        width: 100%;
-       height: 100%;
+       height: calc(100vh - 60px);
        transition: transform 0.3s ease-in-out;
        padding: 20px;
        box-sizing: border-box;
-       display: flex;
+       display: none;
        flex-direction: column;
-       justify-content: center;
+       justify-content: flex-start;
+       overflow-y: auto;
      }
      
      .mobile-slide.active {
        transform: translateX(0);
+       z-index: 10;
      }
      
      .mobile-slide.prev {
        transform: translateX(-100%);
+       z-index: 5;
      }
      
      .mobile-slide.next {
        transform: translateX(100%);
+       z-index: 5;
      }
      
      .mobile-slide-content {
@@ -182,16 +201,19 @@
        padding: 24px;
        margin-bottom: 16px;
        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+       flex: 1;
      }
      
      .mobile-slide-content h2 {
        margin-top: 0;
        margin-bottom: 16px;
        text-align: center;
+       font-size: 20px;
      }
      
      .mobile-slide-content canvas {
        margin-bottom: 16px;
+       max-height: 200px;
      }
      
      .mobile-slide-content .user-actions {
@@ -200,6 +222,7 @@
      
      .mobile-slide-content .user-actions button {
        margin-bottom: 8px;
+       width: 100%;
      }
      
      .mobile-slide-content .user-actions button:last-child {
@@ -254,6 +277,14 @@
          margin: 0;
          padding: 0;
        }
+       
+       h1 {
+         display: none; /* Hide desktop title on mobile */
+       }
+       
+       .mobile-slide.active {
+         overflow-y: auto;
+       }
      }
   </style>
 </head>
@@ -263,6 +294,9 @@
 
      <!-- Mobile Container -->
      <div class="mobile-container">
+       <!-- Mobile Title -->
+       <div class="mobile-title">Smart Calorie Tracker</div>
+       
        <!-- Slide 1: Total Calories Burned -->
        <div class="mobile-slide active" id="mobile-slide-1">
          <div class="mobile-slide-content">
@@ -273,23 +307,23 @@
          </div>
        </div>
 
-       <!-- Slide 2: Weight Trajectory -->
+       <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
-         <div class="mobile-slide-content">
-           <h2>Weight Trajectory</h2>
-           <canvas id="mobileWeightChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
-           <button class="primary" id="mobileAddWeightBtn">Add Weight</button>
-         </div>
-       </div>
-
-       <!-- Slide 3: Workout Calories -->
-       <div class="mobile-slide next" id="mobile-slide-3">
          <div class="mobile-slide-content">
            <h2>Calories Burnt With Workouts</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+         </div>
+       </div>
+
+       <!-- Slide 3: Weight Trajectory -->
+       <div class="mobile-slide next" id="mobile-slide-3">
+         <div class="mobile-slide-content">
+           <h2>Weight Trajectory</h2>
+           <canvas id="mobileWeightChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
+           <button class="primary" id="mobileAddWeightBtn">Add Weight</button>
          </div>
        </div>
 
@@ -1295,30 +1329,34 @@
      let isDragging = false;
 
      function showSlide(slideIndex) {
-       // Remove all classes from slides
+       // Hide all slides first
        for (let i = 0; i < totalSlides; i++) {
          const slide = document.getElementById(`mobile-slide-${i + 1}`);
          const indicator = document.querySelectorAll('.mobile-indicator')[i];
          
          slide.classList.remove('active', 'prev', 'next');
+         slide.style.display = 'none';
          indicator.classList.remove('active');
        }
 
-       // Set current slide
+       // Show current slide
        const currentSlideElement = document.getElementById(`mobile-slide-${slideIndex + 1}`);
        const currentIndicator = document.querySelectorAll('.mobile-indicator')[slideIndex];
        
+       currentSlideElement.style.display = 'flex';
        currentSlideElement.classList.add('active');
        currentIndicator.classList.add('active');
 
-       // Set previous slide
+       // Set previous slide for swipe animation
        const prevIndex = slideIndex === 0 ? totalSlides - 1 : slideIndex - 1;
        const prevSlide = document.getElementById(`mobile-slide-${prevIndex + 1}`);
+       prevSlide.style.display = 'flex';
        prevSlide.classList.add('prev');
 
-       // Set next slide
+       // Set next slide for swipe animation
        const nextIndex = slideIndex === totalSlides - 1 ? 0 : slideIndex + 1;
        const nextSlide = document.getElementById(`mobile-slide-${nextIndex + 1}`);
+       nextSlide.style.display = 'flex';
        nextSlide.classList.add('next');
      }
 
@@ -1844,8 +1882,11 @@
        // Prefill treadmill preview with defaults
        tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
        
-       // Initialize mobile swipe functionality
+                // Initialize mobile swipe functionality
        initMobileSwipe();
+       
+       // Initialize mobile slides
+       showSlide(0);
        
        // Force show auth modal initially, then let Firebase auth state take over
        setTimeout(() => {
