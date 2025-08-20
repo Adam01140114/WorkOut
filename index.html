@@ -178,6 +178,7 @@
        flex-direction: column;
        justify-content: flex-start;
        overflow-y: auto;
+       -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
      }
      
      .mobile-slide.active {
@@ -295,7 +296,7 @@
      <!-- Mobile Container -->
      <div class="mobile-container">
        <!-- Mobile Title -->
-       <div class="mobile-title">Smart Calorie Tracker</div>
+       <div class="mobile-title">Smart Calorie Trackerz</div>
        
        <!-- Slide 1: Total Calories Burned -->
        <div class="mobile-slide active" id="mobile-slide-1">
@@ -763,50 +764,58 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // ===== Authentication State Management =====
-    let currentUser = null;
-    let userProfile = null;
-    let authStateInitialized = false;
+         // ===== Authentication State Management =====
+     let currentUser = null;
+     let userProfile = null;
+     let authStateInitialized = false;
 
-    auth.onAuthStateChanged(async (user) => {
-      console.log('Auth state changed:', user ? 'User logged in' : 'No user');
-      
-      if (user) {
-        currentUser = user;
-        console.log('User signed in:', user.email);
-        
-        // Check if user has profile
-        try {
-          const profileDoc = await db.collection('users').doc(user.uid).get();
-          if (profileDoc.exists) {
-            userProfile = profileDoc.data();
-            console.log('Profile found, showing app');
-            showApp();
-            loadUserData();
-          } else {
-            console.log('No profile found, showing profile setup');
-            showProfileSetup();
-          }
-        } catch (error) {
-          console.error('Error checking profile:', error);
-          showAuthModal();
-        }
-      } else {
-        currentUser = null;
-        userProfile = null;
-        console.log('No user, showing auth modal');
-        // Ensure all modals are hidden first
-        hideAllModals();
-        // Double-check that profile modal is hidden
-        const profileModal = document.getElementById('profileModal');
-        profileModal.style.display = 'none';
-        profileModal.classList.add('hidden');
-        showAuthModal();
-      }
-      
-      // Mark auth state as initialized
-      authStateInitialized = true;
-    });
+     auth.onAuthStateChanged(async (user) => {
+       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+       
+       if (user) {
+         currentUser = user;
+         console.log('User signed in:', user.email);
+         
+         // Check if user has profile
+         try {
+           const profileDoc = await db.collection('users').doc(user.uid).get();
+           if (profileDoc.exists) {
+             userProfile = profileDoc.data();
+             console.log('Profile found, showing app');
+             showApp();
+             loadUserData();
+           } else {
+             console.log('No profile found, showing profile setup');
+             showProfileSetup();
+           }
+         } catch (error) {
+           console.error('Error checking profile:', error);
+           showAuthModal();
+         }
+       } else {
+         currentUser = null;
+         userProfile = null;
+         console.log('No user, showing auth modal');
+         // Ensure all modals are hidden first
+         hideAllModals();
+         // Double-check that profile modal is hidden
+         const profileModal = document.getElementById('profileModal');
+         profileModal.style.display = 'none';
+         profileModal.classList.add('hidden');
+         showAuthModal();
+       }
+       
+       // Mark auth state as initialized
+       authStateInitialized = true;
+     });
+
+     // Show auth modal immediately for first-time users
+     setTimeout(() => {
+       if (!authStateInitialized) {
+         console.log('Showing auth modal for first-time user');
+         showAuthModal();
+       }
+     }, 100);
 
     // ===== UI State Management =====
          function hideAllModals() {
@@ -1540,28 +1549,50 @@
      }
 
      // Touch event handlers
+     let startY = 0;
+     let isVerticalScroll = false;
+
      function handleTouchStart(e) {
        startX = e.touches[0].clientX;
+       startY = e.touches[0].clientY;
        isDragging = true;
+       isVerticalScroll = false;
      }
 
      function handleTouchMove(e) {
        if (!isDragging) return;
-       e.preventDefault(); // Prevent scrolling during swipe
-       currentX = e.touches[0].clientX;
-       const diff = startX - currentX;
        
-       // Add visual feedback only for significant swipes
-       const activeSlide = document.querySelector('.mobile-slide.active');
-       if (Math.abs(diff) > 20) {
-         activeSlide.style.transform = `translateX(${-diff}px)`;
+       currentX = e.touches[0].clientX;
+       const currentY = e.touches[0].clientY;
+       const diffX = startX - currentX;
+       const diffY = startY - currentY;
+       
+       // Determine if this is a vertical scroll or horizontal swipe
+       if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
+         isVerticalScroll = true;
+         return; // Allow normal scrolling
+       }
+       
+       // Only handle horizontal swipes
+       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+         e.preventDefault(); // Prevent scrolling during horizontal swipe
+         
+         // Add visual feedback only for significant swipes
+         const activeSlide = document.querySelector('.mobile-slide.active');
+         if (Math.abs(diffX) > 20) {
+           activeSlide.style.transform = `translateX(${-diffX}px)`;
+         }
        }
      }
 
      function handleTouchEnd(e) {
-       if (!isDragging) return;
-       isDragging = false;
+       if (!isDragging || isVerticalScroll) {
+         isDragging = false;
+         isVerticalScroll = false;
+         return;
+       }
        
+       isDragging = false;
        const diff = startX - currentX;
        const threshold = 80; // Increased threshold to prevent accidental swipes
        
