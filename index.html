@@ -56,6 +56,10 @@
       padding: 20px;
       overflow-y: auto;
     }
+    
+    .modal-overlay.hidden {
+      display: none !important;
+    }
     .modal {
       background: var(--card);
       border-radius: var(--radius);
@@ -445,7 +449,7 @@
     </div>
 
          <!-- Settings Modal -->
-     <div id="settingsModal" class="modal-overlay hidden" style="display: none !important;">
+     <div id="settingsModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
            <div class="modal-icon">⚙️</div>
@@ -507,7 +511,7 @@
      </div>
 
      <!-- Weight Logging Modal -->
-     <div id="weightLoggingModal" class="modal-overlay hidden" style="display: none !important;">
+     <div id="weightLoggingModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
            <div class="modal-icon">⚖️</div>
@@ -530,7 +534,7 @@
      </div>
 
      <!-- Add Weight Modal -->
-     <div id="addWeightModal" class="modal-overlay hidden" style="display: none !important;">
+     <div id="addWeightModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
            <div class="modal-icon">⚖️</div>
@@ -799,18 +803,14 @@
            console.error('Error checking profile:', error);
            showAuthModal();
          }
-       } else {
-         currentUser = null;
-         userProfile = null;
-         console.log('No user, showing auth modal');
-         // Ensure all modals are hidden first
-         hideAllModals();
-         // Double-check that profile modal is hidden
-         const profileModal = document.getElementById('profileModal');
-         profileModal.style.display = 'none';
-         profileModal.classList.add('hidden');
-         showAuthModal();
-       }
+                } else {
+           currentUser = null;
+           userProfile = null;
+           console.log('No user, showing auth modal');
+           // Ensure all modals are hidden first
+           hideAllModals();
+           showAuthModal();
+         }
        
        // Mark auth state as initialized
        authStateInitialized = true;
@@ -832,33 +832,22 @@
        document.getElementById('profileModal').classList.add('hidden');
        const settingsModal = document.getElementById('settingsModal');
        settingsModal.classList.add('hidden');
-       settingsModal.style.display = 'none';
        const addCaloriesModal = document.getElementById('addCaloriesModal');
        addCaloriesModal.classList.add('hidden');
-       addCaloriesModal.style.display = 'none';
        const addWeightModal = document.getElementById('addWeightModal');
        addWeightModal.classList.add('hidden');
-       addWeightModal.style.display = 'none';
        const weightLoggingModal = document.getElementById('weightLoggingModal');
        weightLoggingModal.classList.add('hidden');
-       weightLoggingModal.style.display = 'none';
        
        // Hide mobile modals
        const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
        mobileWorkoutModal.classList.add('hidden');
-       mobileWorkoutModal.style.display = 'none';
        const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
        mobileTreadmillModal.classList.add('hidden');
-       mobileTreadmillModal.style.display = 'none';
        const mobileStairsModal = document.getElementById('mobileStairsModal');
        mobileStairsModal.classList.add('hidden');
-       mobileStairsModal.style.display = 'none';
        
        document.getElementById('appContent').classList.add('hidden');
-       
-       // Force hide profile modal with inline styles as backup
-       const profileModal = document.getElementById('profileModal');
-       profileModal.style.display = 'none';
      }
 
          function showAuthModal() {
@@ -868,7 +857,6 @@
        hideAllModals();
        
        const authModal = document.getElementById('authModal');
-       authModal.style.display = 'flex';
        authModal.classList.remove('hidden');
        authModal.style.zIndex = '2000';
        showSignupForm(); // Show signup form by default instead of login
@@ -903,11 +891,8 @@
       
       console.log('Showing profile setup for user:', currentUser.email);
       document.getElementById('authModal').classList.add('hidden');
-      const authModal = document.getElementById('authModal');
-      authModal.style.display = 'none';
       const profileModal = document.getElementById('profileModal');
       profileModal.classList.remove('hidden');
-      profileModal.style.display = 'flex';
       document.getElementById('appContent').classList.add('hidden');
     }
 
@@ -922,10 +907,6 @@
        
        // Enable settings button when user is authenticated
        document.getElementById('openSettings').disabled = false;
-       
-       // Ensure auth modal is completely hidden
-       const authModal = document.getElementById('authModal');
-       authModal.style.display = 'none';
      }
 
      function showAddCaloriesModal() {
@@ -939,7 +920,6 @@
        document.getElementById('addCaloriesSuccess').classList.add('hidden');
        
        const addCaloriesModal = document.getElementById('addCaloriesModal');
-       addCaloriesModal.style.display = 'flex';
        addCaloriesModal.classList.remove('hidden');
        
        // Ensure modal is visible on mobile
@@ -949,7 +929,6 @@
      function hideAddCaloriesModal() {
        const addCaloriesModal = document.getElementById('addCaloriesModal');
        addCaloriesModal.classList.add('hidden');
-       addCaloriesModal.style.display = 'none';
      }
 
     function showSettings() {
@@ -966,14 +945,12 @@
       document.getElementById('settingsWeight').value = userProfile.weight || '';
       
       const settingsModal = document.getElementById('settingsModal');
-      settingsModal.style.display = 'flex';
       settingsModal.classList.remove('hidden');
     }
 
     function hideSettings() {
       const settingsModal = document.getElementById('settingsModal');
       settingsModal.classList.add('hidden');
-      settingsModal.style.display = 'none';
     }
 
     // ===== Authentication Event Listeners =====
@@ -1068,34 +1045,7 @@
     });
     document.getElementById('cancelSettings').addEventListener('click', hideSettings);
     
-         // Prevent any direct access to modals
-     document.addEventListener('DOMContentLoaded', () => {
-       const settingsModal = document.getElementById('settingsModal');
-       if (settingsModal) {
-         settingsModal.style.display = 'none';
-         settingsModal.classList.add('hidden');
-       }
-       
-       // Prevent any direct access to profile modal
-       const profileModal = document.getElementById('profileModal');
-       if (profileModal) {
-         profileModal.style.display = 'none';
-         profileModal.classList.add('hidden');
-       }
-       
-       // Prevent any direct access to weight modals
-       const addWeightModal = document.getElementById('addWeightModal');
-       if (addWeightModal) {
-         addWeightModal.style.display = 'none';
-         addWeightModal.classList.add('hidden');
-       }
-       
-       const weightLoggingModal = document.getElementById('weightLoggingModal');
-       if (weightLoggingModal) {
-         weightLoggingModal.style.display = 'none';
-         weightLoggingModal.classList.add('hidden');
-       }
-     });
+
 
     document.getElementById('saveSettings').addEventListener('click', async () => {
       // Check if user is authenticated
@@ -1305,14 +1255,12 @@
 
      function showWeightLoggingModal() {
        const weightLoggingModal = document.getElementById('weightLoggingModal');
-       weightLoggingModal.style.display = 'flex';
        weightLoggingModal.classList.remove('hidden');
      }
 
      function hideWeightLoggingModal() {
        const weightLoggingModal = document.getElementById('weightLoggingModal');
        weightLoggingModal.classList.add('hidden');
-       weightLoggingModal.style.display = 'none';
      }
 
      function showAddWeightModal() {
@@ -1325,19 +1273,16 @@
        document.getElementById('addWeightSuccess').classList.add('hidden');
        
        const addWeightModal = document.getElementById('addWeightModal');
-       addWeightModal.style.display = 'flex';
        addWeightModal.classList.remove('hidden');
      }
 
      function hideAddWeightModal() {
        const addWeightModal = document.getElementById('addWeightModal');
        addWeightModal.classList.add('hidden');
-       addWeightModal.style.display = 'none';
      }
 
      function showMobileWorkoutMenu() {
        const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
-       mobileWorkoutModal.style.display = 'flex';
        mobileWorkoutModal.classList.remove('hidden');
        mobileWorkoutModal.style.zIndex = '2000';
      }
@@ -1345,12 +1290,10 @@
      function hideMobileWorkoutMenu() {
        const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
        mobileWorkoutModal.classList.add('hidden');
-       mobileWorkoutModal.style.display = 'none';
      }
 
      function showMobileTreadmillModal() {
        const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
-       mobileTreadmillModal.style.display = 'flex';
        mobileTreadmillModal.classList.remove('hidden');
        mobileTreadmillModal.style.zIndex = '2000';
        
@@ -1364,12 +1307,10 @@
      function hideMobileTreadmillModal() {
        const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
        mobileTreadmillModal.classList.add('hidden');
-       mobileTreadmillModal.style.display = 'none';
      }
 
      function showMobileStairsModal() {
        const mobileStairsModal = document.getElementById('mobileStairsModal');
-       mobileStairsModal.style.display = 'flex';
        mobileStairsModal.classList.remove('hidden');
        mobileStairsModal.style.zIndex = '2000';
        
@@ -1381,7 +1322,6 @@
      function hideMobileStairsModal() {
        const mobileStairsModal = document.getElementById('mobileStairsModal');
        mobileStairsModal.classList.add('hidden');
-       mobileStairsModal.style.display = 'none';
      }
 
      function previewMobileTreadmill() {
@@ -2195,9 +2135,6 @@
      window.addEventListener('DOMContentLoaded',()=>{
        console.log('DOM loaded, initializing app...');
        
-       // Ensure all modals are hidden by default
-       hideAllModals();
-       
        // Prefill example values for profile setup
        document.getElementById('setupAge').value=22;
        document.getElementById('setupHeightFt').value=5;
@@ -2207,7 +2144,7 @@
        // Prefill treadmill preview with defaults
        tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
        
-                // Initialize mobile swipe functionality
+       // Initialize mobile swipe functionality
        initMobileSwipe();
        
        // Initialize mobile slides
@@ -2220,7 +2157,7 @@
          }, 300);
        }
        
-                // Force show auth modal initially, then let Firebase auth state take over
+       // Force show auth modal initially, then let Firebase auth state take over
        setTimeout(() => {
          console.log('Initial timeout - authStateInitialized:', authStateInitialized);
          if (!authStateInitialized) {
