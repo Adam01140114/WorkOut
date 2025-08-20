@@ -1898,9 +1898,9 @@
          
          // Calculate weight change trend based on actual logged weight data
          const today = new Date();
-         const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+         const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
          
-         // Get actual weight data points from the past week (or available data)
+         // Get actual weight data points from the past 3 days (or available data)
          const weightDataPoints = [];
          const allDates = Object.keys(weightByDate).sort();
          
@@ -1915,9 +1915,9 @@
            }
          });
          
-         // Sort by date and get the most recent data points (up to 7 days)
+         // Sort by date and get the most recent data points (up to 3 days)
          weightDataPoints.sort((a, b) => a.timestamp - b.timestamp);
-         const recentWeightData = weightDataPoints.slice(-7); // Last 7 data points
+         const recentWeightData = weightDataPoints.slice(-3); // Last 3 data points
          
          let avgDailyWeightChange = 0;
          
@@ -1928,22 +1928,22 @@
            avgDailyWeightChange = daysBetween > 0 ? totalWeightChange / daysBetween : 0;
          } else {
            // Fallback to calorie-based calculation if not enough weight data
-           const weekLabels = labels.filter(date => {
+           const threeDayLabels = labels.filter(date => {
              const dateObj = new Date(date);
-             return dateObj >= oneWeekAgo && dateObj <= today;
+             return dateObj >= threeDaysAgo && dateObj <= today;
            });
            
-           let weeklyTotal = 0;
-           let weeklyDays = 0;
-           weekLabels.forEach(date => {
+           let threeDayTotal = 0;
+           let threeDayCount = 0;
+           threeDayLabels.forEach(date => {
              const dailyCalories = (basalByDate[date]||0) + (activityByDate[date]||0);
              if (dailyCalories > 0) {
-               weeklyTotal += dailyCalories;
-               weeklyDays++;
+               threeDayTotal += dailyCalories;
+               threeDayCount++;
              }
            });
            
-           const avgDailyCalories = weeklyDays > 0 ? weeklyTotal / weeklyDays : 0;
+           const avgDailyCalories = threeDayCount > 0 ? threeDayTotal / threeDayCount : 0;
            avgDailyWeightChange = -(avgDailyCalories / 3500); // Convert calories to lbs of fat loss (negative)
          }
          
@@ -1951,24 +1951,38 @@
          const actualWeight = cumulative.map(v => baseWeight - (v/3500));
          console.log('Actual weight calculation:', actualWeight);
          
+         // Use actual logged weight data if available, otherwise use calculated weight
+         const tempProjLabels = [...labels];
+         for (let i = 1; i <= 7; i++) {
+           const futureDate = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+           tempProjLabels.push(futureDate.toISOString().split('T')[0]);
+         }
+         
+         const loggedWeightData = tempProjLabels.map(date => {
+           return weightByDate[date] || null;
+         });
+         
+         // Filter out null values and create actual weight line
+         const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
+         const loggedWeightLabels = tempProjLabels.filter((date, index) => loggedWeightData[index] !== null);
+         
          // Blue dotted line: Projected weight based on actual weight trend
          const projectedWeight = [];
-         const futureDays = 7; // Project 7 days into the future
+         const futureDays = 3; // Project 3 days into the future
          
          // Get the last actual weight as starting point for projection
          const lastActualWeight = actualLoggedWeight.length > 0 ? 
            actualLoggedWeight[actualLoggedWeight.length - 1] : baseWeight;
          
-         for (let i = 0; i < actualLoggedWeight.length + futureDays; i++) {
-           if (i < actualLoggedWeight.length) {
-             // Use actual logged weight for past days
-             projectedWeight.push(actualLoggedWeight[i]);
-           } else {
-             // Project future weight based on actual weight trend
-             const daysFromLastWeight = i - actualLoggedWeight.length + 1;
-             const projectedWeightChange = avgDailyWeightChange * daysFromLastWeight;
-             projectedWeight.push(lastActualWeight + projectedWeightChange);
-           }
+         // First, add all actual weight data points
+         for (let i = 0; i < actualLoggedWeight.length; i++) {
+           projectedWeight.push(actualLoggedWeight[i]);
+         }
+         
+         // Then add future projections
+         for (let i = 1; i <= futureDays; i++) {
+           const projectedWeightChange = avgDailyWeightChange * i;
+           projectedWeight.push(lastActualWeight + projectedWeightChange);
          }
          
          const projLabels = [...loggedWeightLabels];
@@ -1976,15 +1990,6 @@
            const futureDate = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
            projLabels.push(futureDate.toISOString().split('T')[0]);
          }
-         
-         // Use actual logged weight data if available, otherwise use calculated weight
-         const loggedWeightData = projLabels.map(date => {
-           return weightByDate[date] || null;
-         });
-         
-         // Filter out null values and create actual weight line
-         const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
-         const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
          
          weightChart.data.labels = projLabels;
          const isWeightFat = weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
@@ -2015,16 +2020,16 @@
            
            // Calculate projected weight for mobile chart
            const mobileProjectedWeight = [];
-           for (let i = 0; i < actualLoggedWeight.length + futureDays; i++) {
-             if (i < actualLoggedWeight.length) {
-               // Use actual logged weight for past days
-               mobileProjectedWeight.push(actualLoggedWeight[i]);
-             } else {
-               // Project future weight based on actual weight trend
-               const daysFromLastWeight = i - actualLoggedWeight.length + 1;
-               const projectedWeightChange = avgDailyWeightChange * daysFromLastWeight;
-               mobileProjectedWeight.push(lastActualWeight + projectedWeightChange);
-             }
+           
+           // First, add all actual weight data points
+           for (let i = 0; i < actualLoggedWeight.length; i++) {
+             mobileProjectedWeight.push(actualLoggedWeight[i]);
+           }
+           
+           // Then add future projections
+           for (let i = 1; i <= futureDays; i++) {
+             const projectedWeightChange = avgDailyWeightChange * i;
+             mobileProjectedWeight.push(lastActualWeight + projectedWeightChange);
            }
            
            mobileWeightChart.data.datasets[0].data = actualLoggedWeight; // Green line: Actual logged weight
