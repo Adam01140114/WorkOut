@@ -212,6 +212,8 @@
        margin-bottom: 16px;
        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
        flex: 1;
+       max-height: 70vh; /* Limit height to 70% of viewport */
+       overflow-y: auto;
      }
      
      .mobile-slide-content h2 {
@@ -339,7 +341,7 @@
            <h2>Weight Trajectory</h2>
            <canvas id="mobileWeightChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
-           <button class="primary" id="mobileAddWeightBtn">Add Weight</button>
+           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
          </div>
        </div>
 
@@ -1368,6 +1370,8 @@
 
      function addWeightForDate(weight, date) {
        weightByDate[date] = weight;
+       console.log('Weight added for date:', date, 'weight:', weight);
+       console.log('Current weightByDate:', weightByDate);
        updateCharts();
        saveUserData();
      }
@@ -1661,6 +1665,8 @@
 
        if(userProfile && userProfile.weight){
          const baseWeight=+userProfile.weight;
+         console.log('Updating weight chart with baseWeight:', baseWeight);
+         console.log('weightByDate data:', weightByDate);
          
          // Calculate average daily calories burned over the past week
          const today = new Date();
@@ -1685,6 +1691,7 @@
          
          // Green line: Actual weight (starts at base weight and decreases based on actual cumulative fat loss)
          const actualWeight = cumulative.map(v => baseWeight - (v/3500));
+         console.log('Actual weight calculation:', actualWeight);
          
          // Blue dotted line: Projected weight based on average daily fat loss
          const projectedWeight = [];
@@ -1714,8 +1721,22 @@
            weightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
            weightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
          } else {
-           weightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
+           // Use actual logged weight data if available, otherwise use calculated weight
+           const loggedWeightData = projLabels.map(date => {
+             return weightByDate[date] || null;
+           });
+           
+           // Filter out null values and create actual weight line
+           const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
+           const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
+           
+           weightChart.data.datasets[0].data = actualLoggedWeight; // Green line: Actual logged weight
            weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+           
+           // Update labels to match logged weight data
+           if (actualLoggedWeight.length > 0) {
+             weightChart.data.labels = loggedWeightLabels;
+           }
          }
          weightChart.update();
 
@@ -1725,8 +1746,22 @@
            mobileWeightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
            mobileWeightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
          } else {
-           mobileWeightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
+           // Use actual logged weight data if available, otherwise use calculated weight
+           const loggedWeightData = projLabels.map(date => {
+             return weightByDate[date] || null;
+           });
+           
+           // Filter out null values and create actual weight line
+           const actualLoggedWeight = loggedWeightData.filter(w => w !== null);
+           const loggedWeightLabels = projLabels.filter((date, index) => loggedWeightData[index] !== null);
+           
+           mobileWeightChart.data.datasets[0].data = actualLoggedWeight; // Green line: Actual logged weight
            mobileWeightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+           
+           // Update labels to match logged weight data
+           if (actualLoggedWeight.length > 0) {
+             mobileWeightChart.data.labels = loggedWeightLabels;
+           }
          }
          mobileWeightChart.update();
        }
