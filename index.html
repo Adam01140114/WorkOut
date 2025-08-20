@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-     <title>WorkSmart - BMR & Calorie Tracker</title>
+     <title>WorkSmart - Calorie Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -138,6 +138,10 @@
        background: linear-gradient(135deg,var(--accent),var(--accent-2));
        color: #081018;
      }
+     .danger-btn {
+       background: var(--danger);
+       color: white;
+     }
   </style>
 </head>
 <body>
@@ -256,8 +260,8 @@
            <input id="settingsWeight" type="number" />
          </div>
          <div class="user-actions">
-           <button class="ghost" id="cancelSettings">Back</button>
            <button class="primary" id="saveSettings">Save</button>
+           <button class="ghost" id="cancelSettings">Back</button>
          </div>
          <div id="settingsError" class="error-message hidden"></div>
          <div id="settingsSuccess" class="success-message hidden"></div>
@@ -284,11 +288,61 @@
            <input id="caloriesDate" type="date" />
          </div>
          <div class="user-actions">
-           <button class="ghost" id="cancelAddCalories">Cancel</button>
            <button class="primary" id="submitAddCalories">Submit</button>
+           <button class="ghost" id="cancelAddCalories">Cancel</button>
          </div>
          <div id="addCaloriesError" class="error-message hidden"></div>
          <div id="addCaloriesSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Weight Logging Modal -->
+     <div id="weightLoggingModal" class="modal-overlay hidden" style="display: none !important;">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚖️</div>
+           <div>
+             <h3 class="modal-title">Daily Weight Check</h3>
+             <p class="modal-subtitle">Have you weighed yourself today?</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="dailyWeight">Weight (lb)</label>
+           <input id="dailyWeight" type="number" step="0.1" placeholder="Enter your weight" />
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="submitDailyWeight">Submit</button>
+           <button class="ghost" id="maybeLaterWeight">Maybe Later</button>
+           <button class="ghost" id="closeWeightModal">Close</button>
+         </div>
+         <div id="weightLoggingError" class="error-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Add Weight Modal -->
+     <div id="addWeightModal" class="modal-overlay hidden" style="display: none !important;">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚖️</div>
+           <div>
+             <h3 class="modal-title">Add Weight</h3>
+             <p class="modal-subtitle">Log your weight for a specific date</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="weightAmount">Weight (lb)</label>
+           <input id="weightAmount" type="number" step="0.1" placeholder="Enter your weight" />
+         </div>
+         <div class="field">
+           <label class="label" for="weightDate">Date</label>
+           <input id="weightDate" type="date" />
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="submitAddWeight">Submit</button>
+           <button class="ghost" id="cancelAddWeight">Cancel</button>
+         </div>
+         <div id="addWeightError" class="error-message hidden"></div>
+         <div id="addWeightSuccess" class="success-message hidden"></div>
        </div>
      </div>
 
@@ -297,17 +351,19 @@
 
       <!-- Total Burned -->
       <section class="card">
-        <h2>Total Calories Burned (Basal + Activity)</h2>
+        <h2>Total Calories Burned</h2>
         <canvas id="totalChart" height="200"></canvas>
         <button class="ghost" id="toggleFat">Show Fat Loss</button>
         <button class="primary" id="addCaloriesBtn">Add Calories</button>
       </section>
 
-      <!-- Weight Trajectory -->
-      <section class="card">
-        <h2>Estimate Weight Trajectory</h2>
-        <canvas id="weightChart" height="200"></canvas>
-      </section>
+             <!-- Weight Trajectory -->
+       <section class="card">
+         <h2>Weight Trajectory</h2>
+         <canvas id="weightChart" height="200"></canvas>
+         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+         <button class="primary" id="addWeightBtn">Add Weight</button>
+       </section>
 
       <!-- Workouts Menu (hidden by default) -->
       <section class="card hidden" id="workoutMenu">
@@ -325,22 +381,16 @@
         <button class="ghost" id="hideWorkouts">Hide Workouts</button>
       </section>
 
-      <!-- Show/Hide Workouts Button -->
-      <section class="card" id="workoutToggleSection">
-      <h2>Count Calories With Workouts</h2>
-        <button class="primary" id="showWorkouts">Show Workouts</button>
-      </section>
+             <!-- Show/Hide Workouts Button -->
+       <section class="card" id="workoutToggleSection">
+         <h2>Calories Burnt With Workouts</h2>
+         <canvas id="workoutChart" height="200"></canvas>
+         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="primary" id="showWorkouts">Show Workouts</button>
+       </section>
 
-          <!-- Settings and Logout Section -->
-    <section class="card">
-      <div class="user-actions">
-        <button class="settings-btn" id="openSettings" disabled>Settings</button>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-      </div>
-    </section>
-
-      <!-- Treadmill Section -->
-      <section class="card hidden" id="treadmillSection">
+                            <!-- Treadmill Section -->
+       <section class="card hidden" id="treadmillSection">
         <h2>Treadmill Calories · ACSM Walking Equation</h2>
         <div class="field">
           <label class="label" for="tspeed">Speed (mph)</label>
@@ -354,11 +404,11 @@
           <label class="label" for="tdur">Duration (min)</label>
           <input id="tdur" type="number" placeholder="30" />
         </div>
-        <div class="result" id="tresult"></div>
-        <button class="primary" id="tcalc">Calculate Calories</button>
-        <button class="ghost" id="tclear">Clear</button>
-        <canvas id="tchart" height="200"></canvas>
-        <button class="ghost" id="backFromTreadmill">Back</button>
+                 <div class="result" id="tresult"></div>
+         <button class="primary" id="tcalc">Calculate Calories</button>
+         <canvas id="tchart" height="200"></canvas>
+         <button class="ghost" id="toggleTreadmillFat">Show Fat Loss</button>
+         <button class="primary" id="backFromTreadmill">Back</button>
       </section>
 
       <!-- Stair Master Section -->
@@ -381,14 +431,26 @@
           <label class="label" for="scustom">Custom MET</label>
           <input id="scustom" type="number" step="0.1" placeholder="9.5" />
         </div>
-        <div class="result" id="sresult"></div>
-        <button class="primary" id="scalc">Calculate Calories</button>
-        <button class="ghost" id="sclear">Clear</button>
-        <canvas id="schart" height="200"></canvas>
-        <button class="ghost" id="backFromStairs">Back</button>
-      </section>
-    </div>
-  </div>
+                 <div class="result" id="sresult"></div>
+         <button class="primary" id="scalc">Calculate Calories</button>
+         <canvas id="schart" height="200"></canvas>
+         <button class="ghost" id="toggleStairsFat">Show Fat Loss</button>
+                  <button class="primary" id="backFromStairs">Back</button>
+       </section>
+
+       <!-- Settings and Logout Section -->
+       <section class="card">
+
+        <h2>User Profile</h2>
+
+         <div class="user-actions">
+           <button class="settings-btn" id="openSettings" disabled>Settings</button>
+           <button class="danger-btn" id="deleteAccountBtn">Delete Account</button>
+           <button class="logout-btn" id="logoutBtn">Logout</button>
+         </div>
+       </section>
+     </div>
+   </div>
 
   <script>
     // ===== Firebase Configuration =====
@@ -463,6 +525,12 @@
        const addCaloriesModal = document.getElementById('addCaloriesModal');
        addCaloriesModal.classList.add('hidden');
        addCaloriesModal.style.display = 'none';
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.classList.add('hidden');
+       addWeightModal.style.display = 'none';
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.classList.add('hidden');
+       weightLoggingModal.style.display = 'none';
        document.getElementById('appContent').classList.add('hidden');
        
        // Force hide profile modal with inline styles as backup
@@ -470,24 +538,29 @@
        profileModal.style.display = 'none';
      }
 
-    function showAuthModal() {
-      console.log('showAuthModal called');
-      
-      // Ensure all other modals are hidden first
-      hideAllModals();
-      
-      document.getElementById('authModal').classList.remove('hidden');
-      showLoginForm();
-    }
+         function showAuthModal() {
+       console.log('showAuthModal called');
+       
+       // Ensure all other modals are hidden first
+       hideAllModals();
+       
+       document.getElementById('authModal').classList.remove('hidden');
+       showSignupForm(); // Show signup form by default instead of login
+     }
 
     function hideAuthModal() {
       document.getElementById('authModal').classList.add('hidden');
     }
 
-    function showLoginForm() {
-      document.getElementById('loginForm').classList.remove('hidden');
-      document.getElementById('signupForm').classList.add('hidden');
-    }
+         function showLoginForm() {
+       document.getElementById('loginForm').classList.remove('hidden');
+       document.getElementById('signupForm').classList.add('hidden');
+     }
+
+     function showSignupForm() {
+       document.getElementById('loginForm').classList.add('hidden');
+       document.getElementById('signupForm').classList.remove('hidden');
+     }
 
     function showSignupForm() {
       document.getElementById('loginForm').classList.add('hidden');
@@ -634,20 +707,25 @@
         return;
       }
 
-      try {
-        const bmr = calcBMR(age, weight, heightFt, heightIn);
-        userProfile = { age, heightFt, heightIn, weight, bmr };
-        
-        await db.collection('users').doc(currentUser.uid).set(userProfile);
-        
-        hideProfileSetup();
-        showApp();
-        loadUserData();
-        errorDiv.classList.add('hidden');
-      } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.classList.remove('hidden');
-      }
+             try {
+         const bmr = calcBMR(age, weight, heightFt, heightIn);
+         userProfile = { age, heightFt, heightIn, weight, bmr };
+         
+         await db.collection('users').doc(currentUser.uid).set(userProfile);
+         
+         // Log initial weight for today
+         const today = todayStr();
+         weightByDate[today] = weight;
+         await saveUserData();
+         
+         hideProfileSetup();
+         showApp();
+         loadUserData();
+         errorDiv.classList.add('hidden');
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+       }
     });
 
     // ===== Settings Management =====
@@ -661,21 +739,34 @@
     });
     document.getElementById('cancelSettings').addEventListener('click', hideSettings);
     
-    // Prevent any direct access to settings modal
-    document.addEventListener('DOMContentLoaded', () => {
-      const settingsModal = document.getElementById('settingsModal');
-      if (settingsModal) {
-        settingsModal.style.display = 'none';
-        settingsModal.classList.add('hidden');
-      }
-      
-      // Prevent any direct access to profile modal
-      const profileModal = document.getElementById('profileModal');
-      if (profileModal) {
-        profileModal.style.display = 'none';
-        profileModal.classList.add('hidden');
-      }
-    });
+         // Prevent any direct access to modals
+     document.addEventListener('DOMContentLoaded', () => {
+       const settingsModal = document.getElementById('settingsModal');
+       if (settingsModal) {
+         settingsModal.style.display = 'none';
+         settingsModal.classList.add('hidden');
+       }
+       
+       // Prevent any direct access to profile modal
+       const profileModal = document.getElementById('profileModal');
+       if (profileModal) {
+         profileModal.style.display = 'none';
+         profileModal.classList.add('hidden');
+       }
+       
+       // Prevent any direct access to weight modals
+       const addWeightModal = document.getElementById('addWeightModal');
+       if (addWeightModal) {
+         addWeightModal.style.display = 'none';
+         addWeightModal.classList.add('hidden');
+       }
+       
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       if (weightLoggingModal) {
+         weightLoggingModal.style.display = 'none';
+         weightLoggingModal.classList.add('hidden');
+       }
+     });
 
     document.getElementById('saveSettings').addEventListener('click', async () => {
       // Check if user is authenticated
@@ -724,50 +815,202 @@
       }
     });
 
-    // ===== Logout =====
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      auth.signOut();
-    });
+         // ===== Logout =====
+     document.getElementById('logoutBtn').addEventListener('click', () => {
+       auth.signOut();
+     });
+
+     // ===== Delete Account =====
+     document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+         try {
+           await db.collection('users').doc(currentUser.uid).delete();
+           await currentUser.delete();
+           auth.signOut();
+         } catch (error) {
+           console.error('Error deleting account:', error);
+           alert('Error deleting account. Please try again.');
+         }
+       }
+     });
+
+     // ===== Weight Logging Modal Event Listeners =====
+     document.getElementById('submitDailyWeight').addEventListener('click', async () => {
+       const weight = Number(document.getElementById('dailyWeight').value);
+       const errorDiv = document.getElementById('weightLoggingError');
+       
+       if (!weight || weight <= 0) {
+         errorDiv.textContent = 'Please enter a valid weight';
+         errorDiv.classList.remove('hidden');
+         return;
+       }
+       
+       try {
+         const today = todayStr();
+         addWeightForDate(weight, today);
+         hideWeightLoggingModal();
+         errorDiv.classList.add('hidden');
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+       }
+     });
+
+     document.getElementById('maybeLaterWeight').addEventListener('click', () => {
+       hideWeightLoggingModal();
+     });
+
+     document.getElementById('closeWeightModal').addEventListener('click', () => {
+       const today = todayStr();
+       weightLoggingClosed[today] = true;
+       saveUserData();
+       hideWeightLoggingModal();
+     });
+
+     // ===== Add Weight Modal Event Listeners =====
+     document.getElementById('addWeightBtn').addEventListener('click', showAddWeightModal);
+     document.getElementById('cancelAddWeight').addEventListener('click', hideAddWeightModal);
+     document.getElementById('submitAddWeight').addEventListener('click', () => {
+       const weight = Number(document.getElementById('weightAmount').value);
+       const date = document.getElementById('weightDate').value;
+       const errorDiv = document.getElementById('addWeightError');
+       const successDiv = document.getElementById('addWeightSuccess');
+       
+       if (!weight || !date) {
+         errorDiv.textContent = 'Please fill in all fields';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       if (weight <= 0) {
+         errorDiv.textContent = 'Please enter a valid weight';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       try {
+         addWeightForDate(weight, date);
+         errorDiv.classList.add('hidden');
+         successDiv.textContent = 'Weight logged successfully!';
+         successDiv.classList.remove('hidden');
+         
+         setTimeout(() => {
+           hideAddWeightModal();
+         }, 1500);
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+       }
+     });
 
     // ===== Data Management =====
-    async function loadUserData() {
-      if (!currentUser) return;
+         async function loadUserData() {
+       if (!currentUser) return;
 
-      try {
-        // Load user's progress data
-        const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
-        if (progressDoc.exists) {
-          const data = progressDoc.data();
-          basalByDate = data.basalByDate || {};
-          activityByDate = data.activityByDate || {};
-          updateCharts();
-        }
+       try {
+         // Load user's progress data
+         const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
+         if (progressDoc.exists) {
+           const data = progressDoc.data();
+           basalByDate = data.basalByDate || {};
+           activityByDate = data.activityByDate || {};
+           weightByDate = data.weightByDate || {};
+           workoutDataByDate = data.workoutDataByDate || {};
+           weightLoggingClosed = data.weightLoggingClosed || {};
+           updateCharts();
+         }
 
-                 // Calculate and display BMR from user profile
+                  // Calculate and display BMR from user profile
          if (userProfile) {
            renderBMR(userProfile.age, userProfile.weight, userProfile.heightFt, userProfile.heightIn);
          }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    }
 
-    async function saveUserData() {
-      if (!currentUser) return;
+         // Load workout charts with saved data
+         loadTreadmillChart();
+         loadStairsChart();
 
-      try {
-        await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
-          basalByDate,
-          activityByDate,
-          lastUpdated: new Date()
-        });
-      } catch (error) {
-        console.error('Error saving user data:', error);
-      }
-    }
+         // Check for daily weight logging only if user has a profile
+         if (userProfile) {
+           checkDailyWeightLogging();
+         }
+       } catch (error) {
+         console.error('Error loading user data:', error);
+       }
+     }
 
-    // ===== Helper Functions =====
-    function todayStr(){return new Date().toISOString().split('T')[0];}
+         async function saveUserData() {
+       if (!currentUser) return;
+
+       try {
+         await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
+           basalByDate,
+           activityByDate,
+           weightByDate,
+           workoutDataByDate,
+           weightLoggingClosed,
+           lastUpdated: new Date()
+         });
+       } catch (error) {
+         console.error('Error saving user data:', error);
+       }
+     }
+
+         // ===== Helper Functions =====
+     function todayStr(){return new Date().toISOString().split('T')[0];}
+
+     // ===== Weight Tracking Functions =====
+     function checkDailyWeightLogging() {
+       const today = todayStr();
+       
+       // Don't show if already logged or closed for today
+       if (weightByDate[today] || weightLoggingClosed[today]) {
+         return;
+       }
+       
+       // Show weight logging modal
+       showWeightLoggingModal();
+     }
+
+     function showWeightLoggingModal() {
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.style.display = 'flex';
+       weightLoggingModal.classList.remove('hidden');
+     }
+
+     function hideWeightLoggingModal() {
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.classList.add('hidden');
+       weightLoggingModal.style.display = 'none';
+     }
+
+     function showAddWeightModal() {
+       const today = new Date().toISOString().split('T')[0];
+       document.getElementById('weightDate').value = today;
+       document.getElementById('weightAmount').value = '';
+       
+       // Clear any previous messages
+       document.getElementById('addWeightError').classList.add('hidden');
+       document.getElementById('addWeightSuccess').classList.add('hidden');
+       
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.style.display = 'flex';
+       addWeightModal.classList.remove('hidden');
+     }
+
+     function hideAddWeightModal() {
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.classList.add('hidden');
+       addWeightModal.style.display = 'none';
+     }
+
+     function addWeightForDate(weight, date) {
+       weightByDate[date] = weight;
+       updateCharts();
+       saveUserData();
+     }
     function mphToMmin(mph){return mph*26.8224}
     function calcTreadmillKcal(lbs,mph,gradePct,minutes){
       const kg=lbs/2.2046;const speed=mphToMmin(mph);const grade=gradePct/100;
@@ -778,10 +1021,13 @@
       const kg=lbs/2.2046;const kcalPerMin=(met*3.5*kg)/200;return kcalPerMin*minutes;
     }
 
-    // ===== State =====
-    let bmr=0;
-    let basalByDate={};     // date -> BMR for that date
-    let activityByDate={};  // date -> sum of activity kcal for that date
+         // ===== State =====
+     let bmr=0;
+     let basalByDate={};     // date -> BMR for that date
+     let activityByDate={};  // date -> sum of activity kcal for that date
+     let weightByDate={};    // date -> weight for that date
+     let workoutDataByDate={}; // date -> workout data for that date
+     let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
 
     // ===== BMR =====
     function toKg(lbs){return lbs/2.2046}
@@ -819,15 +1065,24 @@
       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
     });
 
-    let weightCtx=document.getElementById('weightChart').getContext('2d');
-    let weightChart=new Chart(weightCtx,{
-      type:'line',
-      data:{labels:[],datasets:[
-        {label:'Weight Trajectory',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
-        {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
-      ]},
-      options:{responsive:true,scales:{y:{beginAtZero:false}}}
-    });
+         let weightCtx=document.getElementById('weightChart').getContext('2d');
+     let weightChart=new Chart(weightCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+     });
+
+     let workoutCtx=document.getElementById('workoutChart').getContext('2d');
+     let workoutChart=new Chart(workoutCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
 
     function getAllDates(){
       const set=new Set([...Object.keys(basalByDate),...Object.keys(activityByDate)]);
@@ -839,10 +1094,30 @@
        const daily=labels.map(d=> (basalByDate[d]||0) + (activityByDate[d]||0));
        let cumulative=[];let sum=0;daily.forEach(v=>{sum+=v;cumulative.push(sum)});
 
+       // Total calories chart
        totalChart.data.labels=labels;
        const isFat = totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
        totalChart.data.datasets[0].data = isFat ? daily.map(v=>v/3500) : daily;
        totalChart.update();
+
+       // Workout calories chart
+       const workoutCalories = labels.map(d => {
+         let total = 0;
+         if (workoutDataByDate[d]) {
+           if (workoutDataByDate[d].treadmill && workoutDataByDate[d].treadmill.calories) {
+             total += workoutDataByDate[d].treadmill.calories;
+           }
+           if (workoutDataByDate[d].stairs && workoutDataByDate[d].stairs.calories) {
+             total += workoutDataByDate[d].stairs.calories;
+           }
+         }
+         return total;
+       });
+       
+       workoutChart.data.labels = labels;
+       const isWorkoutFat = workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       workoutChart.data.datasets[0].data = isWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
+       workoutChart.update();
 
        if(userProfile && userProfile.weight){
          const baseWeight=+userProfile.weight;
@@ -894,8 +1169,14 @@
          }
          
          weightChart.data.labels = projLabels;
-         weightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
-         weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+         const isWeightFat = weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+         if (isWeightFat) {
+           weightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
+           weightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
+         } else {
+           weightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
+           weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+         }
          weightChart.update();
        }
      }
@@ -904,9 +1185,68 @@
     let tctx=document.getElementById('tchart').getContext('2d');
     let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
 
-    function treadmillInputs(){
-      return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
-    }
+         function treadmillInputs(){
+       return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
+     }
+
+     function saveTreadmillInputs() {
+       const inputs = treadmillInputs();
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].treadmill = inputs;
+       saveUserData();
+     }
+
+     function loadTreadmillInputs() {
+       const today = todayStr();
+       if (workoutDataByDate[today] && workoutDataByDate[today].treadmill) {
+         const data = workoutDataByDate[today].treadmill;
+         tspeed.value = data.s || 3.5;
+         tgrade.value = data.g || 7.5;
+         tdur.value = data.m || 30;
+         previewTreadmill();
+       } else {
+         // Set default values if no saved data
+         tspeed.value = 3.5;
+         tgrade.value = 7.5;
+         tdur.value = 30;
+         previewTreadmill();
+       }
+     }
+
+     function loadTreadmillChart() {
+       // Clear existing chart data
+       tchart.data.labels = [];
+       tchart.data.datasets[0].data = [];
+       
+       // Load treadmill data from Firebase
+       const dates = Object.keys(workoutDataByDate).sort();
+       dates.forEach(date => {
+         if (workoutDataByDate[date].treadmill && workoutDataByDate[date].treadmill.calories) {
+           tchart.data.labels.push(date);
+           tchart.data.datasets[0].data.push(workoutDataByDate[date].treadmill.calories);
+         }
+       });
+       tchart.update();
+     }
+
+     function loadStairsChart() {
+       // Clear existing chart data
+       schart.data.labels = [];
+       schart.data.datasets[0].data = [];
+       
+       // Load stairs data from Firebase
+       const dates = Object.keys(workoutDataByDate).sort();
+       dates.forEach(date => {
+         if (workoutDataByDate[date].stairs && workoutDataByDate[date].stairs.calories) {
+           schart.data.labels.push(date);
+           schart.data.datasets[0].data.push(workoutDataByDate[date].stairs.calories);
+         }
+       });
+       schart.update();
+     }
     function previewTreadmill(){
       const {w,s,g,m}=treadmillInputs();
       if(w>0 && s>0 && g>=0 && m>0){
@@ -916,29 +1256,49 @@
         tresult.innerHTML='';
       }
     }
-    function renderTreadmill(lbs,mph,gradePct,minutes){
-      const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
-      tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-      addActivityForToday(total);
-      const today=todayStr();
-      tchart.data.labels.push(today);
-      tchart.data.datasets[0].data.push(Math.round(total));
-      tchart.update();
-    }
-    ['input','change'].forEach(evt=>{
-      tspeed.addEventListener(evt,previewTreadmill);
-      tgrade.addEventListener(evt,previewTreadmill);
-      tdur.addEventListener(evt,previewTreadmill);
-    });
-    tcalc.addEventListener('click',()=>{
-      const {w,s,g,m}=treadmillInputs();
-      if(!w||!s||!g||!m){tresult.innerHTML='<p>Please enter all values</p>';return;}
-      renderTreadmill(w,s,g,m);
-    });
-    tclear.addEventListener('click',()=>{
-      ['tspeed','tgrade','tdur'].forEach(id=>document.getElementById(id).value='');
-      tresult.innerHTML='';
-    });
+         function renderTreadmill(lbs,mph,gradePct,minutes){
+       const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
+       tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today=todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].treadmill = {
+         w: lbs, s: mph, g: gradePct, m: minutes,
+         calories: Math.round(total)
+       };
+       saveUserData();
+       
+       // Update treadmill chart
+       tchart.data.labels.push(today);
+       tchart.data.datasets[0].data.push(Math.round(total));
+       tchart.update();
+       
+       // Update overall workout chart
+       updateCharts();
+     }
+         ['input','change'].forEach(evt=>{
+       tspeed.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+       tgrade.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+       tdur.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+     });
+         tcalc.addEventListener('click',()=>{
+       const {w,s,g,m}=treadmillInputs();
+       if(!w||!s||!g||!m){tresult.innerHTML='<p>Please enter all values</p>';return;}
+       renderTreadmill(w,s,g,m);
+     });
 
     // ===== Stairs =====
     let sctx=document.getElementById('schart').getContext('2d');
@@ -948,27 +1308,36 @@
       const isCustom = sintensity.value==='custom';
       document.getElementById('customMetField').classList.toggle('hidden', !isCustom);
     });
-    function renderStairs(lbs, minutes, met){
-      const total=calcStairKcal(lbs, minutes, met);
-      sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
-      addActivityForToday(total);
-      const today=todayStr();
-      schart.data.labels.push(today);
-      schart.data.datasets[0].data.push(Math.round(total));
-      schart.update();
-    }
-    scalc.addEventListener('click',()=>{
-      const w=userProfile?.weight||170, m=+sdur.value;
-      let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
-      if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
-      renderStairs(w, m, met);
-    });
-    sclear.addEventListener('click',()=>{
-      ['sdur','scustom'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
-      sresult.innerHTML='';
-      sintensity.value='8.8';
-      document.getElementById('customMetField').classList.add('hidden');
-    });
+         function renderStairs(lbs, minutes, met){
+       const total=calcStairKcal(lbs, minutes, met);
+       sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today=todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].stairs = {
+         w: lbs, m: minutes, met: met,
+         calories: Math.round(total)
+       };
+       saveUserData();
+       
+       // Update stairs chart
+       schart.data.labels.push(today);
+       schart.data.datasets[0].data.push(Math.round(total));
+       schart.update();
+       
+       // Update overall workout chart
+       updateCharts();
+     }
+         scalc.addEventListener('click',()=>{
+       const w=userProfile?.weight||170, m=+sdur.value;
+       let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
+       if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
+       renderStairs(w, m, met);
+     });
 
     // ===== Workouts Menu Show/Hide =====
     const workoutMenu=document.getElementById('workoutMenu');
@@ -993,16 +1362,19 @@
        setShowBtnVisible(true);
      });
 
-    document.getElementById('openTreadmill').addEventListener('click',()=>{
-      setMenuVisible(false);
-      document.getElementById('treadmillSection').classList.remove('hidden');
-      setShowBtnVisible(false);
-    });
-    document.getElementById('openStairs').addEventListener('click',()=>{
-      setMenuVisible(false);
-      document.getElementById('stairSection').classList.remove('hidden');
-      setShowBtnVisible(false);
-    });
+         document.getElementById('openTreadmill').addEventListener('click',()=>{
+       setMenuVisible(false);
+       document.getElementById('treadmillSection').classList.remove('hidden');
+       setShowBtnVisible(false);
+       loadTreadmillInputs();
+       loadTreadmillChart();
+     });
+         document.getElementById('openStairs').addEventListener('click',()=>{
+       setMenuVisible(false);
+       document.getElementById('stairSection').classList.remove('hidden');
+       setShowBtnVisible(false);
+       loadStairsChart();
+     });
          document.getElementById('backFromTreadmill').addEventListener('click',()=>{
        document.getElementById('treadmillSection').classList.add('hidden');
        setMenuVisible(true);
@@ -1016,12 +1388,36 @@
        showBtn.textContent='Hide Workouts';
      });
 
-    // ===== Fat Loss Toggle =====
-    document.getElementById('toggleFat').addEventListener('click',()=>{
-      const isFat=totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-      totalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
-      updateCharts();
-    });
+         // ===== Fat Loss Toggle =====
+     document.getElementById('toggleFat').addEventListener('click',()=>{
+       const isFat=totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       totalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('toggleWorkoutFat').addEventListener('click',()=>{
+       const isFat=workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       workoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('toggleWeightFat').addEventListener('click',()=>{
+       const isFat=weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       weightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('toggleTreadmillFat').addEventListener('click',()=>{
+       const isFat=tchart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       tchart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       tchart.update();
+     });
+
+     document.getElementById('toggleStairsFat').addEventListener('click',()=>{
+       const isFat=schart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       schart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       schart.update();
+     });
 
          // ===== Manual Add Calories =====
      document.getElementById('addCaloriesBtn').addEventListener('click', showAddCaloriesModal);
