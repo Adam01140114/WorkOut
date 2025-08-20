@@ -298,12 +298,12 @@
 </head>
 <body>
      <div class="wrap">
-     <h1>WorkSmart - Calorie Trackerz</h1>
+     <h1>WorkSmart - Calorie Tracker</h1>
 
      <!-- Mobile Container -->
      <div class="mobile-container">
        <!-- Mobile Title -->
-       <div class="mobile-title">Smart Calorie Trackerz</div>
+       <div class="mobile-title">Smart Calorie Trackerr</div>
        
        <!-- Slide 1: Total Calories Burned -->
        <div class="mobile-slide active" id="mobile-slide-1">
@@ -818,6 +818,7 @@
 
      // Show auth modal immediately for first-time users
      setTimeout(() => {
+       console.log('Checking auth state - authStateInitialized:', authStateInitialized);
        if (!authStateInitialized) {
          console.log('Showing auth modal for first-time user');
          showAuthModal();
@@ -866,7 +867,10 @@
        // Ensure all other modals are hidden first
        hideAllModals();
        
-       document.getElementById('authModal').classList.remove('hidden');
+       const authModal = document.getElementById('authModal');
+       authModal.style.display = 'flex';
+       authModal.classList.remove('hidden');
+       authModal.style.zIndex = '2000';
        showSignupForm(); // Show signup form by default instead of login
      }
 
@@ -1558,12 +1562,21 @@
      // Touch event handlers
      let startY = 0;
      let isVerticalScroll = false;
+     let hasMoved = false;
 
      function handleTouchStart(e) {
+       // Don't start swipe detection if touching a button or interactive element
+       if (e.target.tagName === 'BUTTON' || e.target.closest('button') || 
+           e.target.tagName === 'INPUT' || e.target.closest('input') ||
+           e.target.tagName === 'SELECT' || e.target.closest('select')) {
+         return;
+       }
+       
        startX = e.touches[0].clientX;
        startY = e.touches[0].clientY;
        isDragging = true;
        isVerticalScroll = false;
+       hasMoved = false;
      }
 
      function handleTouchMove(e) {
@@ -1573,6 +1586,11 @@
        const currentY = e.touches[0].clientY;
        const diffX = startX - currentX;
        const diffY = startY - currentY;
+       
+       // Check if we've moved enough to consider it a gesture
+       if (Math.abs(diffX) > 5 || Math.abs(diffY) > 5) {
+         hasMoved = true;
+       }
        
        // Determine if this is a vertical scroll or horizontal swipe
        if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
@@ -1593,9 +1611,10 @@
      }
 
      function handleTouchEnd(e) {
-       if (!isDragging || isVerticalScroll) {
+       if (!isDragging || isVerticalScroll || !hasMoved) {
          isDragging = false;
          isVerticalScroll = false;
+         hasMoved = false;
          return;
        }
        
@@ -1616,6 +1635,8 @@
            prevSlide();
          }
        }
+       
+       hasMoved = false;
      }
 
      // Initialize mobile swipe
@@ -2192,6 +2213,13 @@
        // Initialize mobile slides
        showSlide(0);
        
+       // Ensure auth modal shows for new users
+       if (!currentUser) {
+         setTimeout(() => {
+           showAuthModal();
+         }, 300);
+       }
+       
                 // Force show auth modal initially, then let Firebase auth state take over
        setTimeout(() => {
          console.log('Initial timeout - authStateInitialized:', authStateInitialized);
@@ -2199,7 +2227,7 @@
            console.log('Showing auth modal initially');
            showAuthModal();
          }
-       }, 100);
+       }, 200);
      });
   </script>
 </body>
