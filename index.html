@@ -548,6 +548,97 @@
        </div>
      </div>
 
+     <!-- Mobile Workout Menu Modal -->
+     <div id="mobileWorkoutModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🏋️</div>
+           <div>
+             <h3 class="modal-title">Choose a Workout</h3>
+             <p class="modal-subtitle">Select your workout type</p>
+           </div>
+         </div>
+         <div class="menu-grid" style="margin-bottom: 20px;">
+           <div class="menu-tile" id="mobileOpenTreadmill">
+             <div class="menu-emoji">🏃‍♂️</div>
+             <div>Treadmill</div>
+           </div>
+           <div class="menu-tile" id="mobileOpenStairs">
+             <div class="menu-emoji">🧗</div>
+             <div>Stair Master</div>
+           </div>
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="closeMobileWorkoutMenu">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Treadmill Modal -->
+     <div id="mobileTreadmillModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🏃‍♂️</div>
+           <div>
+             <h3 class="modal-title">Treadmill Calories</h3>
+             <p class="modal-subtitle">ACSM Walking Equation</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTspeed">Speed (mph)</label>
+           <input id="mobileTspeed" type="number" step="0.1" placeholder="3.5" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTgrade">Incline (%)</label>
+           <input id="mobileTgrade" type="number" step="0.1" placeholder="7.5" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTdur">Duration (min)</label>
+           <input id="mobileTdur" type="number" placeholder="30" />
+         </div>
+         <div class="result" id="mobileTresult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileTcalc">Calculate Calories</button>
+           <button class="ghost" id="closeMobileTreadmill">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Stairs Modal -->
+     <div id="mobileStairsModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🧗</div>
+           <div>
+             <h3 class="modal-title">Stair Master Calories</h3>
+             <p class="modal-subtitle">MET Method</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileSdur">Duration (min)</label>
+           <input id="mobileSdur" type="number" placeholder="20" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileSintensity">Intensity</label>
+           <select id="mobileSintensity">
+             <option value="6">Easy · 6 MET</option>
+             <option value="8.8" selected>Moderate · 8.8 MET</option>
+             <option value="10.3">Hard · 10.3 MET</option>
+             <option value="custom">Custom MET</option>
+           </select>
+         </div>
+         <div class="field hidden" id="mobileCustomMetField">
+           <label class="label" for="mobileScustom">Custom MET</label>
+           <input id="mobileScustom" type="number" step="0.1" placeholder="9.5" />
+         </div>
+         <div class="result" id="mobileSresult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileScalc">Calculate Calories</button>
+           <button class="ghost" id="closeMobileStairs">Close</button>
+         </div>
+       </div>
+     </div>
+
          <!-- Main App Content (hidden until authenticated) -->
      <div id="appContent" class="hidden">
 
@@ -734,6 +825,18 @@
        const weightLoggingModal = document.getElementById('weightLoggingModal');
        weightLoggingModal.classList.add('hidden');
        weightLoggingModal.style.display = 'none';
+       
+       // Hide mobile modals
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.classList.add('hidden');
+       mobileWorkoutModal.style.display = 'none';
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.classList.add('hidden');
+       mobileTreadmillModal.style.display = 'none';
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.classList.add('hidden');
+       mobileStairsModal.style.display = 'none';
+       
        document.getElementById('appContent').classList.add('hidden');
        
        // Force hide profile modal with inline styles as backup
@@ -818,6 +921,9 @@
        const addCaloriesModal = document.getElementById('addCaloriesModal');
        addCaloriesModal.style.display = 'flex';
        addCaloriesModal.classList.remove('hidden');
+       
+       // Ensure modal is visible on mobile
+       addCaloriesModal.style.zIndex = '2000';
      }
 
      function hideAddCaloriesModal() {
@@ -1209,6 +1315,69 @@
        addWeightModal.style.display = 'none';
      }
 
+     function showMobileWorkoutMenu() {
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.style.display = 'flex';
+       mobileWorkoutModal.classList.remove('hidden');
+       mobileWorkoutModal.style.zIndex = '2000';
+     }
+
+     function hideMobileWorkoutMenu() {
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.classList.add('hidden');
+       mobileWorkoutModal.style.display = 'none';
+     }
+
+     function showMobileTreadmillModal() {
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.style.display = 'flex';
+       mobileTreadmillModal.classList.remove('hidden');
+       mobileTreadmillModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('mobileTspeed').value = 3.5;
+       document.getElementById('mobileTgrade').value = 7.5;
+       document.getElementById('mobileTdur').value = 30;
+       previewMobileTreadmill();
+     }
+
+     function hideMobileTreadmillModal() {
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.classList.add('hidden');
+       mobileTreadmillModal.style.display = 'none';
+     }
+
+     function showMobileStairsModal() {
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.style.display = 'flex';
+       mobileStairsModal.classList.remove('hidden');
+       mobileStairsModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('mobileSdur').value = 20;
+       document.getElementById('mobileSintensity').value = '8.8';
+     }
+
+     function hideMobileStairsModal() {
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.classList.add('hidden');
+       mobileStairsModal.style.display = 'none';
+     }
+
+     function previewMobileTreadmill() {
+       const w = userProfile?.weight || 170;
+       const s = +document.getElementById('mobileTspeed').value;
+       const g = +document.getElementById('mobileTgrade').value;
+       const m = +document.getElementById('mobileTdur').value;
+       
+       if (w > 0 && s > 0 && g >= 0 && m > 0) {
+         const total = calcTreadmillKcal(w, s, g, m);
+         document.getElementById('mobileTresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+       } else {
+         document.getElementById('mobileTresult').innerHTML = '';
+       }
+     }
+
      function addWeightForDate(weight, date) {
        weightByDate[date] = weight;
        updateCharts();
@@ -1378,12 +1547,13 @@
 
      function handleTouchMove(e) {
        if (!isDragging) return;
+       e.preventDefault(); // Prevent scrolling during swipe
        currentX = e.touches[0].clientX;
        const diff = startX - currentX;
        
-       // Add visual feedback
+       // Add visual feedback only for significant swipes
        const activeSlide = document.querySelector('.mobile-slide.active');
-       if (Math.abs(diff) > 10) {
+       if (Math.abs(diff) > 20) {
          activeSlide.style.transform = `translateX(${-diff}px)`;
        }
      }
@@ -1393,7 +1563,7 @@
        isDragging = false;
        
        const diff = startX - currentX;
-       const threshold = 50;
+       const threshold = 80; // Increased threshold to prevent accidental swipes
        
        // Reset transform
        const activeSlide = document.querySelector('.mobile-slide.active');
@@ -1799,11 +1969,8 @@
      document.getElementById('mobileAddCaloriesBtn').addEventListener('click', showAddCaloriesModal);
      document.getElementById('mobileAddWeightBtn').addEventListener('click', showAddWeightModal);
      document.getElementById('mobileShowWorkouts').addEventListener('click', () => {
-       // Show desktop workout menu
-       document.querySelector('.desktop-container').style.display = 'block';
-       document.querySelector('.mobile-container').style.display = 'none';
-       setMenuVisible(true);
-       setShowBtnVisible(false);
+       // Show mobile workout menu modal
+       showMobileWorkoutMenu();
      });
      document.getElementById('mobileOpenSettings').addEventListener('click', showSettings);
      document.getElementById('mobileDeleteAccountBtn').addEventListener('click', async () => {
@@ -1820,6 +1987,105 @@
      });
      document.getElementById('mobileLogoutBtn').addEventListener('click', () => {
        auth.signOut();
+     });
+     
+     // Mobile workout menu event listeners
+     document.getElementById('closeMobileWorkoutMenu').addEventListener('click', hideMobileWorkoutMenu);
+     document.getElementById('mobileOpenTreadmill').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileTreadmillModal();
+     });
+     document.getElementById('mobileOpenStairs').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileStairsModal();
+     });
+     
+     // Mobile treadmill event listeners
+     document.getElementById('closeMobileTreadmill').addEventListener('click', hideMobileTreadmillModal);
+     document.getElementById('mobileTcalc').addEventListener('click', () => {
+       const w = userProfile?.weight || 170;
+       const s = +document.getElementById('mobileTspeed').value;
+       const g = +document.getElementById('mobileTgrade').value;
+       const m = +document.getElementById('mobileTdur').value;
+       
+       if (!w || !s || !g || !m) {
+         document.getElementById('mobileTresult').innerHTML = '<p>Please enter all values</p>';
+         return;
+       }
+       
+       const total = calcTreadmillKcal(w, s, g, m);
+       document.getElementById('mobileTresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].treadmill = {
+         w: w, s: s, g: g, m: m,
+         calories: Math.round(total)
+       };
+       saveUserData();
+       
+       // Update charts
+       updateCharts();
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileTreadmillModal();
+       }, 2000);
+     });
+     
+     // Mobile stairs event listeners
+     document.getElementById('closeMobileStairs').addEventListener('click', hideMobileStairsModal);
+     document.getElementById('mobileScalc').addEventListener('click', () => {
+       const w = userProfile?.weight || 170;
+       const m = +document.getElementById('mobileSdur').value;
+       let met = document.getElementById('mobileSintensity').value === 'custom' ? 
+         +document.getElementById('mobileScustom').value : 
+         +document.getElementById('mobileSintensity').value;
+       
+       if (!w || !m || !met) {
+         document.getElementById('mobileSresult').innerHTML = '<p>Please enter all values</p>';
+         return;
+       }
+       
+       const total = calcStairKcal(w, m, met);
+       document.getElementById('mobileSresult').innerHTML = `<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].stairs = {
+         w: w, m: m, met: met,
+         calories: Math.round(total)
+       };
+       saveUserData();
+       
+       // Update charts
+       updateCharts();
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileStairsModal();
+       }, 2000);
+     });
+     
+     // Mobile treadmill input event listeners
+     ['input', 'change'].forEach(evt => {
+       document.getElementById('mobileTspeed').addEventListener(evt, previewMobileTreadmill);
+       document.getElementById('mobileTgrade').addEventListener(evt, previewMobileTreadmill);
+       document.getElementById('mobileTdur').addEventListener(evt, previewMobileTreadmill);
+     });
+     
+     // Mobile stairs intensity change listener
+     document.getElementById('mobileSintensity').addEventListener('change', () => {
+       const isCustom = document.getElementById('mobileSintensity').value === 'custom';
+       document.getElementById('mobileCustomMetField').classList.toggle('hidden', !isCustom);
      });
      
      // Add Calories Modal Event Listeners
