@@ -142,13 +142,182 @@
        background: var(--danger);
        color: white;
      }
+     
+     /* Mobile Swipe Navigation */
+     .mobile-container {
+       display: none;
+       overflow: hidden;
+       position: relative;
+       width: 100%;
+       height: 100vh;
+     }
+     
+     .mobile-slide {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       transition: transform 0.3s ease-in-out;
+       padding: 20px;
+       box-sizing: border-box;
+       display: flex;
+       flex-direction: column;
+       justify-content: center;
+     }
+     
+     .mobile-slide.active {
+       transform: translateX(0);
+     }
+     
+     .mobile-slide.prev {
+       transform: translateX(-100%);
+     }
+     
+     .mobile-slide.next {
+       transform: translateX(100%);
+     }
+     
+     .mobile-slide-content {
+       background: var(--card);
+       border-radius: var(--radius);
+       padding: 24px;
+       margin-bottom: 16px;
+       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+     }
+     
+     .mobile-slide-content h2 {
+       margin-top: 0;
+       margin-bottom: 16px;
+       text-align: center;
+     }
+     
+     .mobile-slide-content canvas {
+       margin-bottom: 16px;
+     }
+     
+     .mobile-slide-content .user-actions {
+       margin-top: 0;
+     }
+     
+     .mobile-slide-content .user-actions button {
+       margin-bottom: 8px;
+     }
+     
+     .mobile-slide-content .user-actions button:last-child {
+       margin-bottom: 0;
+     }
+     
+     .mobile-indicators {
+       position: fixed;
+       bottom: 20px;
+       left: 50%;
+       transform: translateX(-50%);
+       display: flex;
+       gap: 8px;
+       z-index: 100;
+     }
+     
+     .mobile-indicator {
+       width: 8px;
+       height: 8px;
+       border-radius: 50%;
+       background: var(--muted);
+       transition: background 0.3s ease;
+     }
+     
+     .mobile-indicator.active {
+       background: var(--accent);
+     }
+     
+     /* Desktop styles */
+     .desktop-container {
+       display: block;
+     }
+     
+     /* Mobile styles */
+     @media (max-width: 768px) {
+       .desktop-container {
+         display: none;
+       }
+       
+       .mobile-container {
+         display: block;
+       }
+       
+       body {
+         padding: 0;
+         margin: 0;
+         overflow: hidden;
+       }
+       
+       .wrap {
+         max-width: none;
+         margin: 0;
+         padding: 0;
+       }
+     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-         <h1>WorkSmart - BMR & Calorie Tracker</h1>
+     <div class="wrap">
+     <h1>WorkSmart - Calorie Tracker</h1>
 
-    <!-- Authentication Modal -->
+     <!-- Mobile Container -->
+     <div class="mobile-container">
+       <!-- Slide 1: Total Calories Burned -->
+       <div class="mobile-slide active" id="mobile-slide-1">
+         <div class="mobile-slide-content">
+           <h2>Total Calories Burned</h2>
+           <canvas id="mobileTotalChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleFat">Show Fat Loss</button>
+           <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
+         </div>
+       </div>
+
+       <!-- Slide 2: Weight Trajectory -->
+       <div class="mobile-slide next" id="mobile-slide-2">
+         <div class="mobile-slide-content">
+           <h2>Weight Trajectory</h2>
+           <canvas id="mobileWeightChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
+           <button class="primary" id="mobileAddWeightBtn">Add Weight</button>
+         </div>
+       </div>
+
+       <!-- Slide 3: Workout Calories -->
+       <div class="mobile-slide next" id="mobile-slide-3">
+         <div class="mobile-slide-content">
+           <h2>Calories Burnt With Workouts</h2>
+           <canvas id="mobileWorkoutChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
+           <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+         </div>
+       </div>
+
+       <!-- Slide 4: User Profile -->
+       <div class="mobile-slide next" id="mobile-slide-4">
+         <div class="mobile-slide-content">
+           <h2>User Profile</h2>
+           <div class="user-actions">
+             <button class="settings-btn" id="mobileOpenSettings" disabled>Settings</button>
+             <button class="danger-btn" id="mobileDeleteAccountBtn">Delete Account</button>
+             <button class="logout-btn" id="mobileLogoutBtn">Logout</button>
+           </div>
+         </div>
+       </div>
+
+       <!-- Mobile Indicators -->
+       <div class="mobile-indicators">
+         <div class="mobile-indicator active"></div>
+         <div class="mobile-indicator"></div>
+         <div class="mobile-indicator"></div>
+         <div class="mobile-indicator"></div>
+       </div>
+     </div>
+
+     <!-- Desktop Container -->
+     <div class="desktop-container">
+
+     <!-- Authentication Modal -->
     <div id="authModal" class="modal-overlay hidden">
       <div class="modal">
         <!-- Login Form -->
@@ -450,6 +619,7 @@
          </div>
        </section>
      </div>
+     </div> <!-- Close desktop-container -->
    </div>
 
   <script>
@@ -1055,18 +1225,38 @@
 
          // BMR calculation is now handled automatically from user profile
 
-    // ===== Charts =====
-    let totalCtx=document.getElementById('totalChart').getContext('2d');
-    let totalChart=new Chart(totalCtx,{
-      type:'line',
-      data:{labels:[],datasets:[
-        {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
-      ]},
-      options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
-    });
+         // ===== Charts =====
+     let totalCtx=document.getElementById('totalChart').getContext('2d');
+     let totalChart=new Chart(totalCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+     // Mobile Charts
+     let mobileTotalCtx=document.getElementById('mobileTotalChart').getContext('2d');
+     let mobileTotalChart=new Chart(mobileTotalCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Daily Total',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
 
          let weightCtx=document.getElementById('weightChart').getContext('2d');
      let weightChart=new Chart(weightCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+     });
+
+     let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
+     let mobileWeightChart=new Chart(mobileWeightCtx,{
        type:'line',
        data:{labels:[],datasets:[
          {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
@@ -1084,10 +1274,114 @@
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
-    function getAllDates(){
-      const set=new Set([...Object.keys(basalByDate),...Object.keys(activityByDate)]);
-      return Array.from(set).sort();
-    }
+     let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
+     let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+         function getAllDates(){
+       const set=new Set([...Object.keys(basalByDate),...Object.keys(activityByDate)]);
+       return Array.from(set).sort();
+     }
+
+     // ===== Mobile Swipe Navigation =====
+     let currentSlide = 0;
+     const totalSlides = 4;
+     let startX = 0;
+     let currentX = 0;
+     let isDragging = false;
+
+     function showSlide(slideIndex) {
+       // Remove all classes from slides
+       for (let i = 0; i < totalSlides; i++) {
+         const slide = document.getElementById(`mobile-slide-${i + 1}`);
+         const indicator = document.querySelectorAll('.mobile-indicator')[i];
+         
+         slide.classList.remove('active', 'prev', 'next');
+         indicator.classList.remove('active');
+       }
+
+       // Set current slide
+       const currentSlideElement = document.getElementById(`mobile-slide-${slideIndex + 1}`);
+       const currentIndicator = document.querySelectorAll('.mobile-indicator')[slideIndex];
+       
+       currentSlideElement.classList.add('active');
+       currentIndicator.classList.add('active');
+
+       // Set previous slide
+       const prevIndex = slideIndex === 0 ? totalSlides - 1 : slideIndex - 1;
+       const prevSlide = document.getElementById(`mobile-slide-${prevIndex + 1}`);
+       prevSlide.classList.add('prev');
+
+       // Set next slide
+       const nextIndex = slideIndex === totalSlides - 1 ? 0 : slideIndex + 1;
+       const nextSlide = document.getElementById(`mobile-slide-${nextIndex + 1}`);
+       nextSlide.classList.add('next');
+     }
+
+     function nextSlide() {
+       currentSlide = (currentSlide + 1) % totalSlides;
+       showSlide(currentSlide);
+     }
+
+     function prevSlide() {
+       currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
+       showSlide(currentSlide);
+     }
+
+     // Touch event handlers
+     function handleTouchStart(e) {
+       startX = e.touches[0].clientX;
+       isDragging = true;
+     }
+
+     function handleTouchMove(e) {
+       if (!isDragging) return;
+       currentX = e.touches[0].clientX;
+       const diff = startX - currentX;
+       
+       // Add visual feedback
+       const activeSlide = document.querySelector('.mobile-slide.active');
+       if (Math.abs(diff) > 10) {
+         activeSlide.style.transform = `translateX(${-diff}px)`;
+       }
+     }
+
+     function handleTouchEnd(e) {
+       if (!isDragging) return;
+       isDragging = false;
+       
+       const diff = startX - currentX;
+       const threshold = 50;
+       
+       // Reset transform
+       const activeSlide = document.querySelector('.mobile-slide.active');
+       activeSlide.style.transform = '';
+       
+       if (Math.abs(diff) > threshold) {
+         if (diff > 0) {
+           // Swipe left - next slide
+           nextSlide();
+         } else {
+           // Swipe right - previous slide
+           prevSlide();
+         }
+       }
+     }
+
+     // Initialize mobile swipe
+     function initMobileSwipe() {
+       const mobileContainer = document.querySelector('.mobile-container');
+       if (mobileContainer) {
+         mobileContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+         mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+         mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+       }
+     }
 
          function updateCharts(){
        const labels=getAllDates();
@@ -1099,6 +1393,12 @@
        const isFat = totalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
        totalChart.data.datasets[0].data = isFat ? daily.map(v=>v/3500) : daily;
        totalChart.update();
+
+       // Mobile total calories chart
+       mobileTotalChart.data.labels=labels;
+       const isMobileFat = mobileTotalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileTotalChart.data.datasets[0].data = isMobileFat ? daily.map(v=>v/3500) : daily;
+       mobileTotalChart.update();
 
        // Workout calories chart
        const workoutCalories = labels.map(d => {
@@ -1118,6 +1418,12 @@
        const isWorkoutFat = workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
        workoutChart.data.datasets[0].data = isWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
        workoutChart.update();
+
+       // Mobile workout calories chart
+       mobileWorkoutChart.data.labels = labels;
+       const isMobileWorkoutFat = mobileWorkoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
+       mobileWorkoutChart.update();
 
        if(userProfile && userProfile.weight){
          const baseWeight=+userProfile.weight;
@@ -1178,6 +1484,17 @@
            weightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
          }
          weightChart.update();
+
+         // Mobile weight chart
+         mobileWeightChart.data.labels = projLabels;
+         if (isWeightFat) {
+           mobileWeightChart.data.datasets[0].data = daily.map(v=>v/3500); // Show fat loss per day
+           mobileWeightChart.data.datasets[1].data = daily.map(v=>v/3500); // Same for projected
+         } else {
+           mobileWeightChart.data.datasets[0].data = actualWeight; // Green line: Actual weight
+           mobileWeightChart.data.datasets[1].data = projectedWeight; // Blue dotted line: Projected weight
+         }
+         mobileWeightChart.update();
        }
      }
 
@@ -1395,6 +1712,25 @@
        updateCharts();
      });
 
+     // Mobile fat loss toggles
+     document.getElementById('mobileToggleFat').addEventListener('click',()=>{
+       const isFat=mobileTotalChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileTotalChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('mobileToggleWeightFat').addEventListener('click',()=>{
+       const isFat=mobileWeightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileWeightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('mobileToggleWorkoutFat').addEventListener('click',()=>{
+       const isFat=mobileWorkoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileWorkoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
      document.getElementById('toggleWorkoutFat').addEventListener('click',()=>{
        const isFat=workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
        workoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
@@ -1421,6 +1757,33 @@
 
          // ===== Manual Add Calories =====
      document.getElementById('addCaloriesBtn').addEventListener('click', showAddCaloriesModal);
+     
+     // Mobile button event listeners
+     document.getElementById('mobileAddCaloriesBtn').addEventListener('click', showAddCaloriesModal);
+     document.getElementById('mobileAddWeightBtn').addEventListener('click', showAddWeightModal);
+     document.getElementById('mobileShowWorkouts').addEventListener('click', () => {
+       // Show desktop workout menu
+       document.querySelector('.desktop-container').style.display = 'block';
+       document.querySelector('.mobile-container').style.display = 'none';
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+     });
+     document.getElementById('mobileOpenSettings').addEventListener('click', showSettings);
+     document.getElementById('mobileDeleteAccountBtn').addEventListener('click', async () => {
+       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+         try {
+           await db.collection('users').doc(currentUser.uid).delete();
+           await currentUser.delete();
+           auth.signOut();
+         } catch (error) {
+           console.error('Error deleting account:', error);
+           alert('Error deleting account. Please try again.');
+         }
+       }
+     });
+     document.getElementById('mobileLogoutBtn').addEventListener('click', () => {
+       auth.signOut();
+     });
      
      // Add Calories Modal Event Listeners
      document.getElementById('cancelAddCalories').addEventListener('click', hideAddCaloriesModal);
@@ -1466,31 +1829,34 @@
        }
      });
 
-    // Initialize app
-    window.addEventListener('DOMContentLoaded',()=>{
-      console.log('DOM loaded, initializing app...');
-      
-      // Ensure all modals are hidden by default
-      hideAllModals();
-      
-      // Prefill example values for profile setup
-      document.getElementById('setupAge').value=22;
-      document.getElementById('setupHeightFt').value=5;
-      document.getElementById('setupHeightIn').value=9;
-      document.getElementById('setupWeight').value=170;
-      
-      // Prefill treadmill preview with defaults
-      tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
-      
-      // Force show auth modal initially, then let Firebase auth state take over
-      setTimeout(() => {
-        console.log('Initial timeout - authStateInitialized:', authStateInitialized);
-        if (!authStateInitialized) {
-          console.log('Showing auth modal initially');
-          showAuthModal();
-        }
-      }, 500);
-    });
+         // Initialize app
+     window.addEventListener('DOMContentLoaded',()=>{
+       console.log('DOM loaded, initializing app...');
+       
+       // Ensure all modals are hidden by default
+       hideAllModals();
+       
+       // Prefill example values for profile setup
+       document.getElementById('setupAge').value=22;
+       document.getElementById('setupHeightFt').value=5;
+       document.getElementById('setupHeightIn').value=9;
+       document.getElementById('setupWeight').value=170;
+       
+       // Prefill treadmill preview with defaults
+       tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
+       
+       // Initialize mobile swipe functionality
+       initMobileSwipe();
+       
+       // Force show auth modal initially, then let Firebase auth state take over
+       setTimeout(() => {
+         console.log('Initial timeout - authStateInitialized:', authStateInitialized);
+         if (!authStateInitialized) {
+           console.log('Showing auth modal initially');
+           showAuthModal();
+         }
+       }, 500);
+     });
   </script>
 </body>
 </html>
