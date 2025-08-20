@@ -60,6 +60,10 @@
     .modal-overlay.hidden {
       display: none !important;
     }
+    
+    /* always above slides/titles on mobile */
+    .modal-overlay { z-index: 9999 !important; }
+    .modal { position: relative; z-index: 10000; }
     .modal {
       background: var(--card);
       border-radius: var(--radius);
@@ -775,7 +779,28 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-         // ===== Authentication State Management =====
+         // ===== Modal Management =====
+    function liftModalsToBody() {
+      const ids = [
+        'authModal',
+        'profileModal',
+        'settingsModal',
+        'addCaloriesModal',
+        'weightLoggingModal',
+        'addWeightModal',
+        'mobileWorkoutModal',
+        'mobileTreadmillModal',
+        'mobileStairsModal'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement !== document.body) {
+          document.body.appendChild(el);
+        }
+      });
+    }
+
+    // ===== Authentication State Management =====
      let currentUser = null;
      let userProfile = null;
      let authStateInitialized = false;
@@ -905,8 +930,11 @@
        document.getElementById('profileModal').classList.add('hidden');
        document.getElementById('appContent').classList.remove('hidden');
        
-       // Enable settings button when user is authenticated
-       document.getElementById('openSettings').disabled = false;
+       // Enable settings buttons
+       const desk = document.getElementById('openSettings');
+       if (desk) desk.disabled = false;
+       const mob = document.getElementById('mobileOpenSettings');
+       if (mob) mob.disabled = false;  // it was left disabled in HTML
      }
 
      function showAddCaloriesModal() {
@@ -2134,6 +2162,8 @@
          // Initialize app
      window.addEventListener('DOMContentLoaded',()=>{
        console.log('DOM loaded, initializing app...');
+       
+       liftModalsToBody(); // <-- make modals visible on mobile
        
        // Prefill example values for profile setup
        document.getElementById('setupAge').value=22;
