@@ -343,7 +343,7 @@
          <div class="mobile-slide-content">
            <h2>Foods Eaten</h2>
            <canvas id="mobileFoodChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleFoodFat">Show Fat Loss</button>
+           <button class="ghost" id="mobileToggleFoodDetail">Show More</button>
            <button class="primary" id="mobileShowFoods">Show Foods</button>
          </div>
        </div>
@@ -729,6 +729,7 @@
          <div class="result" id="mobileCustomFoodResult"></div>
          <div class="user-actions">
            <button class="primary" id="mobileCustomFoodCalc">Add Food</button>
+           <button class="danger-btn" id="mobileDeleteCustomFood" style="background: #f87171; color: white;">Delete Food</button>
            <button class="ghost" id="closeMobileCustomFood">Close</button>
          </div>
        </div>
@@ -2392,9 +2393,55 @@
        updateCharts();
      });
 
-     document.getElementById('mobileToggleFoodFat').addEventListener('click',()=>{
-       const isFat=mobileFoodChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileFoodChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+     document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
+       const isDetailed = mobileFoodChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to total view
+         mobileFoodChart.data.datasets = [{
+           label: 'Food Calories',
+           data: [],
+           borderColor: '#f59e0b',
+           backgroundColor: 'rgba(245,158,11,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('mobileToggleFoodDetail').textContent = 'Show More';
+       } else {
+         // Switch to detailed view showing individual foods
+         const labels = getAllDates();
+         const foodNames = new Set();
+         
+         // Collect all unique food names
+         labels.forEach(date => {
+           const day = foodDataByDate[date] || {};
+           Object.values(day).forEach(food => {
+             if (food.name) foodNames.add(food.name);
+           });
+         });
+         
+         const datasets = [];
+         const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#f97316', '#06b6d4', '#84cc16'];
+         
+         Array.from(foodNames).forEach((foodName, index) => {
+           const foodData = labels.map(date => {
+             const day = foodDataByDate[date] || {};
+             const food = Object.values(day).find(f => f.name === foodName);
+             return food ? food.totalCalories : 0;
+           });
+           
+           datasets.push({
+             label: foodName,
+             data: foodData,
+             borderColor: colors[index % colors.length],
+             backgroundColor: colors[index % colors.length] + '40',
+             fill: false,
+             tension: 0.25
+           });
+         });
+         
+         mobileFoodChart.data.datasets = datasets;
+         document.getElementById('mobileToggleFoodDetail').textContent = 'Show Total';
+       }
        updateCharts();
      });
 
@@ -2639,6 +2686,40 @@
      
      // Mobile custom food input event listeners
      document.getElementById('mobileCustomFoodName').addEventListener('input', updateCustomFoodIcon);
+     
+     // Mobile delete custom food event listener
+     document.getElementById('mobileDeleteCustomFood').addEventListener('click', () => {
+       const name = document.getElementById('mobileCustomFoodName').value;
+       
+       if (!name) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter a food name to delete</p>';
+         return;
+       }
+       
+       // Remove from custom foods
+       delete customFoods[name];
+       
+       // Remove from today's food data
+       const today = todayStr();
+       if (foodDataByDate[today]) {
+         Object.keys(foodDataByDate[today]).forEach(key => {
+           if (foodDataByDate[today][key].name === name) {
+             delete foodDataByDate[today][key];
+           }
+         });
+       }
+       
+       saveUserData();
+       updateFoodMenu();
+       updateCharts();
+       
+       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>Deleted: ${name}</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileCustomFoodModal();
+       }, 2000);
+     });
      
      // Mobile food modal close event listeners
      document.getElementById('closeMobileCustomFood').addEventListener('click', hideMobileCustomFoodModal);
