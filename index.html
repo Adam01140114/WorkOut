@@ -495,6 +495,13 @@
            <label class="label" for="settingsWeight">Weight (lb)</label>
            <input id="settingsWeight" type="number" />
          </div>
+         <div class="field">
+           <label class="label" for="settingsTheme">Theme</label>
+           <select id="settingsTheme">
+             <option value="dark">Dark Mode</option>
+             <option value="light">Light Mode</option>
+           </select>
+         </div>
          <div class="user-actions">
            <button class="primary" id="saveSettings">Save</button>
            <button class="ghost" id="cancelSettings">Back</button>
@@ -700,64 +707,7 @@
        </div>
      </div>
 
-     <!-- Mobile Tacos Modal -->
-     <div id="mobileTacosModal" class="modal-overlay hidden">
-       <div class="modal">
-         <div class="modal-header">
-           <div class="modal-icon">🌮</div>
-           <div>
-             <h3 class="modal-title">Taco Calories</h3>
-             <p class="modal-subtitle">Log your taco consumption</p>
-           </div>
-         </div>
-         <div class="field">
-           <label class="label" for="mobileTacoName">Name</label>
-           <input id="mobileTacoName" type="text" placeholder="e.g., Beef Taco" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileTacoCalories">Calories</label>
-           <input id="mobileTacoCalories" type="number" placeholder="250" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileTacoQuantity">Quantity</label>
-           <input id="mobileTacoQuantity" type="number" placeholder="2" />
-         </div>
-         <div class="result" id="mobileTacoResult"></div>
-         <div class="user-actions">
-           <button class="primary" id="mobileTacoCalc">Calculate Calories</button>
-           <button class="ghost" id="closeMobileTacos">Close</button>
-         </div>
-       </div>
-     </div>
 
-     <!-- Mobile Burger Modal -->
-     <div id="mobileBurgerModal" class="modal-overlay hidden">
-       <div class="modal">
-         <div class="modal-header">
-           <div class="modal-icon">🍔</div>
-           <div>
-             <h3 class="modal-title">Burger Calories</h3>
-             <p class="modal-subtitle">Log your burger consumption</p>
-           </div>
-         </div>
-         <div class="field">
-           <label class="label" for="mobileBurgerName">Name</label>
-           <input id="mobileBurgerName" type="text" placeholder="e.g., Cheeseburger" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileBurgerCalories">Calories</label>
-           <input id="mobileBurgerCalories" type="number" placeholder="500" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileBurgerQuantity">Quantity</label>
-           <input id="mobileBurgerQuantity" type="number" placeholder="1" />
-         </div>
-         <div class="result" id="mobileBurgerResult"></div>
-         <div class="user-actions">
-           <button class="primary" id="mobileBurgerCalc">Calculate Calories</button>
-           <button class="ghost" id="closeMobileBurger">Close</button>
-         </div>
-       </div>
      <!-- Mobile Custom Food Modal -->
      <div id="mobileCustomFoodModal" class="modal-overlay hidden">
        <div class="modal">
@@ -921,8 +871,6 @@
         'mobileTreadmillModal',
         'mobileStairsModal',
         'mobileFoodModal',
-        'mobileTacosModal',
-        'mobileBurgerModal',
         'mobileCustomFoodModal'
       ];
       ids.forEach(id => {
@@ -933,7 +881,7 @@
       });
     }
 
-    // ===== Authentication State Management =====
+         // ===== Authentication State Management =====
      let currentUser = null;
      let userProfile = null;
      let authStateInitialized = false;
@@ -961,14 +909,14 @@
            console.error('Error checking profile:', error);
            showAuthModal();
          }
-                } else {
-           currentUser = null;
-           userProfile = null;
-           console.log('No user, showing auth modal');
-           // Ensure all modals are hidden first
-           hideAllModals();
-           showAuthModal();
-         }
+       } else {
+         currentUser = null;
+         userProfile = null;
+         console.log('No user, showing auth modal');
+         // Ensure all modals are hidden first
+         hideAllModals();
+         showAuthModal();
+       }
        
        // Mark auth state as initialized
        authStateInitialized = true;
@@ -1104,6 +1052,7 @@
       document.getElementById('settingsHeightFt').value = userProfile.heightFt || '';
       document.getElementById('settingsHeightIn').value = userProfile.heightIn || '';
       document.getElementById('settingsWeight').value = userProfile.weight || '';
+      document.getElementById('settingsTheme').value = currentTheme || 'dark';
       
       const settingsModal = document.getElementById('settingsModal');
       settingsModal.classList.remove('hidden');
@@ -1221,6 +1170,7 @@
       const heightFt = +document.getElementById('settingsHeightFt').value;
       const heightIn = +document.getElementById('settingsHeightIn').value;
       const weight = +document.getElementById('settingsWeight').value;
+      const theme = document.getElementById('settingsTheme').value;
       const errorDiv = document.getElementById('settingsError');
       const successDiv = document.getElementById('settingsSuccess');
 
@@ -1234,11 +1184,15 @@
       try {
         const bmr = calcBMR(age, weight, heightFt, heightIn);
         userProfile = { ...userProfile, age, heightFt, heightIn, weight, bmr };
+        currentTheme = theme;
         
         await db.collection('users').doc(currentUser.uid).update(userProfile);
         
                  // Update BMR calculation
          renderBMR(age, weight, heightFt, heightIn);
+         
+         // Apply theme
+         applyTheme(theme);
         
         errorDiv.classList.add('hidden');
         successDiv.textContent = 'Settings saved successfully!';
@@ -1362,6 +1316,7 @@
            foodDataByDate = data.foodDataByDate || {};
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
+           currentTheme = data.currentTheme || 'dark';
            updateCharts();
          }
 
@@ -1376,6 +1331,9 @@
 
          // Update food menu with custom foods
          updateFoodMenu();
+         
+         // Apply current theme
+         applyTheme(currentTheme);
 
          // Check for daily weight logging only if user has a profile
          if (userProfile) {
@@ -1398,6 +1356,7 @@
            foodDataByDate,
            customFoods,
            weightLoggingClosed,
+           currentTheme,
            lastUpdated: new Date()
          });
        } catch (error) {
@@ -1503,39 +1462,7 @@
        mobileFoodModal.classList.add('hidden');
      }
 
-     function showMobileTacosModal() {
-       const mobileTacosModal = document.getElementById('mobileTacosModal');
-       mobileTacosModal.classList.remove('hidden');
-       mobileTacosModal.style.zIndex = '2000';
-       
-       // Set default values
-       document.getElementById('mobileTacoName').value = 'Beef Taco';
-       document.getElementById('mobileTacoCalories').value = 250;
-       document.getElementById('mobileTacoQuantity').value = 2;
-       previewMobileTacos();
-     }
 
-     function hideMobileTacosModal() {
-       const mobileTacosModal = document.getElementById('mobileTacosModal');
-       mobileTacosModal.classList.add('hidden');
-     }
-
-     function showMobileBurgerModal() {
-       const mobileBurgerModal = document.getElementById('mobileBurgerModal');
-       mobileBurgerModal.classList.remove('hidden');
-       mobileBurgerModal.style.zIndex = '2000';
-       
-       // Set default values
-       document.getElementById('mobileBurgerName').value = 'Cheeseburger';
-       document.getElementById('mobileBurgerCalories').value = 500;
-       document.getElementById('mobileBurgerQuantity').value = 1;
-       previewMobileBurger();
-     }
-
-     function hideMobileBurgerModal() {
-       const mobileBurgerModal = document.getElementById('mobileBurgerModal');
-       mobileBurgerModal.classList.add('hidden');
-     }
 
      function showMobileCustomFoodModal(existingFood = null) {
        const mobileCustomFoodModal = document.getElementById('mobileCustomFoodModal');
@@ -1547,13 +1474,17 @@
          document.getElementById('mobileCustomFoodName').value = existingFood.name;
          document.getElementById('mobileCustomFoodCalories').value = existingFood.calories;
          document.getElementById('customFoodIcon').textContent = existingFood.icon;
-         document.getElementById('mobileCustomFoodCalc').textContent = 'Update Food';
+         document.getElementById('mobileCustomFoodCalc').textContent = 'Add Food Calories';
+         
+         // Store the original food name for updating
+         mobileCustomFoodModal.dataset.originalName = existingFood.name;
        } else {
          // Adding new food
          document.getElementById('mobileCustomFoodName').value = '';
          document.getElementById('mobileCustomFoodCalories').value = '';
          document.getElementById('customFoodIcon').textContent = '🍽️';
          document.getElementById('mobileCustomFoodCalc').textContent = 'Add Food';
+         delete mobileCustomFoodModal.dataset.originalName;
        }
        document.getElementById('mobileCustomFoodResult').innerHTML = '';
      }
@@ -1573,66 +1504,47 @@
        const foodMenu = document.getElementById('mobileFoodModal');
        const menuGrid = foodMenu.querySelector('.menu-grid');
        
-       // Start with default foods
-       let menuHTML = `
-         <div class="menu-tile" id="mobileOpenTacos">
-           <div class="menu-emoji">🌮</div>
-           <div>Tacos</div>
-         </div>
-         <div class="menu-tile" id="mobileOpenBurger">
-           <div class="menu-emoji">🍔</div>
-           <div>Burger</div>
-         </div>
-       `;
+       // Check if user has any custom foods
+       const customFoodsArray = Object.values(customFoods);
        
-       // Add custom foods
-       Object.values(customFoods).forEach(food => {
-         menuHTML += `
-           <div class="menu-tile" id="mobileOpenCustom_${food.name.replace(/\s+/g, '_')}">
-             <div class="menu-emoji">${food.icon}</div>
-             <div>${food.name}</div>
+       if (customFoodsArray.length === 0) {
+         // Show empty state message
+         menuGrid.innerHTML = `
+           <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--muted);">
+             <div style="font-size: 48px; margin-bottom: 16px;">🍽️</div>
+             <div style="font-size: 16px; margin-bottom: 8px;">You have no recorded food items</div>
+             <div style="font-size: 14px;">Add some below!</div>
            </div>
          `;
-       });
-       
-       menuGrid.innerHTML = menuHTML;
-       
-       // Re-attach event listeners for custom foods
-       Object.values(customFoods).forEach(food => {
-         const elementId = `mobileOpenCustom_${food.name.replace(/\s+/g, '_')}`;
-         const element = document.getElementById(elementId);
-         if (element) {
-           element.addEventListener('click', () => {
-             hideMobileFoodMenu();
-             showMobileCustomFoodModal(food);
-           });
-         }
-       });
-     }
-
-     function previewMobileTacos() {
-       const calories = +document.getElementById('mobileTacoCalories').value;
-       const quantity = +document.getElementById('mobileTacoQuantity').value;
-       
-       if (calories > 0 && quantity > 0) {
-         const total = calories * quantity;
-         document.getElementById('mobileTacoResult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
        } else {
-         document.getElementById('mobileTacoResult').innerHTML = '';
+         // Show custom foods
+         let menuHTML = '';
+         customFoodsArray.forEach(food => {
+           menuHTML += `
+             <div class="menu-tile" id="mobileOpenCustom_${food.name.replace(/\s+/g, '_')}">
+               <div class="menu-emoji">${food.icon}</div>
+               <div>${food.name}</div>
+             </div>
+           `;
+         });
+         
+         menuGrid.innerHTML = menuHTML;
+         
+         // Re-attach event listeners for custom foods
+         customFoodsArray.forEach(food => {
+           const elementId = `mobileOpenCustom_${food.name.replace(/\s+/g, '_')}`;
+           const element = document.getElementById(elementId);
+           if (element) {
+             element.addEventListener('click', () => {
+               hideMobileFoodMenu();
+               showMobileCustomFoodModal(food);
+             });
+           }
+         });
        }
      }
 
-     function previewMobileBurger() {
-       const calories = +document.getElementById('mobileBurgerCalories').value;
-       const quantity = +document.getElementById('mobileBurgerQuantity').value;
-       
-       if (calories > 0 && quantity > 0) {
-         const total = calories * quantity;
-         document.getElementById('mobileBurgerResult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
-       } else {
-         document.getElementById('mobileBurgerResult').innerHTML = '';
-       }
-     }
+
 
      function previewMobileTreadmill() {
        const w = userProfile?.weight || 170;
@@ -1674,6 +1586,23 @@
      let foodDataByDate={};  // date -> food data for that date
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
+     let currentTheme = 'dark'; // current theme setting
+
+         // ===== Theme Management =====
+     function applyTheme(theme) {
+       const root = document.documentElement;
+       if (theme === 'light') {
+         root.style.setProperty('--bg', '#ffffff');
+         root.style.setProperty('--card', '#f8f9fa');
+         root.style.setProperty('--muted', '#6c757d');
+         root.style.setProperty('--text', '#212529');
+       } else {
+         root.style.setProperty('--bg', '#0b0f14');
+         root.style.setProperty('--card', '#121821');
+         root.style.setProperty('--muted', '#8aa0b4');
+         root.style.setProperty('--text', '#e9f0f6');
+       }
+     }
 
     // ===== BMR =====
     function toKg(lbs){return lbs/2.2046}
@@ -1769,10 +1698,29 @@
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
-         function getAllDates(){
-       const set=new Set([...Object.keys(basalByDate),...Object.keys(activityByDate)]);
-       return Array.from(set).sort();
-     }
+                  function getAllDates(){
+           const set = new Set([
+             ...Object.keys(basalByDate || {}),
+             ...Object.keys(activityByDate || {}),
+             ...Object.keys(foodDataByDate || {}),
+             ...Object.keys(workoutDataByDate || {})
+           ]);
+           return Array.from(set).sort();
+         }
+
+         function computeFoodCaloriesForDate(d){
+           const day = foodDataByDate?.[d] || {};
+           let total = 0;
+           for (const k of Object.keys(day)) {
+             const item = day[k] || {};
+             const qty = Number(item.quantity ?? 1);
+             const fromTotal = Number(item.totalCalories);
+             const fromParts = Number(item.calories) * qty;
+             const add = !isNaN(fromTotal) ? fromTotal : (!isNaN(fromParts) ? fromParts : 0);
+             total += add;
+           }
+           return Math.round(total);
+         }
 
      // ===== Mobile Swipe Navigation =====
      let currentSlide = 0;
@@ -1903,6 +1851,15 @@
        hasMoved = false;
      }
 
+     // Keyboard shortcut handler
+     function handleKeyboardShortcuts(e) {
+       // Ctrl+Shift to swipe left (next slide)
+       if (e.ctrlKey && e.shiftKey) {
+         e.preventDefault();
+         nextSlide();
+       }
+     }
+
      // Initialize mobile swipe
      function initMobileSwipe() {
        const mobileContainer = document.querySelector('.mobile-container');
@@ -1911,6 +1868,9 @@
          mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
          mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
        }
+       
+       // Add keyboard event listener
+       document.addEventListener('keydown', handleKeyboardShortcuts);
      }
 
          // Food icon mapping
@@ -2041,126 +2001,99 @@
            }
 
            return { labels, actual, projected };
-         }
+     }
 
          function updateCharts(){
-       const labels=getAllDates();
-       const daily=labels.map(d=> (basalByDate[d]||0) + (activityByDate[d]||0));
-       let cumulative=[];let sum=0;daily.forEach(v=>{sum+=v;cumulative.push(sum)});
+           const labels = getAllDates();
 
-       // Calculate food calories eaten per day
-       const foodCalories = labels.map(d => {
-         let total = 0;
-         if (foodDataByDate[d]) {
-           if (foodDataByDate[d].tacos && foodDataByDate[d].tacos.totalCalories) {
-             total += foodDataByDate[d].tacos.totalCalories;
+           // calories burned per day
+           const burned = labels.map(d => (basalByDate[d] || 0) + (activityByDate[d] || 0));
+
+           // calories eaten per day, now includes ALL foods
+           const foodCalories = labels.map(d => computeFoodCaloriesForDate(d));
+
+           // deficit = burned minus eaten
+           const deficit = labels.map((_, i) => burned[i] - foodCalories[i]);
+
+           // ----- Total chart (desktop) -----
+           totalChart.data.labels = labels;
+           const isDetailed = totalChart.data.datasets.length > 1;
+           if (isDetailed) {
+             totalChart.data.datasets[0].data = burned;       // Calories Burned
+             totalChart.data.datasets[1].data = foodCalories; // Calories Eaten
+           } else {
+             totalChart.data.datasets[0].data = deficit;      // Calorie Deficit
            }
-           if (foodDataByDate[d].burger && foodDataByDate[d].burger.totalCalories) {
-             total += foodDataByDate[d].burger.totalCalories;
+           totalChart.update();
+
+           // ----- Total chart (mobile) -----
+           mobileTotalChart.data.labels = labels;
+           const isMobileDetailed = mobileTotalChart.data.datasets.length > 1;
+           if (isMobileDetailed) {
+             mobileTotalChart.data.datasets[0].data = burned;
+             mobileTotalChart.data.datasets[1].data = foodCalories;
+           } else {
+             mobileTotalChart.data.datasets[0].data = deficit;
+           }
+           mobileTotalChart.update();
+
+           // ----- Workout charts -----
+           const workoutPerDay = labels.map(d => {
+             let t = 0;
+             const w = workoutDataByDate[d];
+             if (w?.treadmill?.calories) t += w.treadmill.calories;
+             if (w?.stairs?.calories)    t += w.stairs.calories;
+             return t;
+           });
+
+           workoutChart.data.labels = labels;
+           const isWorkoutFat = workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           workoutChart.data.datasets[0].data = isWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
+           workoutChart.update();
+
+           mobileWorkoutChart.data.labels = labels;
+           const isMobileWorkoutFat = mobileWorkoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
+           mobileWorkoutChart.update();
+
+           // ----- Food chart (mobile) -----
+           mobileFoodChart.data.labels = labels;
+           const isMobileFoodFat = mobileFoodChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           mobileFoodChart.data.datasets[0].data = isMobileFoodFat ? foodCalories.map(v => v/3500) : foodCalories;
+           mobileFoodChart.update();
+
+           // ----- Weight charts -----
+           if (userProfile) {
+             const { labels: wLabels, actual: wActual, projected: wProjected } =
+               computeWeightSeries(weightByDate, 3);
+
+             // desktop
+             weightChart.data.labels = wLabels;
+             const isWeightFat = weightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+             if (isWeightFat) {
+               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
+               weightChart.data.datasets[0].data = perDay;
+               weightChart.data.datasets[1].data = perDay;
+             } else {
+               weightChart.data.datasets[0].data = wActual;
+               weightChart.data.datasets[1].data = wProjected;
+             }
+             weightChart.update();
+
+             // mobile
+             mobileWeightChart.data.labels = wLabels;
+             const isMobileWeightFat = mobileWeightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+             if (isMobileWeightFat) {
+               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
+               mobileWeightChart.data.datasets[0].data = perDay;
+               mobileWeightChart.data.datasets[1].data = perDay;
+             } else {
+               mobileWeightChart.data.datasets[0].data = wActual;
+               mobileWeightChart.data.datasets[1].data = wProjected;
+             }
+             mobileWeightChart.update();
            }
          }
-         return total;
-       });
-
-       // Calculate calorie deficit (calories burned - calories eaten)
-       const calorieDeficit = labels.map((d, i) => daily[i] - foodCalories[i]);
-
-       // Total calories chart - check if showing detailed view
-       totalChart.data.labels=labels;
-       const isDetailed = totalChart.data.datasets.length > 1;
-       
-       if (isDetailed) {
-         // Show detailed view with both calories burned and eaten
-         totalChart.data.datasets[0].data = daily; // Calories burned
-         totalChart.data.datasets[1].data = foodCalories; // Calories eaten
-       } else {
-         // Show calorie deficit
-         totalChart.data.datasets[0].data = calorieDeficit;
-       }
-       totalChart.update();
-
-       // Mobile total calories chart - check if showing detailed view
-       mobileTotalChart.data.labels=labels;
-       const isMobileDetailed = mobileTotalChart.data.datasets.length > 1;
-       
-       if (isMobileDetailed) {
-         // Show detailed view with both calories burned and eaten
-         mobileTotalChart.data.datasets[0].data = daily; // Calories burned
-         mobileTotalChart.data.datasets[1].data = foodCalories; // Calories eaten
-       } else {
-         // Show calorie deficit
-         mobileTotalChart.data.datasets[0].data = calorieDeficit;
-       }
-       mobileTotalChart.update();
-
-       // Workout calories chart
-       const workoutCalories = labels.map(d => {
-         let total = 0;
-         if (workoutDataByDate[d]) {
-           if (workoutDataByDate[d].treadmill && workoutDataByDate[d].treadmill.calories) {
-             total += workoutDataByDate[d].treadmill.calories;
-           }
-           if (workoutDataByDate[d].stairs && workoutDataByDate[d].stairs.calories) {
-             total += workoutDataByDate[d].stairs.calories;
-           }
-         }
-         return total;
-       });
-       
-       workoutChart.data.labels = labels;
-       const isWorkoutFat = workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       workoutChart.data.datasets[0].data = isWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
-       workoutChart.update();
-
-       // Mobile workout calories chart
-       mobileWorkoutChart.data.labels = labels;
-       const isMobileWorkoutFat = mobileWorkoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutCalories.map(v=>v/3500) : workoutCalories;
-       mobileWorkoutChart.update();
-
-       // Food calories chart (using existing foodCalories variable)
-       
-       // Mobile food calories chart
-       mobileFoodChart.data.labels = labels;
-       const isMobileFoodFat = mobileFoodChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileFoodChart.data.datasets[0].data = isMobileFoodFat ? foodCalories.map(v=>v/3500) : foodCalories;
-       mobileFoodChart.update();
-
-       // ===== Weight charts =====
-       if (userProfile) {
-         const { labels: wLabels, actual: wActual, projected: wProjected } =
-           computeWeightSeries(weightByDate, 3);
-
-         // Desktop
-         weightChart.data.labels = wLabels;
-         const isWeightFat = weightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-         if (isWeightFat) {
-           // unchanged behavior when toggled to fat loss
-           const daily = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)));
-           const perDayFat = daily.map(v => v / 3500);
-           weightChart.data.datasets[0].data = perDayFat;
-           weightChart.data.datasets[1].data = perDayFat;
-         } else {
-           weightChart.data.datasets[0].data = wActual;        // green: actual
-           weightChart.data.datasets[1].data = wProjected;     // blue dotted: projected only after last actual
-         }
-         weightChart.update();
-
-         // Mobile
-         mobileWeightChart.data.labels = wLabels;
-         const isMobileWeightFat = mobileWeightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-         if (isMobileWeightFat) {
-           const daily = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)));
-           const perDayFat = daily.map(v => v / 3500);
-           mobileWeightChart.data.datasets[0].data = perDayFat;
-           mobileWeightChart.data.datasets[1].data = perDayFat;
-         } else {
-           mobileWeightChart.data.datasets[0].data = wActual;
-           mobileWeightChart.data.datasets[1].data = wProjected;
-         }
-         mobileWeightChart.update();
-       }
-     }
 
     // ===== Treadmill =====
     let tctx=document.getElementById('tchart').getContext('2d');
@@ -2537,14 +2470,6 @@
        hideMobileFoodMenu();
        showMobileCustomFoodModal();
      });
-     document.getElementById('mobileOpenTacos').addEventListener('click', () => {
-       hideMobileFoodMenu();
-       showMobileTacosModal();
-     });
-     document.getElementById('mobileOpenBurger').addEventListener('click', () => {
-       hideMobileFoodMenu();
-       showMobileBurgerModal();
-     });
      
      // Mobile treadmill event listeners
      document.getElementById('closeMobileTreadmill').addEventListener('click', hideMobileTreadmillModal);
@@ -2634,86 +2559,7 @@
        document.getElementById('mobileCustomMetField').classList.toggle('hidden', !isCustom);
      });
      
-     // Mobile food calculation event listeners
-     document.getElementById('mobileTacoCalc').addEventListener('click', () => {
-       const name = document.getElementById('mobileTacoName').value;
-       const calories = +document.getElementById('mobileTacoCalories').value;
-       const quantity = +document.getElementById('mobileTacoQuantity').value;
-       
-       if (!name || !calories || !quantity) {
-         document.getElementById('mobileTacoResult').innerHTML = '<p>Please enter all values</p>';
-         return;
-       }
-       
-       const total = calories * quantity;
-       document.getElementById('mobileTacoResult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       
-       // Save food data to Firebase
-       const today = todayStr();
-       if (!foodDataByDate[today]) {
-         foodDataByDate[today] = {};
-       }
-       foodDataByDate[today].tacos = {
-         name: name,
-         calories: calories,
-         quantity: quantity,
-         totalCalories: Math.round(total)
-       };
-       saveUserData();
-       
-       // Update charts
-       updateCharts();
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideMobileTacosModal();
-       }, 2000);
-     });
-     
-     document.getElementById('mobileBurgerCalc').addEventListener('click', () => {
-       const name = document.getElementById('mobileBurgerName').value;
-       const calories = +document.getElementById('mobileBurgerCalories').value;
-       const quantity = +document.getElementById('mobileBurgerQuantity').value;
-       
-       if (!name || !calories || !quantity) {
-         document.getElementById('mobileBurgerResult').innerHTML = '<p>Please enter all values</p>';
-         return;
-       }
-       
-       const total = calories * quantity;
-       document.getElementById('mobileBurgerResult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       
-       // Save food data to Firebase
-       const today = todayStr();
-       if (!foodDataByDate[today]) {
-         foodDataByDate[today] = {};
-       }
-       foodDataByDate[today].burger = {
-         name: name,
-         calories: calories,
-         quantity: quantity,
-         totalCalories: Math.round(total)
-       };
-       saveUserData();
-       
-       // Update charts
-       updateCharts();
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideMobileBurgerModal();
-       }, 2000);
-     });
-     
-     // Mobile food input event listeners
-     ['input', 'change'].forEach(evt => {
-       document.getElementById('mobileTacoName').addEventListener(evt, previewMobileTacos);
-       document.getElementById('mobileTacoCalories').addEventListener(evt, previewMobileTacos);
-       document.getElementById('mobileTacoQuantity').addEventListener(evt, previewMobileTacos);
-       document.getElementById('mobileBurgerName').addEventListener(evt, previewMobileBurger);
-       document.getElementById('mobileBurgerCalories').addEventListener(evt, previewMobileBurger);
-       document.getElementById('mobileBurgerQuantity').addEventListener(evt, previewMobileBurger);
-     });
+
      
      // Mobile custom food event listeners
      document.getElementById('mobileCustomFoodCalc').addEventListener('click', () => {
@@ -2730,6 +2576,8 @@
          return;
        }
        
+       const isUpdate = document.getElementById('mobileCustomFoodCalc').textContent === 'Add Food Calories';
+       
        // Save custom food to Firebase
        const icon = pickEmoji(name);
        customFoods[name] = {
@@ -2737,12 +2585,50 @@
          calories: calories,
          icon: icon
        };
+       
+       // Also save to food data for today's tracking
+       const today = todayStr();
+       if (!foodDataByDate[today]) {
+         foodDataByDate[today] = {};
+       }
+       
+       // For updates, we need to find and update the existing entry
+       if (isUpdate) {
+         const originalName = document.getElementById('mobileCustomFoodModal').dataset.originalName;
+         
+         // Find the existing food entry and update it
+         Object.keys(foodDataByDate[today]).forEach(key => {
+           if (foodDataByDate[today][key].name === originalName) {
+             // Remove the old entry
+             delete foodDataByDate[today][key];
+           }
+         });
+         
+         // Add the updated entry
+         foodDataByDate[today][name.toLowerCase().replace(/\s+/g, '_')] = {
+           name: name,
+           calories: calories,
+           quantity: 1,
+           totalCalories: calories
+         };
+       } else {
+         // For new foods, add to today's data
+         foodDataByDate[today][name.toLowerCase().replace(/\s+/g, '_')] = {
+           name: name,
+           calories: calories,
+           quantity: 1,
+           totalCalories: calories
+         };
+       }
+       
        saveUserData();
        
        // Update food menu to show new custom food
        updateFoodMenu();
        
-       const isUpdate = document.getElementById('mobileCustomFoodCalc').textContent === 'Update Food';
+       // Update charts to show the new food calories
+       updateCharts();
+       
        document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>${isUpdate ? 'Updated' : 'Added'}: ${name} (${calories} kcal)</div>`;
        
        // Close modal after a short delay
@@ -2755,8 +2641,6 @@
      document.getElementById('mobileCustomFoodName').addEventListener('input', updateCustomFoodIcon);
      
      // Mobile food modal close event listeners
-     document.getElementById('closeMobileTacos').addEventListener('click', hideMobileTacosModal);
-     document.getElementById('closeMobileBurger').addEventListener('click', hideMobileBurgerModal);
      document.getElementById('closeMobileCustomFood').addEventListener('click', hideMobileCustomFoodModal);
      
      // Add Calories Modal Event Listeners
@@ -2834,7 +2718,7 @@
          }, 300);
        }
        
-       // Force show auth modal initially, then let Firebase auth state take over
+                // Force show auth modal initially, then let Firebase auth state take over
        setTimeout(() => {
          console.log('Initial timeout - authStateInitialized:', authStateInitialized);
          if (!authStateInitialized) {
