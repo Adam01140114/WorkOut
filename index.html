@@ -2596,21 +2596,21 @@
        if (isUpdate) {
          const originalName = document.getElementById('mobileCustomFoodModal').dataset.originalName;
          
-         // Find the existing food entry and update it
+         // Find the existing food entry and add to it
          Object.keys(foodDataByDate[today]).forEach(key => {
            if (foodDataByDate[today][key].name === originalName) {
-             // Remove the old entry
-             delete foodDataByDate[today][key];
+             // Add to the existing calories instead of replacing
+             const existingCalories = foodDataByDate[today][key].totalCalories || 0;
+             const newTotalCalories = existingCalories + calories;
+             
+             foodDataByDate[today][key] = {
+               name: name,
+               calories: calories,
+               quantity: 1,
+               totalCalories: newTotalCalories
+             };
            }
          });
-         
-         // Add the updated entry
-         foodDataByDate[today][name.toLowerCase().replace(/\s+/g, '_')] = {
-           name: name,
-           calories: calories,
-           quantity: 1,
-           totalCalories: calories
-         };
        } else {
          // For new foods, add to today's data
          foodDataByDate[today][name.toLowerCase().replace(/\s+/g, '_')] = {
@@ -2629,7 +2629,7 @@
        // Update charts to show the new food calories
        updateCharts();
        
-       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>${isUpdate ? 'Updated' : 'Added'}: ${name} (${calories} kcal)</div>`;
+       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>${isUpdate ? 'Logged' : 'Added'}: ${name} (${calories} kcal)</div>`;
        
        // Close modal after a short delay
        setTimeout(() => {
