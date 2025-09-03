@@ -268,6 +268,175 @@
        display: block;
      }
      
+     /* Streak Module Styles */
+     .streak-module {
+       background: linear-gradient(135deg, #1e293b, #334155);
+       border-radius: 20px;
+       padding: 20px;
+       margin: 20px;
+       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+       border: 1px solid rgba(255, 255, 255, 0.1);
+     }
+     
+     .streak-header {
+       display: flex;
+       align-items: center;
+       gap: 16px;
+       margin-bottom: 20px;
+     }
+     
+     .streak-icon {
+       font-size: 32px;
+       filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.5));
+     }
+     
+     .streak-info {
+       flex: 1;
+     }
+     
+     .streak-count {
+       font-size: 32px;
+       font-weight: bold;
+       color: #fbbf24;
+       text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+       line-height: 1;
+     }
+     
+     .streak-label {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+     .streak-progress {
+       height: 8px;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 4px;
+       margin-bottom: 20px;
+       overflow: hidden;
+     }
+     
+     .streak-bar {
+       height: 100%;
+       background: linear-gradient(90deg, #fbbf24, #f59e0b);
+       border-radius: 4px;
+       transition: width 0.5s ease;
+       width: 0%;
+     }
+     
+     .streak-stats {
+       display: flex;
+       justify-content: space-around;
+       gap: 16px;
+     }
+     
+     .streak-stat {
+       text-align: center;
+       flex: 1;
+     }
+     
+     .stat-value {
+       display: block;
+       font-size: 20px;
+       font-weight: bold;
+       color: var(--accent);
+       line-height: 1;
+     }
+     
+     .stat-label {
+       font-size: 12px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+     /* Desktop Streak Styles */
+     .streak-card {
+       background: linear-gradient(135deg, #1e293b, #334155);
+       border: 1px solid rgba(255, 255, 255, 0.1);
+       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+     }
+     
+     .streak-container {
+       padding: 8px;
+     }
+     
+     .streak-main {
+       display: flex;
+       align-items: center;
+       gap: 24px;
+       margin-bottom: 24px;
+     }
+     
+     .streak-icon-large {
+       font-size: 48px;
+       filter: drop-shadow(0 0 15px rgba(255, 165, 0, 0.6));
+     }
+     
+     .streak-details {
+       flex: 1;
+     }
+     
+     .streak-count-large {
+       font-size: 48px;
+       font-weight: bold;
+       color: #fbbf24;
+       text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+       line-height: 1;
+     }
+     
+     .streak-label-large {
+       font-size: 18px;
+       color: var(--text);
+       margin-top: 8px;
+       font-weight: 600;
+     }
+     
+     .streak-subtitle {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+     .streak-progress-large {
+       height: 12px;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 6px;
+       margin-bottom: 24px;
+       overflow: hidden;
+     }
+     
+     .streak-bar-large {
+       height: 100%;
+       background: linear-gradient(90deg, #fbbf24, #f59e0b);
+       border-radius: 6px;
+       transition: width 0.5s ease;
+       width: 0%;
+     }
+     
+     .streak-stats-large {
+       display: grid;
+       grid-template-columns: repeat(3, 1fr);
+       gap: 24px;
+     }
+     
+     .streak-stat-large {
+       text-align: center;
+     }
+     
+     .stat-value-large {
+       display: block;
+       font-size: 28px;
+       font-weight: bold;
+       color: var(--accent);
+       line-height: 1;
+     }
+     
+     .stat-label-large {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 8px;
+     }
+     
      /* Mobile styles */
      @media (max-width: 768px) {
        .desktop-container {
@@ -303,6 +472,19 @@
          overflow-y: auto;
          -webkit-overflow-scrolling: touch;
        }
+       
+       .streak-module {
+         margin: 16px;
+         padding: 16px;
+       }
+       
+       .streak-count {
+         font-size: 28px;
+       }
+       
+       .streak-icon {
+         font-size: 28px;
+       }
      }
   </style>
 </head>
@@ -314,7 +496,31 @@
      <div class="mobile-container">
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
-       <br><br><br>
+       
+       <!-- Streak Module -->
+       <div class="streak-module">
+         <div class="streak-header">
+           <div class="streak-icon">🔥</div>
+           <div class="streak-info">
+             <div class="streak-count" id="mobileStreakCount">0</div>
+             <div class="streak-label">Day Streak</div>
+           </div>
+         </div>
+         <div class="streak-progress">
+           <div class="streak-bar" id="mobileStreakBar"></div>
+         </div>
+         <div class="streak-stats">
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileBestStreak">0</span>
+             <span class="stat-label">Best</span>
+           </div>
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileTotalWorkouts">0</span>
+             <span class="stat-label">Total</span>
+           </div>
+         </div>
+       </div>
+       
        <!-- Slide 1: Total Calories Burned -->
        <div class="mobile-slide active" id="mobile-slide-1">
          <br>
@@ -737,6 +943,37 @@
 
          <!-- Main App Content (hidden until authenticated) -->
      <div id="appContent" class="hidden">
+
+      <!-- Streak Module -->
+      <section class="card streak-card">
+        <div class="streak-container">
+          <div class="streak-main">
+            <div class="streak-icon-large">🔥</div>
+            <div class="streak-details">
+              <div class="streak-count-large" id="desktopStreakCount">0</div>
+              <div class="streak-label-large">Day Workout Streak</div>
+              <div class="streak-subtitle">Keep the fire burning! 🔥</div>
+            </div>
+          </div>
+          <div class="streak-progress-large">
+            <div class="streak-bar-large" id="desktopStreakBar"></div>
+          </div>
+          <div class="streak-stats-large">
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopBestStreak">0</span>
+              <span class="stat-label-large">Best Streak</span>
+            </div>
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopTotalWorkouts">0</span>
+              <span class="stat-label-large">Total Workouts</span>
+            </div>
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopCurrentWeek">0</span>
+              <span class="stat-label-large">This Week</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <!-- Total Burned -->
       <section class="card">
@@ -1358,6 +1595,16 @@
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
            currentTheme = data.currentTheme || 'dark';
+           
+           // Load streak data if it exists
+           if (data.streakData) {
+             streakData = { ...streakData, ...data.streakData };
+             // Convert workoutDates back to Set if it exists
+             if (data.streakData.workoutDates) {
+               streakData.workoutDates = new Set(data.streakData.workoutDates);
+             }
+           }
+           
            updateCharts();
          }
 
@@ -1389,6 +1636,12 @@
        if (!currentUser) return;
 
        try {
+         // Convert Set to Array for Firebase storage
+         const streakDataForStorage = {
+           ...streakData,
+           workoutDates: Array.from(streakData.workoutDates)
+         };
+         
          await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
            basalByDate,
            activityByDate,
@@ -1398,6 +1651,7 @@
            customFoods,
            weightLoggingClosed,
            currentTheme,
+           streakData: streakDataForStorage,
            lastUpdated: new Date()
          });
        } catch (error) {
@@ -1407,6 +1661,154 @@
 
          // ===== Helper Functions =====
      function todayStr(){return new Date().toISOString().split('T')[0];}
+     
+     // ===== Streak Functions =====
+     function calculateStreaks() {
+       const today = todayStr();
+       const workoutDates = Object.keys(workoutDataByDate).filter(date => {
+         const day = workoutDataByDate[date];
+         return (day.treadmill && day.treadmill.calories > 0) || 
+                (day.stairs && day.stairs.calories > 0);
+       }).sort();
+       
+       if (workoutDates.length === 0) {
+         streakData.currentStreak = 0;
+         streakData.bestStreak = 0;
+         streakData.totalWorkouts = 0;
+         streakData.lastWorkoutDate = null;
+         streakData.workoutDates = new Set();
+         return;
+       }
+       
+       // Calculate total workouts
+       streakData.totalWorkouts = workoutDates.length;
+       streakData.lastWorkoutDate = workoutDates[workoutDates.length - 1];
+       streakData.workoutDates = new Set(workoutDates);
+       
+       // Calculate current streak
+       let currentStreak = 0;
+       let currentDate = new Date(today);
+       
+       // Check if user worked out today
+       if (workoutDates.includes(today)) {
+         currentStreak = 1;
+         currentDate.setDate(currentDate.getDate() - 1);
+         
+         // Count backwards to find consecutive days
+         while (true) {
+           const checkDate = currentDate.toISOString().split('T')[0];
+           if (workoutDates.includes(checkDate)) {
+             currentStreak++;
+             currentDate.setDate(currentDate.getDate() - 1);
+           } else {
+             break;
+           }
+         }
+       } else {
+         // Check if user worked out yesterday
+         const yesterday = new Date(today);
+         yesterday.setDate(yesterday.getDate() - 1);
+         const yesterdayStr = yesterday.toISOString().split('T')[0];
+         
+         if (workoutDates.includes(yesterdayStr)) {
+           // Count backwards from yesterday
+           currentStreak = 1;
+           currentDate.setDate(currentDate.getDate() - 2);
+           
+           while (true) {
+             const checkDate = currentDate.toISOString().split('T')[0];
+             if (workoutDates.includes(checkDate)) {
+               currentStreak++;
+               currentDate.setDate(currentDate.getDate() - 1);
+             } else {
+               break;
+             }
+           }
+         } else {
+           currentStreak = 0;
+         }
+       }
+       
+       streakData.currentStreak = currentStreak;
+       
+       // Calculate best streak
+       let bestStreak = 0;
+       let tempStreak = 0;
+       
+       for (let i = 0; i < workoutDates.length; i++) {
+         if (i === 0) {
+           tempStreak = 1;
+         } else {
+           const prevDate = new Date(workoutDates[i - 1]);
+           const currDate = new Date(workoutDates[i]);
+           const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+           
+           if (diffDays === 1) {
+             tempStreak++;
+           } else {
+             bestStreak = Math.max(bestStreak, tempStreak);
+             tempStreak = 1;
+           }
+         }
+       }
+       
+       bestStreak = Math.max(bestStreak, tempStreak);
+       streakData.bestStreak = bestStreak;
+     }
+     
+     function updateStreakDisplay() {
+       // Update mobile streak display
+       const mobileStreakCount = document.getElementById('mobileStreakCount');
+       const mobileBestStreak = document.getElementById('mobileBestStreak');
+       const mobileTotalWorkouts = document.getElementById('mobileTotalWorkouts');
+       const mobileStreakBar = document.getElementById('mobileStreakBar');
+       
+       if (mobileStreakCount) {
+         mobileStreakCount.textContent = streakData.currentStreak;
+         mobileBestStreak.textContent = streakData.bestStreak;
+         mobileTotalWorkouts.textContent = streakData.totalWorkouts;
+         
+         // Update progress bar (max at 30 days for visual appeal)
+         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         mobileStreakBar.style.width = progressPercent + '%';
+       }
+       
+       // Update desktop streak display
+       const desktopStreakCount = document.getElementById('desktopStreakCount');
+       const desktopBestStreak = document.getElementById('desktopBestStreak');
+       const desktopTotalWorkouts = document.getElementById('desktopTotalWorkouts');
+       const desktopCurrentWeek = document.getElementById('desktopCurrentWeek');
+       const desktopStreakBar = document.getElementById('desktopStreakBar');
+       
+       if (desktopStreakCount) {
+         desktopStreakCount.textContent = streakData.currentStreak;
+         desktopBestStreak.textContent = streakData.bestStreak;
+         desktopTotalWorkouts.textContent = streakData.totalWorkouts;
+         
+         // Calculate workouts this week
+         const today = new Date();
+         const weekStart = new Date(today);
+         weekStart.setDate(today.getDate() - today.getDay());
+         const weekStartStr = weekStart.toISOString().split('T')[0];
+         
+         let weekWorkouts = 0;
+         for (let i = 0; i < 7; i++) {
+           const checkDate = new Date(weekStart);
+           checkDate.setDate(weekStart.getDate() + i);
+           const checkDateStr = checkDate.toISOString().split('T')[0];
+           
+           if (streakData.workoutDates.has(checkDateStr)) {
+             weekWorkouts++;
+           }
+         }
+         
+         desktopCurrentWeek.textContent = weekWorkouts;
+         
+         // Update progress bar
+         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         desktopStreakBar.style.width = progressPercent + '%';
+       }
+     }
 
      // ===== Weight Tracking Functions =====
      function checkDailyWeightLogging() {
@@ -1628,6 +2030,15 @@
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
      let currentTheme = 'dark'; // current theme setting
+     
+     // ===== Streak Tracking =====
+     let streakData = {
+       currentStreak: 0,
+       bestStreak: 0,
+       totalWorkouts: 0,
+       lastWorkoutDate: null,
+       workoutDates: new Set()
+     };
 
          // ===== Theme Management =====
      function applyTheme(theme) {
@@ -1676,9 +2087,52 @@
      let totalChart=new Chart(totalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 return `${datasetLabel}: ${value.toLocaleString()} calories`;
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
+       }
      });
 
      // Mobile Charts
@@ -1686,38 +2140,222 @@
      let mobileTotalChart=new Chart(mobileTotalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 return `${datasetLabel}: ${value.toLocaleString()} calories`;
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
+       }
      });
 
          let weightCtx=document.getElementById('weightChart').getContext('2d');
      let weightChart=new Chart(weightCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 if (context.dataset.label === 'Actual Weight') {
+                   return `${datasetLabel}: ${value} lbs`;
+                 } else {
+                   return `${datasetLabel}: ${value.toFixed(1)} lbs`;
+                 }
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:false}}
+       }
      });
 
      let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
      let mobileWeightChart=new Chart(mobileWeightCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 if (context.dataset.label === 'Actual Weight') {
+                   return `${datasetLabel}: ${value} lbs`;
+                 } else {
+                   return `${datasetLabel}: ${value.toFixed(1)} lbs`;
+                 }
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:false}}
+       }
      });
 
      let workoutCtx=document.getElementById('workoutChart').getContext('2d');
      let workoutChart=new Chart(workoutCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 if (workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
+                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
+                 } else {
+                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
+                 }
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
+       }
      });
 
      let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
@@ -2252,6 +2890,10 @@
        
        // Update overall workout chart
        updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
      }
          ['input','change'].forEach(evt=>{
        tspeed.addEventListener(evt,()=>{
@@ -2321,6 +2963,10 @@
        
        // Update overall workout chart
        updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
      }
          scalc.addEventListener('click',()=>{
        const w=userProfile?.weight||170, m=+sdur.value;
@@ -2642,6 +3288,10 @@
        // Update charts
        updateCharts();
        
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
        // Close modal after a short delay
        setTimeout(() => {
          hideMobileTreadmillModal();
@@ -2697,6 +3347,10 @@
        
        // Update charts
        updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
        
        // Close modal after a short delay
        setTimeout(() => {
