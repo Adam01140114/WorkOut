@@ -208,7 +208,7 @@
      .mobile-slide-content {
        background: var(--card);
        border-radius: var(--radius);
-       padding: 0 24px 24px 24px;
+       padding: 24px 24px 24px 24px;
        margin-bottom: 16px;
        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
        flex: none; /* Don't expand to fill space */
@@ -497,6 +497,10 @@
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
        
+
+       <div class="mobile-slide active" id="mobile-slide-1">
+
+        
        <!-- Streak Module -->
        <div class="streak-module">
          <div class="streak-header">
@@ -522,8 +526,7 @@
        </div>
        
        <!-- Slide 1: Total Calories Burned -->
-       <div class="mobile-slide active" id="mobile-slide-1">
-         <br>
+       
          <div class="mobile-slide-content">
            <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
@@ -534,7 +537,6 @@
 
        <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
-         <br>
          <div class="mobile-slide-content">
            <h2>Calories Burnt With Workouts</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
@@ -545,7 +547,6 @@
 
        <!-- Slide 3: Foods Eaten -->
        <div class="mobile-slide next" id="mobile-slide-3">
-         <br>
          <div class="mobile-slide-content">
            <h2>Foods Eaten</h2>
            <canvas id="mobileFoodChart" height="200"></canvas>
@@ -556,7 +557,6 @@
 
        <!-- Slide 4: Weight Trajectory -->
        <div class="mobile-slide next" id="mobile-slide-4">
-         <br>
          <div class="mobile-slide-content">
            <h2>Weight Trajectory</h2>
            <canvas id="mobileWeightChart" height="200"></canvas>
@@ -567,7 +567,6 @@
 
        <!-- Slide 5: User Profile -->
        <div class="mobile-slide next" id="mobile-slide-5">
-         <br>
          <div class="mobile-slide-content">
            <h2>User Profile</h2>
            <div class="user-actions">
