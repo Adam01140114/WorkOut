@@ -535,6 +535,7 @@
          </div>
        </div>
 
+       <br><br>
        <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
          <div class="mobile-slide-content">
@@ -1603,6 +1604,10 @@
                streakData.workoutDates = new Set(data.streakData.workoutDates);
              }
            }
+           
+           // Recalculate streaks after loading data to ensure accuracy
+           calculateStreaks();
+           updateStreakDisplay();
            
            updateCharts();
          }
