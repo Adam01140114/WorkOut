@@ -1815,6 +1815,65 @@
          desktopStreakBar.style.width = progressPercent + '%';
        }
      }
+     
+     // ===== Tooltip Click-Outside Handler =====
+     function initTooltipClickOutside() {
+       // Get all chart canvases
+       const chartCanvases = [
+         'totalChart',
+         'mobileTotalChart',
+         'weightChart',
+         'mobileWeightChart',
+         'workoutChart',
+         'mobileWorkoutChart',
+         'mobileFoodChart',
+         'tchart',
+         'schart'
+       ];
+       
+       // Add click event listener to document
+       document.addEventListener('click', function(event) {
+         // Check if the click is outside any chart canvas
+         const isClickOnChart = chartCanvases.some(canvasId => {
+           const canvas = document.getElementById(canvasId);
+           return canvas && (canvas === event.target || canvas.contains(event.target));
+         });
+         
+         // If click is outside charts, hide all tooltips
+         if (!isClickOnChart) {
+           hideAllTooltips();
+         }
+       });
+       
+       // Add touch event listener for mobile
+       document.addEventListener('touchend', function(event) {
+         // Check if the touch is outside any chart canvas
+         const isTouchOnChart = chartCanvases.some(canvasId => {
+           const canvas = document.getElementById(canvasId);
+           return canvas && (canvas === event.target || canvas.contains(event.target));
+         });
+         
+         // If touch is outside charts, hide all tooltips
+         if (!isTouchOnChart) {
+           hideAllTooltips();
+         }
+       });
+     }
+     
+     function hideAllTooltips() {
+       // Hide tooltips by triggering a click on the document body
+       // This will cause Chart.js to hide any active tooltips
+       const body = document.body;
+       if (body) {
+         // Create a synthetic click event to trigger tooltip hiding
+         const clickEvent = new MouseEvent('click', {
+           bubbles: true,
+           cancelable: true,
+           view: window
+         });
+         body.dispatchEvent(clickEvent);
+       }
+     }
 
      // ===== Weight Tracking Functions =====
      function checkDailyWeightLogging() {
@@ -3790,6 +3849,9 @@
        
        // Initialize food menu
        updateFoodMenu();
+       
+       // Initialize tooltip click-outside functionality
+       initTooltipClickOutside();
        
        // Ensure auth modal shows for new users
        if (!currentUser) {
