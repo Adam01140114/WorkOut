@@ -474,7 +474,7 @@
        }
        
        .streak-module {
-         margin: 16px 16px 8px 16px;
+         margin: 16px;
          padding: 16px;
        }
        
@@ -496,9 +496,7 @@
      <div class="mobile-container">
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
-       <br><br>
-
-       <div class="mobile-slide active" id="mobile-slide-1"></div>
+       
        <!-- Streak Module -->
        <div class="streak-module">
          <div class="streak-header">
@@ -524,7 +522,7 @@
        </div>
        
        <!-- Slide 1: Total Calories Burned -->
-       
+       <div class="mobile-slide active" id="mobile-slide-1">
          <br>
          <div class="mobile-slide-content">
            <h2>Total Calorie Deficit</h2>
@@ -1629,9 +1627,6 @@
          if (userProfile) {
            checkDailyWeightLogging();
          }
-
-         // Initialize tooltip hide functionality
-         initTooltipHideOnClickOutside();
        } catch (error) {
          console.error('Error loading user data:', error);
        }
@@ -2094,42 +2089,7 @@
        data:{labels:[],datasets:[
          {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (datasetLabel === 'Calorie Deficit') {
-                   const deficit = value;
-                   if (deficit > 0) {
-                     return `${datasetLabel}: +${deficit} kcal (Surplus)`;
-                   } else {
-                     return `${datasetLabel}: ${deficit} kcal (Deficit)`;
-                   }
-                 }
-                 return `${datasetLabel}: ${value} kcal`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      // Mobile Charts
@@ -2139,42 +2099,7 @@
        data:{labels:[],datasets:[
          {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (datasetLabel === 'Calorie Deficit') {
-                   const deficit = value;
-                   if (deficit > 0) {
-                     return `${datasetLabel}: +${deficit} kcal (Surplus)`;
-                   } else {
-                     return `${datasetLabel}: ${deficit} kcal (Deficit)`;
-                   }
-                 }
-                 return `${datasetLabel}: ${value} kcal`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
          let weightCtx=document.getElementById('weightChart').getContext('2d');
@@ -2184,39 +2109,7 @@
          {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
          {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:false}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (datasetLabel === 'Actual Weight') {
-                   return `${datasetLabel}: ${value} lbs`;
-                 } else if (datasetLabel === 'Projected Weight') {
-                   return `${datasetLabel}: ${value ? value.toFixed(1) + ' lbs' : 'No projection'}`;
-                 }
-                 return `${datasetLabel}: ${value}`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
      });
 
      let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
@@ -2226,39 +2119,7 @@
          {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
          {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:false}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (datasetLabel === 'Actual Weight') {
-                   return `${datasetLabel}: ${value} lbs`;
-                 } else if (datasetLabel === 'Projected Weight') {
-                   return `${datasetLabel}: ${value ? value.toFixed(1) + ' lbs' : 'No projection'}`;
-                 }
-                 return `${datasetLabel}: ${value}`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
      });
 
      let workoutCtx=document.getElementById('workoutChart').getContext('2d');
@@ -2267,37 +2128,7 @@
        data:{labels:[],datasets:[
          {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (context.chart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(3)} lbs`;
-                 }
-                 return `${datasetLabel}: ${value} kcal`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
@@ -2306,37 +2137,7 @@
        data:{labels:[],datasets:[
          {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (context.chart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(3)} lbs`;
-                 }
-                 return `${datasetLabel}: ${value} kcal`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      // Mobile Food Chart
@@ -2346,37 +2147,7 @@
        data:{labels:[],datasets:[
          {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}},
-         plugins: {
-           tooltip: {
-             enabled: true,
-             mode: 'index',
-             intersect: false,
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#f59e0b',
-             borderWidth: 2,
-             cornerRadius: 8,
-             displayColors: true,
-             callbacks: {
-               title: function(context) {
-                 return `Date: ${context[0].label}`;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (context.chart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(3)} lbs`;
-                 }
-                 return `${datasetLabel}: ${value} kcal`;
-               }
-             }
-           }
-         }
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
                   function getAllDates(){
@@ -2552,31 +2323,6 @@
        
        // Add keyboard event listener
        document.addEventListener('keydown', handleKeyboardShortcuts);
-     }
-
-     // Hide tooltips when clicking outside charts
-     function initTooltipHideOnClickOutside() {
-       document.addEventListener('click', function(event) {
-         // Check if click is outside any chart canvas
-         const isClickOnChart = event.target.tagName === 'CANVAS' || 
-                               event.target.closest('canvas') ||
-                               event.target.closest('.chartjs-tooltip');
-         
-         if (!isClickOnChart) {
-           // Hide tooltips on all charts
-           const charts = [
-             totalChart, mobileTotalChart, weightChart, mobileWeightChart,
-             workoutChart, mobileWorkoutChart, mobileFoodChart, tchart, schart
-           ];
-           
-           charts.forEach(chart => {
-             if (chart && chart.tooltip) {
-               chart.tooltip.setActiveElements([], {});
-               chart.update();
-             }
-           });
-         }
-       });
      }
 
          // Food icon mapping
@@ -2804,50 +2550,7 @@
 
     // ===== Treadmill =====
     let tctx=document.getElementById('tchart').getContext('2d');
-    let tchart=new Chart(tctx,{
-      type:'line',
-      data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},
-      options:{
-        scales:{y:{beginAtZero:true}},
-        plugins: {
-          tooltip: {
-            enabled: true,
-            mode: 'index',
-            intersect: false,
-            backgroundColor: 'rgba(18, 24, 33, 0.95)',
-            titleColor: '#e9f0f6',
-            bodyColor: '#e9f0f6',
-            borderColor: '#6ee7b7',
-            borderWidth: 2,
-            cornerRadius: 8,
-            displayColors: true,
-            callbacks: {
-              title: function(context) {
-                return `Date: ${context[0].label}`;
-              },
-              label: function(context) {
-                const value = context.parsed.y;
-                const datasetLabel = context.dataset.label;
-                return `${datasetLabel}: ${value} kcal`;
-              },
-              afterBody: function(context) {
-                const date = context[0].label;
-                const workoutData = workoutDataByDate[date];
-                if (workoutData && workoutData.treadmill && workoutData.treadmill.workouts) {
-                  const workouts = workoutData.treadmill.workouts;
-                  let details = [];
-                  workouts.forEach((workout, index) => {
-                    details.push(`Workout ${index + 1}: ${workout.m} min @ ${workout.s} mph, ${workout.g}% incline`);
-                  });
-                  return details;
-                }
-                return null;
-              }
-            }
-          }
-        }
-      }
-    });
+    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
 
          function treadmillInputs(){
        return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
@@ -2987,50 +2690,7 @@
 
     // ===== Stairs =====
     let sctx=document.getElementById('schart').getContext('2d');
-    let schart=new Chart(sctx,{
-      type:'line',
-      data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},
-      options:{
-        scales:{y:{beginAtZero:true}},
-        plugins: {
-          tooltip: {
-            enabled: true,
-            mode: 'index',
-            intersect: false,
-            backgroundColor: 'rgba(18, 24, 33, 0.95)',
-            titleColor: '#e9f0f6',
-            bodyColor: '#e9f0f6',
-            borderColor: '#6ee7b7',
-            borderWidth: 2,
-            cornerRadius: 8,
-            displayColors: true,
-            callbacks: {
-              title: function(context) {
-                return `Date: ${context[0].label}`;
-              },
-              label: function(context) {
-                const value = context.parsed.y;
-                const datasetLabel = context.dataset.label;
-                return `${datasetLabel}: ${value} kcal`;
-              },
-              afterBody: function(context) {
-                const date = context[0].label;
-                const workoutData = workoutDataByDate[date];
-                if (workoutData && workoutData.stairs && workoutData.stairs.workouts) {
-                  const workouts = workoutData.stairs.workouts;
-                  let details = [];
-                  workouts.forEach((workout, index) => {
-                    details.push(`Workout ${index + 1}: ${workout.m} min @ ${workout.met} MET`);
-                  });
-                  return details;
-                }
-                return null;
-              }
-            }
-          }
-        }
-      }
-    });
+    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
 
     sintensity.addEventListener('change',()=>{
       const isCustom = sintensity.value==='custom';
