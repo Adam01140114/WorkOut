@@ -2362,9 +2362,56 @@
      let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#6ee7b7',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 if (mobileWorkoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
+                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
+                 } else {
+                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
+                 }
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
+       }
      });
 
      // Mobile Food Chart
@@ -2372,9 +2419,56 @@
      let mobileFoodChart=new Chart(mobileFoodCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25}
+         {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{
+         responsive:true,
+         interaction: {
+           intersect: false,
+           mode: 'index'
+         },
+         plugins: {
+           tooltip: {
+             backgroundColor: 'rgba(18, 24, 33, 0.95)',
+             titleColor: '#e9f0f6',
+             bodyColor: '#e9f0f6',
+             borderColor: '#f59e0b',
+             borderWidth: 2,
+             cornerRadius: 12,
+             displayColors: false,
+             titleFont: {
+               size: 16,
+               weight: 'bold'
+             },
+             bodyFont: {
+               size: 14
+             },
+             padding: 16,
+             callbacks: {
+               title: function(context) {
+                 const date = context[0].label;
+                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                   weekday: 'long', 
+                   year: 'numeric', 
+                   month: 'long', 
+                   day: 'numeric' 
+                 });
+                 return formattedDate;
+               },
+               label: function(context) {
+                 const value = context.parsed.y;
+                 const datasetLabel = context.dataset.label;
+                 if (mobileFoodChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
+                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
+                 } else {
+                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
+                 }
+               }
+             }
+           }
+         },
+         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
+       }
      });
 
                   function getAllDates(){
