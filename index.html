@@ -273,7 +273,7 @@
        background: linear-gradient(135deg, #1e293b, #334155);
        border-radius: 20px;
        padding: 20px 20px 0 20px;
-       margin: 20px;
+       margin: 10px;
        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
        border: 1px solid rgba(255, 255, 255, 0.1);
      }
@@ -1587,6 +1587,8 @@
          const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
          if (progressDoc.exists) {
            const data = progressDoc.data();
+           console.log('Loading user data from Firebase:', data);
+           
            basalByDate = data.basalByDate || {};
            activityByDate = data.activityByDate || {};
            weightByDate = data.weightByDate || {};
@@ -1595,6 +1597,8 @@
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
            currentTheme = data.currentTheme || 'dark';
+           
+           console.log('Loaded workoutDataByDate:', workoutDataByDate);
            
            // Load streak data if it exists
            if (data.streakData) {
@@ -1606,7 +1610,9 @@
            }
            
            // Recalculate streaks after loading data to ensure accuracy
+           console.log('About to recalculate streaks...');
            calculateStreaks();
+           console.log('Streaks calculated, updating display...');
            updateStreakDisplay();
            
            updateCharts();
@@ -1669,11 +1675,17 @@
      // ===== Streak Functions =====
      function calculateStreaks() {
        const today = todayStr();
+       console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
+       
        const workoutDates = Object.keys(workoutDataByDate).filter(date => {
          const day = workoutDataByDate[date];
-         return (day.treadmill && day.treadmill.calories > 0) || 
-                (day.stairs && day.stairs.calories > 0);
+         const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
+         const hasStairs = day.stairs && day.stairs.calories > 0;
+         console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
+         return hasTreadmill || hasStairs;
        }).sort();
+       
+       console.log('Filtered workout dates:', workoutDates);
        
        if (workoutDates.length === 0) {
          streakData.currentStreak = 0;
@@ -1761,6 +1773,8 @@
      }
      
      function updateStreakDisplay() {
+       console.log('updateStreakDisplay called, streakData:', streakData);
+       
        // Update mobile streak display
        const mobileStreakCount = document.getElementById('mobileStreakCount');
        const mobileBestStreak = document.getElementById('mobileBestStreak');
@@ -1768,6 +1782,7 @@
        const mobileStreakBar = document.getElementById('mobileStreakBar');
        
        if (mobileStreakCount) {
+         console.log(`Setting mobile streak count to: ${streakData.currentStreak}`);
          mobileStreakCount.textContent = streakData.currentStreak;
          mobileBestStreak.textContent = streakData.bestStreak;
          mobileTotalWorkouts.textContent = streakData.totalWorkouts;
@@ -1785,6 +1800,7 @@
        const desktopStreakBar = document.getElementById('desktopStreakBar');
        
        if (desktopStreakCount) {
+         console.log(`Setting desktop streak count to: ${streakData.currentStreak}`);
          desktopStreakCount.textContent = streakData.currentStreak;
          desktopBestStreak.textContent = streakData.bestStreak;
          desktopTotalWorkouts.textContent = streakData.totalWorkouts;
