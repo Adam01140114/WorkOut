@@ -639,7 +639,7 @@
          </div>
          <div class="result" id="mobileTresult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileTcalc">Calculate Calories</button>
+           <button class="primary" id="mobileTcalc">Log Calories</button>
            <button class="ghost" id="closeMobileTreadmill">Close</button>
          </div>
        </div>
@@ -674,7 +674,7 @@
          </div>
          <div class="result" id="mobileSresult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileScalc">Calculate Calories</button>
+           <button class="primary" id="mobileScalc">Log Calories</button>
            <button class="ghost" id="closeMobileStairs">Close</button>
          </div>
        </div>
@@ -794,7 +794,7 @@
           <input id="tdur" type="number" placeholder="30" />
         </div>
                  <div class="result" id="tresult"></div>
-         <button class="primary" id="tcalc">Calculate Calories</button>
+         <button class="primary" id="tcalc">Log Calories</button>
          <canvas id="tchart" height="200"></canvas>
          <button class="ghost" id="toggleTreadmillFat">Show Fat Loss</button>
          <button class="primary" id="backFromTreadmill">Back</button>
@@ -821,7 +821,7 @@
           <input id="scustom" type="number" step="0.1" placeholder="9.5" />
         </div>
                  <div class="result" id="sresult"></div>
-         <button class="primary" id="scalc">Calculate Calories</button>
+         <button class="primary" id="scalc">Log Calories</button>
          <canvas id="schart" height="200"></canvas>
          <button class="ghost" id="toggleStairsFat">Show Fat Loss</button>
                   <button class="primary" id="backFromStairs">Back</button>
@@ -1242,6 +1242,26 @@
        
        try {
          const today = todayStr();
+         
+         // Update user profile with new weight
+         if (userProfile) {
+           userProfile.weight = weight;
+           userProfile.bmr = calcBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Save updated profile to Firebase
+           await db.collection('users').doc(currentUser.uid).update(userProfile);
+           
+                    // Update BMR calculation for today
+         renderBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+         
+         // Update settings modal if it's open
+         const settingsWeightInput = document.getElementById('settingsWeight');
+         if (settingsWeightInput) {
+           settingsWeightInput.value = weight;
+         }
+         }
+         
+         // Add weight to tracking data
          addWeightForDate(weight, today);
          hideWeightLoggingModal();
          errorDiv.classList.add('hidden');
@@ -1265,7 +1285,7 @@
      // ===== Add Weight Modal Event Listeners =====
      document.getElementById('addWeightBtn').addEventListener('click', showAddWeightModal);
      document.getElementById('cancelAddWeight').addEventListener('click', hideAddWeightModal);
-     document.getElementById('submitAddWeight').addEventListener('click', () => {
+     document.getElementById('submitAddWeight').addEventListener('click', async () => {
        const weight = Number(document.getElementById('weightAmount').value);
        const date = document.getElementById('weightDate').value;
        const errorDiv = document.getElementById('addWeightError');
@@ -1287,6 +1307,26 @@
        
        try {
          addWeightForDate(weight, date);
+         
+         // If this is today's weight, update the user profile
+         const today = todayStr();
+         if (date === today && userProfile) {
+           userProfile.weight = weight;
+           userProfile.bmr = calcBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Save updated profile to Firebase
+           await db.collection('users').doc(currentUser.uid).update(userProfile);
+           
+           // Update BMR calculation for today
+           renderBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Update settings modal if it's open
+           const settingsWeightInput = document.getElementById('settingsWeight');
+           if (settingsWeightInput) {
+             settingsWeightInput.value = weight;
+           }
+         }
+         
          errorDiv.classList.add('hidden');
          successDiv.textContent = 'Weight logged successfully!';
          successDiv.classList.remove('hidden');
@@ -2042,6 +2082,7 @@
            const workoutPerDay = labels.map(d => {
              let t = 0;
              const w = workoutDataByDate[d];
+             // Use cumulative calories for each workout type
              if (w?.treadmill?.calories) t += w.treadmill.calories;
              if (w?.stairs?.calories)    t += w.stairs.calories;
              return t;
@@ -2136,7 +2177,7 @@
        tchart.data.labels = [];
        tchart.data.datasets[0].data = [];
        
-       // Load treadmill data from Firebase
+       // Load treadmill data from Firebase - shows cumulative daily totals
        const dates = Object.keys(workoutDataByDate).sort();
        dates.forEach(date => {
          if (workoutDataByDate[date].treadmill && workoutDataByDate[date].treadmill.calories) {
@@ -2152,7 +2193,7 @@
        schart.data.labels = [];
        schart.data.datasets[0].data = [];
        
-       // Load stairs data from Firebase
+       // Load stairs data from Firebase - shows cumulative daily totals
        const dates = Object.keys(workoutDataByDate).sort();
        dates.forEach(date => {
          if (workoutDataByDate[date].stairs && workoutDataByDate[date].stairs.calories) {
@@ -2181,16 +2222,33 @@
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
-       workoutDataByDate[today].treadmill = {
-         w: lbs, s: mph, g: gradePct, m: minutes,
-         calories: Math.round(total)
-       };
+       
+       // If there's already treadmill data for today, add to it instead of replacing
+       if (workoutDataByDate[today].treadmill) {
+         workoutDataByDate[today].treadmill.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].treadmill.workouts) {
+           workoutDataByDate[today].treadmill.workouts = [];
+         }
+         workoutDataByDate[today].treadmill.workouts.push({
+           w: lbs, s: mph, g: gradePct, m: minutes,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].treadmill = {
+           w: lbs, s: mph, g: gradePct, m: minutes,
+           calories: Math.round(total),
+           workouts: [{
+             w: lbs, s: mph, g: gradePct, m: minutes,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       
        saveUserData();
        
-       // Update treadmill chart
-       tchart.data.labels.push(today);
-       tchart.data.datasets[0].data.push(Math.round(total));
-       tchart.update();
+       // Update treadmill chart with cumulative total
+       loadTreadmillChart();
        
        // Update overall workout chart
        updateCharts();
@@ -2233,16 +2291,33 @@
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
-       workoutDataByDate[today].stairs = {
-         w: lbs, m: minutes, met: met,
-         calories: Math.round(total)
-       };
+       
+       // If there's already stairs data for today, add to it instead of replacing
+       if (workoutDataByDate[today].stairs) {
+         workoutDataByDate[today].stairs.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].stairs.workouts) {
+           workoutDataByDate[today].stairs.workouts = [];
+         }
+         workoutDataByDate[today].stairs.workouts.push({
+           w: lbs, m: minutes, met: met,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].stairs = {
+           w: lbs, m: minutes, met: met,
+           calories: Math.round(total),
+           workouts: [{
+             w: lbs, m: minutes, met: met,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       
        saveUserData();
        
-       // Update stairs chart
-       schart.data.labels.push(today);
-       schart.data.datasets[0].data.push(Math.round(total));
-       schart.update();
+       // Update stairs chart with cumulative total
+       loadStairsChart();
        
        // Update overall workout chart
        updateCharts();
@@ -2540,10 +2615,28 @@
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
-       workoutDataByDate[today].treadmill = {
-         w: w, s: s, g: g, m: m,
-         calories: Math.round(total)
-       };
+       
+       // If there's already treadmill data for today, add to it instead of replacing
+       if (workoutDataByDate[today].treadmill) {
+         workoutDataByDate[today].treadmill.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].treadmill.workouts) {
+           workoutDataByDate[today].treadmill.workouts = [];
+         }
+         workoutDataByDate[today].treadmill.workouts.push({
+           w: w, s: s, g: g, m: m,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].treadmill = {
+           w: w, s: s, g: g, m: m,
+           calories: Math.round(total),
+           workouts: [{
+             w: w, s: s, g: g, m: m,
+             calories: Math.round(total)
+           }]
+         };
+       }
        saveUserData();
        
        // Update charts
@@ -2578,10 +2671,28 @@
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
-       workoutDataByDate[today].stairs = {
-         w: w, m: m, met: met,
-         calories: Math.round(total)
-       };
+       
+       // If there's already stairs data for today, add to it instead of replacing
+       if (workoutDataByDate[today].stairs) {
+         workoutDataByDate[today].stairs.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].stairs.workouts) {
+           workoutDataByDate[today].stairs.workouts = [];
+         }
+         workoutDataByDate[today].stairs.workouts.push({
+           w: w, m: m, met: met,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].stairs = {
+           w: w, m: m, met: met,
+           calories: Math.round(total),
+           workouts: [{
+             w: w, m: m, met: met,
+             calories: Math.round(total)
+           }]
+         };
+       }
        saveUserData();
        
        // Update charts
