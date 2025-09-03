@@ -1616,6 +1616,10 @@
          // Load workout charts with saved data
          loadTreadmillChart();
          loadStairsChart();
+         
+         // Calculate and display streaks
+         calculateStreaks();
+         updateStreakDisplay();
 
          // Update food menu with custom foods
          updateFoodMenu();
@@ -2871,7 +2875,69 @@
 
     // ===== Treadmill =====
     let tctx=document.getElementById('tchart').getContext('2d');
-    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
+    let tchart=new Chart(tctx,{
+      type:'line',
+      data:{
+        labels:[],
+        datasets:[{
+          label:'Calories Burned',
+          data:[],
+          borderColor:'#6ee7b7',
+          fill:false,
+          tension:0.25,
+          pointRadius:6,
+          pointHoverRadius:8
+        }]
+      },
+      options:{
+        responsive:true,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(18, 24, 33, 0.95)',
+            titleColor: '#e9f0f6',
+            bodyColor: '#e9f0f6',
+            borderColor: '#6ee7b7',
+            borderWidth: 2,
+            cornerRadius: 12,
+            displayColors: false,
+            titleFont: {
+              size: 16,
+              weight: 'bold'
+            },
+            bodyFont: {
+              size: 14
+            },
+            padding: 16,
+            callbacks: {
+              title: function(context) {
+                const date = context[0].label;
+                const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                });
+                return formattedDate;
+              },
+              label: function(context) {
+                const value = context.parsed.y;
+                const datasetLabel = context.dataset.label;
+                if (tchart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
+                  return `${datasetLabel}: ${value.toFixed(2)} lbs`;
+                } else {
+                  return `${datasetLabel}: ${value.toLocaleString()} calories`;
+                }
+              }
+            }
+          }
+        },
+        scales:{y:{beginAtZero:true}}
+      }
+    });
 
          function treadmillInputs(){
        return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
@@ -3011,7 +3077,69 @@
 
     // ===== Stairs =====
     let sctx=document.getElementById('schart').getContext('2d');
-    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
+    let schart=new Chart(sctx,{
+      type:'line',
+      data:{
+        labels:[],
+        datasets:[{
+          label:'Calories Burned',
+          data:[],
+          borderColor:'#6ee7b7',
+          fill:false,
+          tension:0.25,
+          pointRadius:6,
+          pointHoverRadius:8
+        }]
+      },
+      options:{
+        responsive:true,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          tooltip: {
+            backgroundColor: 'rgba(18, 24, 33, 0.95)',
+            titleColor: '#e9f0f6',
+            bodyColor: '#e9f0f6',
+            borderColor: '#6ee7b7',
+            borderWidth: 2,
+            cornerRadius: 12,
+            displayColors: false,
+            titleFont: {
+              size: 16,
+              weight: 'bold'
+             },
+            bodyFont: {
+              size: 14
+            },
+            padding: 16,
+            callbacks: {
+              title: function(context) {
+                const date = context[0].label;
+                const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                });
+                return formattedDate;
+              },
+              label: function(context) {
+                const value = context.parsed.y;
+                const datasetLabel = context.dataset.label;
+                if (schart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
+                  return `${datasetLabel}: ${value.toFixed(2)} lbs`;
+                } else {
+                  return `${datasetLabel}: ${value.toLocaleString()} calories`;
+                }
+              }
+            }
+          }
+        },
+        scales:{y:{beginAtZero:true}}
+      }
+    });
 
     sintensity.addEventListener('change',()=>{
       const isCustom = sintensity.value==='custom';
@@ -3141,7 +3269,9 @@
              borderColor: '#6ee7b7',
              backgroundColor: 'rgba(110,231,183,.3)',
              fill: true,
-             tension: 0.25
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 8
            },
            {
              label: 'Calories Eaten',
@@ -3149,7 +3279,9 @@
              borderColor: '#f59e0b',
              backgroundColor: 'rgba(245,158,11,.3)',
              fill: true,
-             tension: 0.25
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 8
            }
          ];
          document.getElementById('toggleFat').textContent = 'Show Deficit';
@@ -3180,7 +3312,9 @@
              borderColor: '#6ee7b7',
              backgroundColor: 'rgba(110,231,183,.3)',
              fill: true,
-             tension: 0.25
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 8
            },
            {
              label: 'Calories Eaten',
@@ -3188,7 +3322,9 @@
              borderColor: '#f59e0b',
              backgroundColor: 'rgba(245,158,11,.3)',
              fill: true,
-             tension: 0.25
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 8
            }
          ];
          document.getElementById('mobileToggleFat').textContent = 'Show Deficit';
@@ -3250,7 +3386,9 @@
              borderColor: colors[index % colors.length],
              backgroundColor: colors[index % colors.length] + '40',
              fill: false,
-             tension: 0.25
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 8
            });
          });
          
