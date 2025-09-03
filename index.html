@@ -494,50 +494,45 @@
 
      <!-- Mobile Container -->
      <div class="mobile-container">
-              <!-- Mobile Title -->
+       <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
+       <br><br>
+       <div class="mobile-slide active" id="mobile-slide-1">
+       <!-- Streak Module -->
+       <div class="streak-module">
+         <div class="streak-header">
+           <div class="streak-icon">🔥</div>
+           <div class="streak-info">
+             <div class="streak-count" id="mobileStreakCount">0</div>
+             <div class="streak-label">Day Streak</div>
+           </div>
+         </div>
+         <div class="streak-progress">
+           <div class="streak-bar" id="mobileStreakBar"></div>
+         </div>
+         <div class="streak-stats">
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileBestStreak">0</span>
+             <span class="stat-label">Best</span>
+           </div>
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileTotalWorkouts">0</span>
+             <span class="stat-label">Total</span>
+           </div>
+         </div>
+       </div>
        
-       <br><br>
-
-       <br><br>
-       <div class="mobile-slide active" id="mobile-slide-1"></div>
-        <!-- Streak Module -->
-        <div class="streak-module">
-          <div class="streak-header">
-            <div class="streak-icon">🔥</div>
-            <div class="streak-info">
-              <div class="streak-count" id="mobileStreakCount">0</div>
-              <div class="streak-label">Day Streak</div>
-            </div>
-          </div>
-          <div class="streak-progress">
-            <div class="streak-bar" id="mobileStreakBar"></div>
-          </div>
-          <div class="streak-stats">
-            <div class="streak-stat">
-              <span class="stat-value" id="mobileBestStreak">0</span>
-              <span class="stat-label">Best</span>
-            </div>
-            <div class="streak-stat">
-              <span class="stat-value" id="mobileTotalWorkouts">0</span>
-              <span class="stat-label">Total</span>
-            </div>
-          </div>
-        </div>
-
        <!-- Slide 1: Total Calories Burned -->
        
          <br>
          <div class="mobile-slide-content">
-           <h2>Total Calorie Deficitz</h2>
+           <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
          </div>
        </div>
 
-       
-       
        <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
          <br>
@@ -913,7 +908,7 @@
            </div>
          </div>
          <div class="user-actions">
-           <button class="ghost" id="mobileAddCustomFood">Add Foods</button>
+           <button class="primary" id="mobileAddCustomFood" style="background: #60a5fa; color: white;">Add Foods</button>
            <button class="ghost" id="closeMobileFoodMenu">Close</button>
          </div>
        </div>
@@ -1622,10 +1617,6 @@
          // Load workout charts with saved data
          loadTreadmillChart();
          loadStairsChart();
-         
-         // Calculate and display streaks
-         calculateStreaks();
-         updateStreakDisplay();
 
          // Update food menu with custom foods
          updateFoodMenu();
@@ -1818,94 +1809,6 @@
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          desktopStreakBar.style.width = progressPercent + '%';
        }
-     }
-     
-     // ===== Tooltip Click-Outside Handler =====
-     let isHidingTooltips = false; // Flag to prevent recursion
-     
-     function initTooltipClickOutside() {
-       // Get all chart canvases
-       const chartCanvases = [
-         'totalChart',
-         'mobileTotalChart',
-         'weightChart',
-         'mobileWeightChart',
-         'workoutChart',
-         'mobileWorkoutChart',
-         'mobileFoodChart',
-         'tchart',
-         'schart'
-       ];
-       
-       // Add click event listener to document
-       document.addEventListener('click', function(event) {
-         // Prevent recursion
-         if (isHidingTooltips) return;
-         
-         // Check if the click is outside any chart canvas
-         const isClickOnChart = chartCanvases.some(canvasId => {
-           const canvas = document.getElementById(canvasId);
-           return canvas && (canvas === event.target || canvas.contains(event.target));
-         });
-         
-         // If click is outside charts, hide all tooltips
-         if (!isClickOnChart) {
-           isHidingTooltips = true;
-           hideAllTooltips();
-           // Reset flag after a short delay
-           setTimeout(() => {
-             isHidingTooltips = false;
-           }, 100);
-         }
-       });
-       
-       // Add touch event listener for mobile
-       document.addEventListener('touchend', function(event) {
-         // Prevent recursion
-         if (isHidingTooltips) return;
-         
-         // Check if the touch is outside any chart canvas
-         const isTouchOnChart = chartCanvases.some(canvasId => {
-           const canvas = document.getElementById(canvasId);
-           return canvas && (canvas === event.target || canvas.contains(event.target));
-         });
-         
-         // If touch is outside charts, hide all tooltips
-         if (!isTouchOnChart) {
-           isHidingTooltips = true;
-           hideAllTooltips();
-           // Reset flag after a short delay
-           setTimeout(() => {
-             isHidingTooltips = false;
-           }, 100);
-         }
-       });
-     }
-     
-     function hideAllTooltips() {
-       // Hide tooltips by directly manipulating Chart.js tooltip states
-       const chartIds = [
-         'totalChart',
-         'mobileTotalChart',
-         'weightChart',
-         'mobileWeightChart',
-         'workoutChart',
-         'mobileWorkoutChart',
-         'mobileFoodChart',
-         'tchart',
-         'schart'
-       ];
-       
-       chartIds.forEach(chartId => {
-         const chartElement = document.getElementById(chartId);
-         if (chartElement && chartElement.chart) {
-           const chart = chartElement.chart;
-           if (chart.tooltip && chart.tooltip.opacity !== 0) {
-             chart.tooltip.setActiveElements([], {x: 0, y: 0});
-             chart.update('none'); // Update without animation to avoid flicker
-           }
-         }
-       });
      }
 
      // ===== Weight Tracking Functions =====
@@ -2238,278 +2141,47 @@
      let mobileTotalChart=new Chart(mobileTotalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 return `${datasetLabel}: ${value.toLocaleString()} calories`;
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
          let weightCtx=document.getElementById('weightChart').getContext('2d');
      let weightChart=new Chart(weightCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (context.dataset.label === 'Actual Weight') {
-                   return `${datasetLabel}: ${value} lbs`;
-                 } else {
-                   return `${datasetLabel}: ${value.toFixed(1)} lbs`;
-                 }
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:false}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
      });
 
      let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
      let mobileWeightChart=new Chart(mobileWeightCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (context.dataset.label === 'Actual Weight') {
-                   return `${datasetLabel}: ${value} lbs`;
-                 } else {
-                   return `${datasetLabel}: ${value.toFixed(1)} lbs`;
-                 }
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:false}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
      });
 
      let workoutCtx=document.getElementById('workoutChart').getContext('2d');
      let workoutChart=new Chart(workoutCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
-                 } else {
-                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
-                 }
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
      let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (mobileWorkoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
-                 } else {
-                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
-                 }
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      // Mobile Food Chart
@@ -2517,56 +2189,9 @@
      let mobileFoodChart=new Chart(mobileFoodCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#f59e0b',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 if (mobileFoodChart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                   return `${datasetLabel}: ${value.toFixed(2)} lbs`;
-                 } else {
-                   return `${datasetLabel}: ${value.toLocaleString()} calories`;
-                 }
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
                   function getAllDates(){
@@ -2969,69 +2594,7 @@
 
     // ===== Treadmill =====
     let tctx=document.getElementById('tchart').getContext('2d');
-    let tchart=new Chart(tctx,{
-      type:'line',
-      data:{
-        labels:[],
-        datasets:[{
-          label:'Calories Burned',
-          data:[],
-          borderColor:'#6ee7b7',
-          fill:false,
-          tension:0.25,
-          pointRadius:6,
-          pointHoverRadius:8
-        }]
-      },
-      options:{
-        responsive:true,
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        },
-        plugins: {
-          tooltip: {
-            backgroundColor: 'rgba(18, 24, 33, 0.95)',
-            titleColor: '#e9f0f6',
-            bodyColor: '#e9f0f6',
-            borderColor: '#6ee7b7',
-            borderWidth: 2,
-            cornerRadius: 12,
-            displayColors: false,
-            titleFont: {
-              size: 16,
-              weight: 'bold'
-            },
-            bodyFont: {
-              size: 14
-            },
-            padding: 16,
-            callbacks: {
-              title: function(context) {
-                const date = context[0].label;
-                const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                });
-                return formattedDate;
-              },
-              label: function(context) {
-                const value = context.parsed.y;
-                const datasetLabel = context.dataset.label;
-                if (tchart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                  return `${datasetLabel}: ${value.toFixed(2)} lbs`;
-                } else {
-                  return `${datasetLabel}: ${value.toLocaleString()} calories`;
-                }
-              }
-            }
-          }
-        },
-        scales:{y:{beginAtZero:true}}
-      }
-    });
+    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
 
          function treadmillInputs(){
        return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
@@ -3171,69 +2734,7 @@
 
     // ===== Stairs =====
     let sctx=document.getElementById('schart').getContext('2d');
-    let schart=new Chart(sctx,{
-      type:'line',
-      data:{
-        labels:[],
-        datasets:[{
-          label:'Calories Burned',
-          data:[],
-          borderColor:'#6ee7b7',
-          fill:false,
-          tension:0.25,
-          pointRadius:6,
-          pointHoverRadius:8
-        }]
-      },
-      options:{
-        responsive:true,
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        },
-        plugins: {
-          tooltip: {
-            backgroundColor: 'rgba(18, 24, 33, 0.95)',
-            titleColor: '#e9f0f6',
-            bodyColor: '#e9f0f6',
-            borderColor: '#6ee7b7',
-            borderWidth: 2,
-            cornerRadius: 12,
-            displayColors: false,
-            titleFont: {
-              size: 16,
-              weight: 'bold'
-             },
-            bodyFont: {
-              size: 14
-            },
-            padding: 16,
-            callbacks: {
-              title: function(context) {
-                const date = context[0].label;
-                const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                });
-                return formattedDate;
-              },
-              label: function(context) {
-                const value = context.parsed.y;
-                const datasetLabel = context.dataset.label;
-                if (schart.options.scales.y.title?.text === 'Fat Loss (lbs)') {
-                  return `${datasetLabel}: ${value.toFixed(2)} lbs`;
-                } else {
-                  return `${datasetLabel}: ${value.toLocaleString()} calories`;
-                }
-              }
-            }
-          }
-        },
-        scales:{y:{beginAtZero:true}}
-      }
-    });
+    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25}]},options:{scales:{y:{beginAtZero:true}}}});
 
     sintensity.addEventListener('change',()=>{
       const isCustom = sintensity.value==='custom';
@@ -3363,9 +2864,7 @@
              borderColor: '#6ee7b7',
              backgroundColor: 'rgba(110,231,183,.3)',
              fill: true,
-             tension: 0.25,
-             pointRadius: 6,
-             pointHoverRadius: 8
+             tension: 0.25
            },
            {
              label: 'Calories Eaten',
@@ -3373,9 +2872,7 @@
              borderColor: '#f59e0b',
              backgroundColor: 'rgba(245,158,11,.3)',
              fill: true,
-             tension: 0.25,
-             pointRadius: 6,
-             pointHoverRadius: 8
+             tension: 0.25
            }
          ];
          document.getElementById('toggleFat').textContent = 'Show Deficit';
@@ -3406,9 +2903,7 @@
              borderColor: '#6ee7b7',
              backgroundColor: 'rgba(110,231,183,.3)',
              fill: true,
-             tension: 0.25,
-             pointRadius: 6,
-             pointHoverRadius: 8
+             tension: 0.25
            },
            {
              label: 'Calories Eaten',
@@ -3416,9 +2911,7 @@
              borderColor: '#f59e0b',
              backgroundColor: 'rgba(245,158,11,.3)',
              fill: true,
-             tension: 0.25,
-             pointRadius: 6,
-             pointHoverRadius: 8
+             tension: 0.25
            }
          ];
          document.getElementById('mobileToggleFat').textContent = 'Show Deficit';
@@ -3480,9 +2973,7 @@
              borderColor: colors[index % colors.length],
              backgroundColor: colors[index % colors.length] + '40',
              fill: false,
-             tension: 0.25,
-             pointRadius: 6,
-             pointHoverRadius: 8
+             tension: 0.25
            });
          });
          
@@ -3882,9 +3373,6 @@
        
        // Initialize food menu
        updateFoodMenu();
-       
-       // Initialize tooltip click-outside functionality
-       initTooltipClickOutside();
        
        // Ensure auth modal shows for new users
        if (!currentUser) {
