@@ -496,7 +496,9 @@
      <div class="mobile-container">
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
-       
+       <br><br>
+
+       <div class="mobile-slide active" id="mobile-slide-1"></div>
        <!-- Streak Module -->
        <div class="streak-module">
          <div class="streak-header">
@@ -522,7 +524,7 @@
        </div>
        
        <!-- Slide 1: Total Calories Burned -->
-       <div class="mobile-slide active" id="mobile-slide-1">
+       
          <br>
          <div class="mobile-slide-content">
            <h2>Total Calorie Deficit</h2>
@@ -1627,6 +1629,9 @@
          if (userProfile) {
            checkDailyWeightLogging();
          }
+
+         // Initialize tooltip hide functionality
+         initTooltipHideOnClickOutside();
        } catch (error) {
          console.error('Error loading user data:', error);
        }
@@ -2547,6 +2552,31 @@
        
        // Add keyboard event listener
        document.addEventListener('keydown', handleKeyboardShortcuts);
+     }
+
+     // Hide tooltips when clicking outside charts
+     function initTooltipHideOnClickOutside() {
+       document.addEventListener('click', function(event) {
+         // Check if click is outside any chart canvas
+         const isClickOnChart = event.target.tagName === 'CANVAS' || 
+                               event.target.closest('canvas') ||
+                               event.target.closest('.chartjs-tooltip');
+         
+         if (!isClickOnChart) {
+           // Hide tooltips on all charts
+           const charts = [
+             totalChart, mobileTotalChart, weightChart, mobileWeightChart,
+             workoutChart, mobileWorkoutChart, mobileFoodChart, tchart, schart
+           ];
+           
+           charts.forEach(chart => {
+             if (chart && chart.tooltip) {
+               chart.tooltip.setActiveElements([], {});
+               chart.update();
+             }
+           });
+         }
+       });
      }
 
          // Food icon mapping
