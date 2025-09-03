@@ -1781,6 +1781,13 @@
        const mobileTotalWorkouts = document.getElementById('mobileTotalWorkouts');
        const mobileStreakBar = document.getElementById('mobileStreakBar');
        
+       console.log('Mobile elements found:', {
+         mobileStreakCount: !!mobileStreakCount,
+         mobileBestStreak: !!mobileBestStreak,
+         mobileTotalWorkouts: !!mobileTotalWorkouts,
+         mobileStreakBar: !!mobileStreakBar
+       });
+       
        if (mobileStreakCount) {
          console.log(`Setting mobile streak count to: ${streakData.currentStreak}`);
          mobileStreakCount.textContent = streakData.currentStreak;
