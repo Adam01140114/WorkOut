@@ -497,38 +497,42 @@
               <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
        
+       <br><br>
+
+       <br><br>
+       <div class="mobile-slide active" id="mobile-slide-1"></div>
+        <!-- Streak Module -->
+        <div class="streak-module">
+          <div class="streak-header">
+            <div class="streak-icon">🔥</div>
+            <div class="streak-info">
+              <div class="streak-count" id="mobileStreakCount">0</div>
+              <div class="streak-label">Day Streak</div>
+            </div>
+          </div>
+          <div class="streak-progress">
+            <div class="streak-bar" id="mobileStreakBar"></div>
+          </div>
+          <div class="streak-stats">
+            <div class="streak-stat">
+              <span class="stat-value" id="mobileBestStreak">0</span>
+              <span class="stat-label">Best</span>
+            </div>
+            <div class="streak-stat">
+              <span class="stat-value" id="mobileTotalWorkouts">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+          </div>
+        </div>
+
        <!-- Slide 1: Total Calories Burned -->
-       <div class="mobile-slide active" id="mobile-slide-1">
+       
          <br>
          <div class="mobile-slide-content">
            <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
-         </div>
-       </div>
-       
-       <!-- Streak Module -->
-       <div class="streak-module">
-         <div class="streak-header">
-           <div class="streak-icon">🔥</div>
-           <div class="streak-info">
-             <div class="streak-count" id="mobileStreakCount">0</div>
-             <div class="streak-label">Day Streak</div>
-           </div>
-         </div>
-         <div class="streak-progress">
-           <div class="streak-bar" id="mobileStreakBar"></div>
-         </div>
-         <div class="streak-stats">
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileBestStreak">0</span>
-             <span class="stat-label">Best</span>
-           </div>
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileTotalWorkouts">0</span>
-             <span class="stat-label">Total</span>
-           </div>
          </div>
        </div>
 
@@ -1817,6 +1821,8 @@
      }
      
      // ===== Tooltip Click-Outside Handler =====
+     let isHidingTooltips = false; // Flag to prevent recursion
+     
      function initTooltipClickOutside() {
        // Get all chart canvases
        const chartCanvases = [
@@ -1833,6 +1839,9 @@
        
        // Add click event listener to document
        document.addEventListener('click', function(event) {
+         // Prevent recursion
+         if (isHidingTooltips) return;
+         
          // Check if the click is outside any chart canvas
          const isClickOnChart = chartCanvases.some(canvasId => {
            const canvas = document.getElementById(canvasId);
@@ -1841,12 +1850,20 @@
          
          // If click is outside charts, hide all tooltips
          if (!isClickOnChart) {
+           isHidingTooltips = true;
            hideAllTooltips();
+           // Reset flag after a short delay
+           setTimeout(() => {
+             isHidingTooltips = false;
+           }, 100);
          }
        });
        
        // Add touch event listener for mobile
        document.addEventListener('touchend', function(event) {
+         // Prevent recursion
+         if (isHidingTooltips) return;
+         
          // Check if the touch is outside any chart canvas
          const isTouchOnChart = chartCanvases.some(canvasId => {
            const canvas = document.getElementById(canvasId);
@@ -1855,24 +1872,40 @@
          
          // If touch is outside charts, hide all tooltips
          if (!isTouchOnChart) {
+           isHidingTooltips = true;
            hideAllTooltips();
+           // Reset flag after a short delay
+           setTimeout(() => {
+             isHidingTooltips = false;
+           }, 100);
          }
        });
      }
      
      function hideAllTooltips() {
-       // Hide tooltips by triggering a click on the document body
-       // This will cause Chart.js to hide any active tooltips
-       const body = document.body;
-       if (body) {
-         // Create a synthetic click event to trigger tooltip hiding
-         const clickEvent = new MouseEvent('click', {
-           bubbles: true,
-           cancelable: true,
-           view: window
-         });
-         body.dispatchEvent(clickEvent);
-       }
+       // Hide tooltips by directly manipulating Chart.js tooltip states
+       const chartIds = [
+         'totalChart',
+         'mobileTotalChart',
+         'weightChart',
+         'mobileWeightChart',
+         'workoutChart',
+         'mobileWorkoutChart',
+         'mobileFoodChart',
+         'tchart',
+         'schart'
+       ];
+       
+       chartIds.forEach(chartId => {
+         const chartElement = document.getElementById(chartId);
+         if (chartElement && chartElement.chart) {
+           const chart = chartElement.chart;
+           if (chart.tooltip && chart.tooltip.opacity !== 0) {
+             chart.tooltip.setActiveElements([], {x: 0, y: 0});
+             chart.update('none'); // Update without animation to avoid flicker
+           }
+         }
+       });
      }
 
      // ===== Weight Tracking Functions =====
