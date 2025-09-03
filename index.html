@@ -496,34 +496,11 @@
      <div class="mobile-container">
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
-       <br><br>
-       <div class="mobile-slide active" id="mobile-slide-1">
-       <!-- Streak Module -->
-       <div class="streak-module">
-         <div class="streak-header">
-           <div class="streak-icon">🔥</div>
-           <div class="streak-info">
-             <div class="streak-count" id="mobileStreakCount">0</div>
-             <div class="streak-label">Day Streak</div>
-           </div>
-         </div>
-         <div class="streak-progress">
-           <div class="streak-bar" id="mobileStreakBar"></div>
-         </div>
-         <div class="streak-stats">
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileBestStreak">0</span>
-             <span class="stat-label">Best</span>
-           </div>
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileTotalWorkouts">0</span>
-             <span class="stat-label">Total</span>
-           </div>
-         </div>
-       </div>
+       
+      
        
        <!-- Slide 1: Total Calories Burned -->
-       
+       <div class="mobile-slide active" id="mobile-slide-1">
          <br>
          <div class="mobile-slide-content">
            <h2>Total Calorie Deficit</h2>
@@ -531,6 +508,32 @@
            <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
          </div>
+
+
+          <!-- Streak Module -->
+       <div class="streak-module">
+        <div class="streak-header">
+          <div class="streak-icon">🔥</div>
+          <div class="streak-info">
+            <div class="streak-count" id="mobileStreakCount">0</div>
+            <div class="streak-label">Day Streak</div>
+          </div>
+        </div>
+        <div class="streak-progress">
+          <div class="streak-bar" id="mobileStreakBar"></div>
+        </div>
+        <div class="streak-stats">
+          <div class="streak-stat">
+            <span class="stat-value" id="mobileBestStreak">0</span>
+            <span class="stat-label">Best</span>
+          </div>
+          <div class="streak-stat">
+            <span class="stat-value" id="mobileTotalWorkouts">0</span>
+            <span class="stat-label">Total</span>
+          </div>
+        </div>
+      </div>
+      
        </div>
 
        <!-- Slide 2: Calories Burned With Workouts -->
@@ -2088,52 +2091,9 @@
      let totalChart=new Chart(totalCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:8}
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25}
        ]},
-       options:{
-         responsive:true,
-         interaction: {
-           intersect: false,
-           mode: 'index'
-         },
-         plugins: {
-           tooltip: {
-             backgroundColor: 'rgba(18, 24, 33, 0.95)',
-             titleColor: '#e9f0f6',
-             bodyColor: '#e9f0f6',
-             borderColor: '#6ee7b7',
-             borderWidth: 2,
-             cornerRadius: 12,
-             displayColors: false,
-             titleFont: {
-               size: 16,
-               weight: 'bold'
-             },
-             bodyFont: {
-               size: 14
-             },
-             padding: 16,
-             callbacks: {
-               title: function(context) {
-                 const date = context[0].label;
-                 const formattedDate = new Date(date).toLocaleDateString('en-US', { 
-                   weekday: 'long', 
-                   year: 'numeric', 
-                   month: 'long', 
-                   day: 'numeric' 
-                 });
-                 return formattedDate;
-               },
-               label: function(context) {
-                 const value = context.parsed.y;
-                 const datasetLabel = context.dataset.label;
-                 return `${datasetLabel}: ${value.toLocaleString()} calories`;
-               }
-             }
-           }
-         },
-         scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}
-       }
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
      // Mobile Charts
