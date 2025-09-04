@@ -255,15 +255,23 @@
        margin-bottom: 0;
      }
      
-     .mobile-indicators {
-       position: fixed;
-       bottom: 20px;
-       left: 50%;
-       transform: translateX(-50%);
-       display: flex;
-       gap: 8px;
-       z-index: 100;
-     }
+         /* Combined Navigation Container */
+    .mobile-navigation {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
+    }
+    
+    .mobile-indicators {
+      display: flex;
+      gap: 8px;
+    }
      
      .mobile-indicator {
        width: 8px;
@@ -617,7 +625,7 @@
        <!-- Mobile Title -->
        <div class="mobile-title">Smart Calorie Tracker</div>
        
-       <br>
+       
        <div class="mobile-slide active" id="mobile-slide-1">
 
       <!-- Streak Module -->
