@@ -219,16 +219,16 @@
        z-index: 5;
      }
      
-     .mobile-slide-content {
-       background: var(--card);
-       border-radius: var(--radius);
-       padding: 24px 24px 24px 24px;
-       margin-bottom: 16px;
-       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-       flex: none; /* Don't expand to fill space */
-       max-height: 70vh; /* Limit height to 70% of viewport */
-       overflow-y: auto;
-     }
+         .mobile-slide-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 24px 24px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      flex: none; /* Don't expand to fill space */
+      max-height: 70vh; /* Limit height to 70% of viewport */
+      overflow: visible;
+    }
      
      .mobile-slide-content h2 {
        margin-top: 0;
@@ -581,7 +581,7 @@
        .streak-module {
         margin-top: 0px;
          margin-bottom: 15px;
-         padding: 8px 18px 8px 18px;
+         padding: 15px 25px 15px 25px;
        }
        
        .streak-count {
@@ -592,6 +592,8 @@
         font-size: 10px;
         filter: drop-shadow(0 0 22px rgba(255, 165, 0, 0.9));
         margin-top: 12px;
+        margin-left: 5px;
+        margin-right: 5px;
       }
       
       .animated-fire {
@@ -683,7 +685,7 @@
        <!-- Slide 1: Total Calories Burned -->
        
          <div class="mobile-slide-content">
-           <h2>Total Calorie Deficitz</h2>
+           <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
