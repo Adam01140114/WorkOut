@@ -82,6 +82,19 @@
     .modal-icon {
       font-size: 24px;
     }
+    
+    /* Modal Animated Fire Icon */
+    .animated-fire-modal {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .fire-svg-modal {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 6px rgba(255, 100, 0, 0.5));
+    }
     .modal-title {
       font-size: 24px;
       font-weight: bold;
@@ -313,10 +326,56 @@
        margin-bottom: 20px;
      }
      
-     .streak-icon {
-       font-size: 32px;
-       filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.5));
-     }
+         .streak-icon {
+      font-size: 32px;
+      filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.5));
+    }
+    
+    /* Animated Fire Icon */
+    .animated-fire {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+    }
+    
+    .fire-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.6));
+    }
+    
+    .fire-flame-1 {
+      animation: fireFlicker1 1.2s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    .fire-flame-2 {
+      animation: fireFlicker2 0.8s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    .fire-flame-3 {
+      animation: fireFlicker3 1.0s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    @keyframes fireFlicker1 {
+      0% { transform: scale(1) rotate(-1deg) translateY(0px); }
+      50% { transform: scale(1.05) rotate(1deg) translateY(-1px); }
+      100% { transform: scale(0.98) rotate(-0.5deg) translateY(0px); }
+    }
+    
+    @keyframes fireFlicker2 {
+      0% { transform: scale(1) rotate(1deg) translateY(0px); }
+      50% { transform: scale(1.03) rotate(-1deg) translateY(-1px); }
+      100% { transform: scale(1.01) rotate(0.5deg) translateY(0px); }
+    }
+    
+    @keyframes fireFlicker3 {
+      0% { transform: scale(1) rotate(0deg) translateY(0px); }
+      50% { transform: scale(1.02) rotate(0.5deg) translateY(-1px); }
+      100% { transform: scale(0.99) rotate(-0.3deg) translateY(0px); }
+    }
      
      .streak-info {
        flex: 1;
@@ -395,10 +454,23 @@
        margin-bottom: 24px;
      }
      
-     .streak-icon-large {
-       font-size: 48px;
-       filter: drop-shadow(0 0 15px rgba(255, 165, 0, 0.6));
-     }
+         .streak-icon-large {
+      font-size: 48px;
+      filter: drop-shadow(0 0 15px rgba(255, 165, 0, 0.6));
+    }
+    
+    /* Large Animated Fire Icon */
+    .animated-fire-large {
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+    }
+    
+    .fire-svg-large {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 12px rgba(255, 100, 0, 0.8));
+    }
      
      .streak-details {
        flex: 1;
@@ -512,9 +584,14 @@
          font-size: 28px;
        }
        
-       .streak-icon {
-         font-size: 28px;
-       }
+             .streak-icon {
+        font-size: 28px;
+      }
+      
+      .animated-fire {
+        width: 28px;
+        height: 28px;
+      }
        
        /* Improve touch responsiveness */
        .mobile-slide-content {
@@ -546,7 +623,37 @@
       <!-- Streak Module -->
        <div class="streak-module">
          <div class="streak-header">
-           <div class="streak-icon">🔥</div>
+           <div class="streak-icon">
+            <div class="animated-fire">
+              <svg class="fire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g class="fire-flame-1">
+                  <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                </g>
+                <g class="fire-flame-2">
+                  <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                </g>
+                <g class="fire-flame-3">
+                  <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                </g>
+                <defs>
+                  <linearGradient id="fireGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ffd23f;stop-opacity:1" />
+                  </linearGradient>
+                  <linearGradient id="fireGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff8c42;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#ffd23f;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                  </linearGradient>
+                  <linearGradient id="fireGradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffd23f;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
            <div class="streak-info">
              <div class="streak-count" id="mobileStreakCount">0</div>
              <div class="streak-label">Day Streak</div>
@@ -768,7 +875,21 @@
      <div id="addCaloriesModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
-           <div class="modal-icon">🔥</div>
+           <div class="modal-icon">
+            <div class="animated-fire-modal">
+              <svg class="fire-svg-modal" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g class="fire-flame-1">
+                  <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                </g>
+                <g class="fire-flame-2">
+                  <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                </g>
+                <g class="fire-flame-3">
+                  <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                </g>
+              </svg>
+            </div>
+          </div>
            <div>
              <h3 class="modal-title">Add Calories</h3>
              <p class="modal-subtitle">Log your activity calories</p>
@@ -995,11 +1116,25 @@
       <section class="card streak-card">
         <div class="streak-container">
           <div class="streak-main">
-            <div class="streak-icon-large">🔥</div>
+            <div class="streak-icon-large">
+              <div class="animated-fire-large">
+                <svg class="fire-svg-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g class="fire-flame-1">
+                    <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                  </g>
+                  <g class="fire-flame-2">
+                    <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                  </g>
+                  <g class="fire-flame-3">
+                    <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
             <div class="streak-details">
               <div class="streak-count-large" id="desktopStreakCount">0</div>
               <div class="streak-label-large">Day Workout Streak</div>
-              <div class="streak-subtitle">Keep the fire burning! 🔥</div>
+              <div class="streak-subtitle">Keep the fire burning! <span class="animated-fire-modal" style="display: inline-block; width: 16px; height: 16px;"><svg class="fire-svg-modal" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;"><g class="fire-flame-1"><path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/></g><g class="fire-flame-2"><path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/></g><g class="fire-flame-3"><path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/></g></svg></span></div>
             </div>
           </div>
           <div class="streak-progress-large">
