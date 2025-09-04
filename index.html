@@ -685,7 +685,7 @@
        <!-- Slide 1: Total Calories Burned -->
        
          <div class="mobile-slide-content">
-           <h2>Total Calorie Deficitz</h2>
+           <h2>Total Calorie Deficit</h2>
            <canvas id="mobileTotalChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleFat">Show More</button>
            <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
@@ -1805,6 +1805,9 @@
            console.log('Streaks calculated, updating display...');
            updateStreakDisplay();
            
+           // Check if user is new and hide swipe hint if they have workouts
+           checkAndHideSwipeHint();
+           
            updateCharts();
          }
 
@@ -1962,8 +1965,21 @@
        streakData.bestStreak = bestStreak;
      }
      
+     function checkAndHideSwipeHint() {
+       // Hide swipe hint if user has logged any workouts
+       if (streakData.totalWorkouts > 0) {
+         const swipeHint = document.querySelector('.swipe-hint');
+         if (swipeHint) {
+           swipeHint.style.display = 'none';
+         }
+       }
+     }
+     
      function updateStreakDisplay() {
        console.log('updateStreakDisplay called, streakData:', streakData);
+       
+       // Check if user is new (no workouts logged) and hide swipe hint if they have workouts
+       checkAndHideSwipeHint();
        
        // Update mobile streak display
        const mobileStreakCount = document.getElementById('mobileStreakCount');
@@ -3031,6 +3047,9 @@
        // Update streaks
        calculateStreaks();
        updateStreakDisplay();
+       
+       // Hide swipe hint if this is the user's first workout
+       checkAndHideSwipeHint();
      }
          ['input','change'].forEach(evt=>{
        tspeed.addEventListener(evt,()=>{
@@ -3104,6 +3123,9 @@
        // Update streaks
        calculateStreaks();
        updateStreakDisplay();
+       
+       // Hide swipe hint if this is the user's first workout
+       checkAndHideSwipeHint();
      }
          scalc.addEventListener('click',()=>{
        const w=userProfile?.weight||170, m=+sdur.value;
