@@ -172,7 +172,9 @@
       position: relative;
       width: 100%;
       height: calc(var(--vh, 1vh) * 100);
-       padding-top: 60px; /* Add space for title */
+      padding-top: 60px; /* Add space for title */
+      margin: 0 auto;
+      box-sizing: border-box;
      }
      
      .mobile-title {
@@ -187,12 +189,14 @@
        font-weight: bold;
        z-index: 200;
        border-bottom: 1px solid rgba(255,255,255,0.1);
+       margin: 0 auto;
+       box-sizing: border-box;
      }
      
          .mobile-slide {
       position: absolute;
-      top: 0;
       left: 0;
+      right: 0;
       width: 100%;
       height: calc(calc(var(--vh, 1vh) * 100) - 60px);
       transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -208,19 +212,16 @@
     }
      
      .mobile-slide.active {
-       display: flex;
        transform: translateX(0);
        z-index: 10;
      }
      
      .mobile-slide.prev {
-       display: flex;
        transform: translateX(-100%);
        z-index: 5;
      }
      
      .mobile-slide.next {
-       display: flex;
        transform: translateX(100%);
        z-index: 5;
      }
@@ -233,10 +234,10 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       flex: none; /* Don't expand to fill space */
       max-height: 70vh; /* Limit height to 70% of viewport */
-      overflow: visible;
-      width: 100%;
       max-width: 100%;
+      width: 100%;
       box-sizing: border-box;
+      overflow: visible;
     }
      
      .mobile-slide-content h2 {
@@ -275,10 +276,6 @@
       align-items: center;
       gap: 8px;
       z-index: 100;
-      width: auto;
-      max-width: 100vw;
-      padding: 0 20px;
-      box-sizing: border-box;
     }
     
     .mobile-indicators {
@@ -560,13 +557,7 @@
        }
        
        .mobile-container {
-         display: block !important;
-         position: relative;
-         width: 100vw;
-         height: 100vh;
-         overflow: hidden;
-         margin: 0;
-         padding: 0;
+         display: block;
        }
        
        body {
@@ -574,8 +565,6 @@
          margin: 0;
          overflow: hidden;
          touch-action: pan-y; /* Allow vertical scrolling but optimize for horizontal swipes */
-         width: 100vw;
-         height: 100vh;
        }
        
        .wrap {
@@ -634,61 +623,35 @@
          -webkit-user-select: none;
          user-select: none;
        }
-     }
-     
-     /* Additional responsive breakpoints for better cross-device compatibility */
-     @media (max-width: 480px) {
+       
+       /* Additional centering fixes for edge cases */
        .mobile-slide {
-         padding: 16px;
+         left: 0 !important;
+         right: 0 !important;
+         margin-left: 0 !important;
+         margin-right: 0 !important;
        }
        
        .mobile-slide-content {
-         padding: 20px;
+         margin-left: auto !important;
+         margin-right: auto !important;
+         max-width: 100% !important;
        }
        
-       .mobile-navigation {
-         bottom: 16px;
-       }
-     }
-     
-     @media (max-width: 360px) {
-       .mobile-slide {
-         padding: 12px;
+       /* Ensure proper centering on very wide screens */
+       @media (min-width: 768px) and (max-width: 1024px) {
+         .mobile-container {
+           max-width: 100vw;
+           margin: 0 auto;
+         }
        }
        
-       .mobile-slide-content {
-         padding: 16px;
-       }
-       
-       .mobile-slide-content h2 {
-         font-size: 18px;
-       }
-     }
-     
-     /* Landscape orientation fixes */
-     @media (orientation: landscape) and (max-height: 500px) {
-       .mobile-slide {
-         height: calc(100vh - 50px);
-         padding: 12px;
-       }
-       
-       .mobile-slide-content {
-         max-height: 60vh;
-         padding: 16px;
-       }
-       
-       .mobile-navigation {
-         bottom: 12px;
-       }
-     }
-     
-     /* Very wide screens (tablets in landscape) */
-     @media (min-width: 769px) and (max-width: 1024px) {
-       .mobile-container {
-         max-width: 500px;
-         margin: 0 auto;
-         border-left: 1px solid rgba(255,255,255,0.1);
-         border-right: 1px solid rgba(255,255,255,0.1);
+       /* Handle landscape orientation centering */
+       @media (orientation: landscape) {
+         .mobile-slide {
+           left: 0 !important;
+           right: 0 !important;
+         }
        }
      }
   </style>
@@ -2525,10 +2488,6 @@
          slide.style.display = 'none';
          slide.style.transform = '';
          slide.style.opacity = '';
-         slide.style.top = '0';
-         slide.style.left = '0';
-         slide.style.position = 'absolute';
-         slide.style.width = '100%';
          indicator.classList.remove('active');
        }
 
@@ -2537,10 +2496,6 @@
        const currentIndicator = document.querySelectorAll('.mobile-indicator')[slideIndex];
        
        currentSlideElement.style.display = 'flex';
-       currentSlideElement.style.top = '0';
-       currentSlideElement.style.left = '0';
-       currentSlideElement.style.position = 'absolute';
-       currentSlideElement.style.width = '100%';
        currentSlideElement.classList.add('active');
        currentIndicator.classList.add('active');
 
@@ -2548,35 +2503,23 @@
        const prevIndex = slideIndex === 0 ? totalSlides - 1 : slideIndex - 1;
        const prevSlide = document.getElementById(`mobile-slide-${prevIndex + 1}`);
        prevSlide.style.display = 'flex';
-       prevSlide.style.top = '0';
-       prevSlide.style.left = '0';
-       prevSlide.style.position = 'absolute';
-       prevSlide.style.width = '100%';
        prevSlide.classList.add('prev');
 
        // Set next slide for swipe animation
        const nextIndex = slideIndex === totalSlides - 1 ? 0 : slideIndex + 1;
        const nextSlide = document.getElementById(`mobile-slide-${nextIndex + 1}`);
        nextSlide.style.display = 'flex';
-       nextSlide.style.top = '0';
-       nextSlide.style.left = '0';
-       nextSlide.style.position = 'absolute';
-       nextSlide.style.width = '100%';
        nextSlide.classList.add('next');
      }
 
      function nextSlide() {
-       console.log('nextSlide called, current slide:', currentSlide, 'total slides:', totalSlides);
        currentSlide = (currentSlide + 1) % totalSlides;
-       console.log('New current slide:', currentSlide);
        showSlide(currentSlide);
        incrementSwipeCount();
      }
 
      function prevSlide() {
-       console.log('prevSlide called, current slide:', currentSlide, 'total slides:', totalSlides);
        currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
-       console.log('New current slide:', currentSlide);
        showSlide(currentSlide);
        incrementSwipeCount();
      }
@@ -2615,9 +2558,6 @@
        isVerticalScroll = false;
        hasMoved = false;
        velocity = 0;
-       
-       // Prevent centering fixes during swipe
-       console.log('Touch start - swipe detection active');
      }
 
      function handleTouchMove(e) {
@@ -2643,18 +2583,16 @@
        // Determine if this is a vertical scroll or horizontal swipe
        if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
          isVerticalScroll = true;
-         console.log('Vertical scroll detected');
          return; // Allow normal scrolling
        }
        
        // Handle horizontal swipes with reduced threshold
        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
          e.preventDefault(); // Prevent scrolling during horizontal swipe
-         console.log('Horizontal swipe detected, diffX:', diffX);
          
          // Add visual feedback for all swipes (reduced threshold)
          const activeSlide = document.querySelector('.mobile-slide.active');
-         if (activeSlide && Math.abs(diffX) > 5) {
+         if (Math.abs(diffX) > 5) {
            // Add smooth transition during swipe
            activeSlide.style.transition = 'none';
            activeSlide.style.transform = `translateX(${-diffX}px)`;
@@ -2667,8 +2605,6 @@
      }
 
      function handleTouchEnd(e) {
-       console.log('Touch end - isDragging:', isDragging, 'isVerticalScroll:', isVerticalScroll, 'hasMoved:', hasMoved);
-       
        if (!isDragging || isVerticalScroll || !hasMoved) {
          // Reset any transforms
          const activeSlide = document.querySelector('.mobile-slide.active');
@@ -2686,7 +2622,6 @@
        
        isDragging = false;
        const diff = startX - currentX;
-       console.log('Processing swipe - diff:', diff);
        const timeDiff = Date.now() - startTime;
        
        // Dynamic threshold based on velocity and distance
@@ -2727,101 +2662,29 @@
 
      // Keyboard shortcut handler
      function handleKeyboardShortcuts(e) {
-       console.log('Keyboard event:', e.key, 'ctrlKey:', e.ctrlKey, 'shiftKey:', e.shiftKey);
-       
        // Arrow keys for navigation
        if (e.key === 'ArrowLeft') {
          e.preventDefault();
-         console.log('Arrow left pressed - going to previous slide');
          prevSlide();
        } else if (e.key === 'ArrowRight') {
          e.preventDefault();
-         console.log('Arrow right pressed - going to next slide');
          nextSlide();
        }
        // Ctrl+Shift for quick navigation
        else if (e.ctrlKey && e.shiftKey) {
          e.preventDefault();
-         console.log('Ctrl+Shift pressed - going to next slide');
          nextSlide();
-       }
-     }
-
-     // Fix centering issues for current users
-     function fixCenteringIssues() {
-       // Don't fix centering if user is currently swiping
-       if (isDragging) return;
-       
-       const mobileContainer = document.querySelector('.mobile-container');
-       const mobileSlides = document.querySelectorAll('.mobile-slide');
-       const mobileNavigation = document.querySelector('.mobile-navigation');
-       
-       if (mobileContainer) {
-         // Reset container positioning
-         mobileContainer.style.position = 'relative';
-         mobileContainer.style.width = '100vw';
-         mobileContainer.style.height = '100vh';
-         mobileContainer.style.margin = '0';
-         mobileContainer.style.padding = '0';
-         mobileContainer.style.left = '0';
-         mobileContainer.style.top = '0';
-         mobileContainer.style.transform = '';
-       }
-       
-       // Reset all slides positioning (but preserve active slide transforms)
-       mobileSlides.forEach(slide => {
-         slide.style.position = 'absolute';
-         slide.style.top = '0';
-         slide.style.left = '0';
-         slide.style.width = '100%';
-         slide.style.height = '';
-         slide.style.margin = '0';
-         
-         // Only reset transform if it's not the active slide or if it's not currently being swiped
-         if (!slide.classList.contains('active') || !isDragging) {
-           slide.style.transform = '';
-         }
-       });
-       
-       // Ensure navigation is properly centered
-       if (mobileNavigation) {
-         mobileNavigation.style.position = 'fixed';
-         mobileNavigation.style.bottom = '20px';
-         mobileNavigation.style.left = '50%';
-         mobileNavigation.style.transform = 'translateX(-50%)';
-         mobileNavigation.style.width = 'auto';
-         mobileNavigation.style.maxWidth = '100vw';
-         mobileNavigation.style.padding = '0 20px';
-         mobileNavigation.style.boxSizing = 'border-box';
-       }
-       
-       // Force viewport height recalculation
-       setVH();
-       
-       // Re-show current slide with proper positioning
-       if (currentSlide >= 0 && currentSlide < totalSlides) {
-         showSlide(currentSlide);
        }
      }
 
      // Initialize mobile swipe with improved event handling
      function initMobileSwipe() {
        const mobileContainer = document.querySelector('.mobile-container');
-       console.log('Initializing mobile swipe, container found:', !!mobileContainer);
-       
        if (mobileContainer) {
-         console.log('Mobile container display:', getComputedStyle(mobileContainer).display);
-         console.log('Mobile container visibility:', getComputedStyle(mobileContainer).visibility);
-         
-         // Fix any existing centering issues first
-         fixCenteringIssues();
-         
          // Use passive: false for better control over touch events
          mobileContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
          mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
          mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-         
-         console.log('Touch event listeners attached to mobile container');
          
          // Add mouse events for desktop testing
          mobileContainer.addEventListener('mousedown', (e) => {
@@ -2895,7 +2758,6 @@
        
        // Add keyboard event listener
        document.addEventListener('keydown', handleKeyboardShortcuts);
-       console.log('Keyboard event listener attached');
        
        // Fix mobile viewport height issues
        fixMobileViewport();
@@ -2914,34 +2776,90 @@
        // Update on resize and orientation change
        window.addEventListener('resize', () => {
          setVH();
-         // Only fix centering if not currently swiping
-         if (!isDragging) {
-           setTimeout(() => fixCenteringIssues(), 100);
-         }
+         fixMobileSlideCentering(); // Fix centering on resize
        });
        window.addEventListener('orientationchange', () => {
          setTimeout(() => {
            setVH();
-           // Only fix centering if not currently swiping
-           if (!isDragging) {
-             fixCenteringIssues();
-           }
+           fixMobileSlideCentering(); // Fix centering on orientation change
          }, 100); // Delay to ensure proper height calculation
        });
-       
-       // Add visibility change listener to fix issues when returning to tab
-       document.addEventListener('visibilitychange', () => {
-         if (!document.hidden) {
-           setTimeout(() => {
-             setVH();
-             // Only fix centering if not currently swiping
-             if (!isDragging) {
-               fixCenteringIssues();
-             }
-           }, 100);
+     }
+
+     // Fix mobile slide centering issues
+     function fixMobileSlideCentering() {
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       mobileSlides.forEach(slide => {
+         // Reset any existing transforms that might cause centering issues
+         slide.style.left = '0';
+         slide.style.right = '0';
+         slide.style.marginLeft = 'auto';
+         slide.style.marginRight = 'auto';
+         slide.style.transform = slide.classList.contains('active') ? 'translateX(0)' : 
+                                 slide.classList.contains('prev') ? 'translateX(-100%)' : 
+                                 slide.classList.contains('next') ? 'translateX(100%)' : 'translateX(0)';
+         
+         // Ensure proper centering for slide content
+         const slideContent = slide.querySelector('.mobile-slide-content');
+         if (slideContent) {
+           slideContent.style.marginLeft = 'auto';
+           slideContent.style.marginRight = 'auto';
+           slideContent.style.maxWidth = '100%';
          }
        });
+       
+       console.log('Mobile slide centering fixed');
      }
+
+     // Aggressive centering fix for users with cached centering issues
+     function forceMobileSlideCentering() {
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       const mobileContainer = document.querySelector('.mobile-container');
+       
+       // Reset container
+       if (mobileContainer) {
+         mobileContainer.style.left = '0';
+         mobileContainer.style.right = '0';
+         mobileContainer.style.marginLeft = 'auto';
+         mobileContainer.style.marginRight = 'auto';
+         mobileContainer.style.transform = '';
+       }
+       
+       // Reset all slides
+       mobileSlides.forEach(slide => {
+         slide.style.left = '0';
+         slide.style.right = '0';
+         slide.style.marginLeft = 'auto';
+         slide.style.marginRight = 'auto';
+         slide.style.position = 'absolute';
+         slide.style.width = '100%';
+         
+         // Reset transforms based on current state
+         if (slide.classList.contains('active')) {
+           slide.style.transform = 'translateX(0)';
+         } else if (slide.classList.contains('prev')) {
+           slide.style.transform = 'translateX(-100%)';
+         } else if (slide.classList.contains('next')) {
+           slide.style.transform = 'translateX(100%)';
+         } else {
+           slide.style.transform = 'translateX(0)';
+         }
+         
+         // Reset slide content
+         const slideContent = slide.querySelector('.mobile-slide-content');
+         if (slideContent) {
+           slideContent.style.marginLeft = 'auto';
+           slideContent.style.marginRight = 'auto';
+           slideContent.style.maxWidth = '100%';
+           slideContent.style.width = '100%';
+         }
+       });
+       
+       console.log('Forced mobile slide centering reset completed');
+     }
+
+     // Make centering fix available globally for manual use
+     window.fixCentering = forceMobileSlideCentering;
      
      function resetMobileContainer() {
        // Reset mobile container positioning to prevent "pushed up" state
@@ -2950,28 +2868,15 @@
          mobileContainer.style.top = '';
          mobileContainer.style.transform = '';
          mobileContainer.style.position = '';
-         mobileContainer.style.left = '';
-         mobileContainer.style.right = '';
-         mobileContainer.style.width = '';
-         mobileContainer.style.height = '';
        }
        
        // Reset all mobile slides positioning
        const mobileSlides = document.querySelectorAll('.mobile-slide');
        mobileSlides.forEach(slide => {
-         slide.style.top = '0';
-         slide.style.left = '0';
+         slide.style.top = '';
          slide.style.transform = '';
-         slide.style.position = 'absolute';
-         slide.style.width = '100%';
-         slide.style.height = '';
-         slide.style.margin = '';
-         slide.style.padding = '';
-         // Don't change display - let showSlide handle visibility
+         slide.style.position = '';
        });
-       
-       // Force recalculation of viewport height
-       setVH();
        
        // Force reflow to ensure changes take effect
        mobileContainer?.offsetHeight;
@@ -3984,20 +3889,16 @@
                 // Initialize mobile swipe functionality
        initMobileSwipe();
        
-       // Fix any existing centering issues for current users
-       setTimeout(() => {
-         fixCenteringIssues();
-       }, 100);
-       
-       // Ensure first slide is visible as fallback
-       const firstSlide = document.getElementById('mobile-slide-1');
-       if (firstSlide) {
-         firstSlide.style.display = 'flex';
-         firstSlide.classList.add('active');
-       }
-       
        // Initialize mobile slides
        showSlide(0);
+       
+       // Fix centering issues for all mobile slides
+       fixMobileSlideCentering();
+       
+       // Force centering reset for users with cached issues
+       setTimeout(() => {
+         forceMobileSlideCentering();
+       }, 100);
        
        // Reset mobile container to fix any existing "pushed up" state
        resetMobileContainer();
