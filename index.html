@@ -2611,6 +2611,9 @@
        isVerticalScroll = false;
        hasMoved = false;
        velocity = 0;
+       
+       // Prevent centering fixes during swipe
+       console.log('Touch start - swipe detection active');
      }
 
      function handleTouchMove(e) {
@@ -2636,16 +2639,18 @@
        // Determine if this is a vertical scroll or horizontal swipe
        if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
          isVerticalScroll = true;
+         console.log('Vertical scroll detected');
          return; // Allow normal scrolling
        }
        
        // Handle horizontal swipes with reduced threshold
        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
          e.preventDefault(); // Prevent scrolling during horizontal swipe
+         console.log('Horizontal swipe detected, diffX:', diffX);
          
          // Add visual feedback for all swipes (reduced threshold)
          const activeSlide = document.querySelector('.mobile-slide.active');
-         if (Math.abs(diffX) > 5) {
+         if (activeSlide && Math.abs(diffX) > 5) {
            // Add smooth transition during swipe
            activeSlide.style.transition = 'none';
            activeSlide.style.transform = `translateX(${-diffX}px)`;
@@ -2658,6 +2663,8 @@
      }
 
      function handleTouchEnd(e) {
+       console.log('Touch end - isDragging:', isDragging, 'isVerticalScroll:', isVerticalScroll, 'hasMoved:', hasMoved);
+       
        if (!isDragging || isVerticalScroll || !hasMoved) {
          // Reset any transforms
          const activeSlide = document.querySelector('.mobile-slide.active');
@@ -2675,6 +2682,7 @@
        
        isDragging = false;
        const diff = startX - currentX;
+       console.log('Processing swipe - diff:', diff);
        const timeDiff = Date.now() - startTime;
        
        // Dynamic threshold based on velocity and distance
@@ -2732,6 +2740,9 @@
 
      // Fix centering issues for current users
      function fixCenteringIssues() {
+       // Don't fix centering if user is currently swiping
+       if (isDragging) return;
+       
        const mobileContainer = document.querySelector('.mobile-container');
        const mobileSlides = document.querySelectorAll('.mobile-slide');
        const mobileNavigation = document.querySelector('.mobile-navigation');
@@ -2748,7 +2759,7 @@
          mobileContainer.style.transform = '';
        }
        
-       // Reset all slides positioning
+       // Reset all slides positioning (but preserve active slide transforms)
        mobileSlides.forEach(slide => {
          slide.style.position = 'absolute';
          slide.style.top = '0';
@@ -2756,8 +2767,11 @@
          slide.style.width = '100%';
          slide.style.height = '';
          slide.style.margin = '0';
-         slide.style.transform = '';
-         // Don't hide slides here - let showSlide handle visibility
+         
+         // Only reset transform if it's not the active slide or if it's not currently being swiped
+         if (!slide.classList.contains('active') || !isDragging) {
+           slide.style.transform = '';
+         }
        });
        
        // Ensure navigation is properly centered
@@ -2883,12 +2897,18 @@
        // Update on resize and orientation change
        window.addEventListener('resize', () => {
          setVH();
-         fixCenteringIssues();
+         // Only fix centering if not currently swiping
+         if (!isDragging) {
+           setTimeout(() => fixCenteringIssues(), 100);
+         }
        });
        window.addEventListener('orientationchange', () => {
          setTimeout(() => {
            setVH();
-           fixCenteringIssues();
+           // Only fix centering if not currently swiping
+           if (!isDragging) {
+             fixCenteringIssues();
+           }
          }, 100); // Delay to ensure proper height calculation
        });
        
@@ -2897,7 +2917,10 @@
          if (!document.hidden) {
            setTimeout(() => {
              setVH();
-             fixCenteringIssues();
+             // Only fix centering if not currently swiping
+             if (!isDragging) {
+               fixCenteringIssues();
+             }
            }, 100);
          }
        });
