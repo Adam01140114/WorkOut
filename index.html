@@ -200,7 +200,7 @@
       width: 100%;
       height: calc(calc(var(--vh, 1vh) * 100) - 60px);
       transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-      padding: 8px 20px 20px 20px;
+      padding: 0 20px 20px 20px;
       box-sizing: border-box;
       display: none;
       flex-direction: column;
@@ -589,7 +589,7 @@
        }
        
        .streak-module {
-         margin-top: 8px;
+         margin-top: 0px;
          margin-bottom: 0px;
          padding: 15px 25px 15px 25px;
          margin-left: auto;
@@ -658,17 +658,18 @@
        
        /* Consistent spacing for all screen sizes */
        .streak-module {
-         margin-top: 8px !important;
+         margin-top: 0px !important;
        }
        
        /* Additional responsive improvements for very small screens */
        @media (max-width: 360px) {
          .streak-module {
            padding: 12px 20px !important;
+           margin-top: 0px !important;
          }
          
          .mobile-slide {
-           padding: 6px 16px 16px 16px !important;
+           padding: 0 16px 16px 16px !important;
          }
        }
      }
@@ -2891,13 +2892,13 @@
          // Get the exact height of the mobile title
          const titleHeight = mobileTitle.offsetHeight;
          
-         // Position the streak module to start immediately after the title with minimal gap
-         streakModule.style.marginTop = '8px';
+         // Position the streak module to start immediately after the title with no gap
+         streakModule.style.marginTop = '0px';
          streakModule.style.marginBottom = '0px';
          streakModule.style.position = 'relative';
          streakModule.style.top = '0px';
          
-         console.log(`Streak module positioned with 8px margin after title (height: ${titleHeight}px)`);
+         console.log(`Streak module positioned with 0px margin after title (height: ${titleHeight}px)`);
        }
      }
      
