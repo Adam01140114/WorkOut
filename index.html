@@ -200,7 +200,7 @@
       width: 100%;
       height: calc(calc(var(--vh, 1vh) * 100) - 60px);
       transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-      padding: 20px;
+      padding: 16px 20px;
       box-sizing: border-box;
       display: none;
       flex-direction: column;
@@ -230,7 +230,7 @@
       background: var(--card);
       border-radius: var(--radius);
       padding: 24px 24px 24px 24px;
-      margin-bottom: 16px;
+      margin: 16px auto;
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       flex: none; /* Don't expand to fill space */
       max-height: 70vh; /* Limit height to 70% of viewport */
@@ -589,9 +589,12 @@
        }
        
        .streak-module {
-        margin-top: 37px;
+         margin-top: 20px;
          margin-bottom: 15px;
          padding: 15px 25px 15px 25px;
+         /* Use responsive spacing that adapts to screen size */
+         margin-left: auto;
+         margin-right: auto;
        }
        
        .streak-count {
@@ -651,6 +654,41 @@
          .mobile-slide {
            left: 0 !important;
            right: 0 !important;
+         }
+         
+         .streak-module {
+           margin-top: 10px !important;
+         }
+       }
+       
+       /* Responsive spacing for different screen heights */
+       @media (max-height: 600px) {
+         .streak-module {
+           margin-top: 10px !important;
+         }
+       }
+       
+       @media (min-height: 800px) {
+         .streak-module {
+           margin-top: 30px !important;
+         }
+       }
+       
+       /* Additional responsive improvements */
+       @media (max-width: 360px) {
+         .streak-module {
+           margin-top: 15px !important;
+           padding: 12px 20px !important;
+         }
+         
+         .mobile-slide {
+           padding: 12px 16px !important;
+         }
+       }
+       
+       @media (min-width: 768px) and (max-width: 1024px) {
+         .streak-module {
+           margin-top: 25px !important;
          }
        }
      }
@@ -2777,11 +2815,13 @@
        window.addEventListener('resize', () => {
          setVH();
          fixMobileSlideCentering(); // Fix centering on resize
+         fixStreakModulePositioning(); // Fix streak positioning on resize
        });
        window.addEventListener('orientationchange', () => {
          setTimeout(() => {
            setVH();
            fixMobileSlideCentering(); // Fix centering on orientation change
+           fixStreakModulePositioning(); // Fix streak positioning on orientation change
          }, 100); // Delay to ensure proper height calculation
        });
      }
@@ -2860,6 +2900,37 @@
 
      // Make centering fix available globally for manual use
      window.fixCentering = forceMobileSlideCentering;
+     window.fixStreakPositioning = fixStreakModulePositioning;
+
+     // Fix streak module positioning for different screen sizes
+     function fixStreakModulePositioning() {
+       const streakModule = document.querySelector('.streak-module');
+       const mobileTitle = document.querySelector('.mobile-title');
+       
+       if (streakModule && mobileTitle) {
+         // Get actual dimensions
+         const screenHeight = window.innerHeight;
+         const titleHeight = mobileTitle.offsetHeight;
+         const availableHeight = screenHeight - titleHeight - 60; // Account for padding
+         
+         // Calculate optimal margin based on screen size
+         let optimalMargin;
+         if (screenHeight <= 600) {
+           optimalMargin = 8; // Very small screens
+         } else if (screenHeight <= 700) {
+           optimalMargin = 15; // Small screens
+         } else if (screenHeight <= 800) {
+           optimalMargin = 20; // Medium screens
+         } else {
+           optimalMargin = 25; // Large screens
+         }
+         
+         // Apply the optimal margin
+         streakModule.style.marginTop = optimalMargin + 'px';
+         
+         console.log(`Streak module positioning adjusted for screen height: ${screenHeight}px, margin: ${optimalMargin}px`);
+       }
+     }
      
      function resetMobileContainer() {
        // Reset mobile container positioning to prevent "pushed up" state
@@ -3898,6 +3969,7 @@
        // Force centering reset for users with cached issues
        setTimeout(() => {
          forceMobileSlideCentering();
+         fixStreakModulePositioning();
        }, 100);
        
        // Reset mobile container to fix any existing "pushed up" state
