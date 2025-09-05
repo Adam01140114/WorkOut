@@ -2566,13 +2566,17 @@
      }
 
      function nextSlide() {
+       console.log('nextSlide called, current slide:', currentSlide, 'total slides:', totalSlides);
        currentSlide = (currentSlide + 1) % totalSlides;
+       console.log('New current slide:', currentSlide);
        showSlide(currentSlide);
        incrementSwipeCount();
      }
 
      function prevSlide() {
+       console.log('prevSlide called, current slide:', currentSlide, 'total slides:', totalSlides);
        currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
+       console.log('New current slide:', currentSlide);
        showSlide(currentSlide);
        incrementSwipeCount();
      }
@@ -2723,17 +2727,22 @@
 
      // Keyboard shortcut handler
      function handleKeyboardShortcuts(e) {
+       console.log('Keyboard event:', e.key, 'ctrlKey:', e.ctrlKey, 'shiftKey:', e.shiftKey);
+       
        // Arrow keys for navigation
        if (e.key === 'ArrowLeft') {
          e.preventDefault();
+         console.log('Arrow left pressed - going to previous slide');
          prevSlide();
        } else if (e.key === 'ArrowRight') {
          e.preventDefault();
+         console.log('Arrow right pressed - going to next slide');
          nextSlide();
        }
        // Ctrl+Shift for quick navigation
        else if (e.ctrlKey && e.shiftKey) {
          e.preventDefault();
+         console.log('Ctrl+Shift pressed - going to next slide');
          nextSlide();
        }
      }
@@ -2798,7 +2807,12 @@
      // Initialize mobile swipe with improved event handling
      function initMobileSwipe() {
        const mobileContainer = document.querySelector('.mobile-container');
+       console.log('Initializing mobile swipe, container found:', !!mobileContainer);
+       
        if (mobileContainer) {
+         console.log('Mobile container display:', getComputedStyle(mobileContainer).display);
+         console.log('Mobile container visibility:', getComputedStyle(mobileContainer).visibility);
+         
          // Fix any existing centering issues first
          fixCenteringIssues();
          
@@ -2806,6 +2820,8 @@
          mobileContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
          mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
          mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+         
+         console.log('Touch event listeners attached to mobile container');
          
          // Add mouse events for desktop testing
          mobileContainer.addEventListener('mousedown', (e) => {
@@ -2879,6 +2895,7 @@
        
        // Add keyboard event listener
        document.addEventListener('keydown', handleKeyboardShortcuts);
+       console.log('Keyboard event listener attached');
        
        // Fix mobile viewport height issues
        fixMobileViewport();
