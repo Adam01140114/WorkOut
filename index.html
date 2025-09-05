@@ -191,6 +191,8 @@
      
          .mobile-slide {
       position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: calc(calc(var(--vh, 1vh) * 100) - 60px);
       transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -199,6 +201,7 @@
       display: none;
       flex-direction: column;
       justify-content: flex-start;
+      align-items: center;
       overflow: visible;
       -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
       will-change: transform, opacity; /* Optimize for animations */
@@ -228,6 +231,9 @@
       flex: none; /* Don't expand to fill space */
       max-height: 70vh; /* Limit height to 70% of viewport */
       overflow: visible;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
     }
      
      .mobile-slide-content h2 {
@@ -266,6 +272,10 @@
       align-items: center;
       gap: 8px;
       z-index: 100;
+      width: auto;
+      max-width: 100vw;
+      padding: 0 20px;
+      box-sizing: border-box;
     }
     
     .mobile-indicators {
@@ -548,6 +558,12 @@
        
        .mobile-container {
          display: block;
+         position: relative;
+         width: 100vw;
+         height: 100vh;
+         overflow: hidden;
+         margin: 0;
+         padding: 0;
        }
        
        body {
@@ -555,6 +571,8 @@
          margin: 0;
          overflow: hidden;
          touch-action: pan-y; /* Allow vertical scrolling but optimize for horizontal swipes */
+         width: 100vw;
+         height: 100vh;
        }
        
        .wrap {
@@ -612,6 +630,62 @@
        .mobile-container {
          -webkit-user-select: none;
          user-select: none;
+       }
+     }
+     
+     /* Additional responsive breakpoints for better cross-device compatibility */
+     @media (max-width: 480px) {
+       .mobile-slide {
+         padding: 16px;
+       }
+       
+       .mobile-slide-content {
+         padding: 20px;
+       }
+       
+       .mobile-navigation {
+         bottom: 16px;
+       }
+     }
+     
+     @media (max-width: 360px) {
+       .mobile-slide {
+         padding: 12px;
+       }
+       
+       .mobile-slide-content {
+         padding: 16px;
+       }
+       
+       .mobile-slide-content h2 {
+         font-size: 18px;
+       }
+     }
+     
+     /* Landscape orientation fixes */
+     @media (orientation: landscape) and (max-height: 500px) {
+       .mobile-slide {
+         height: calc(100vh - 50px);
+         padding: 12px;
+       }
+       
+       .mobile-slide-content {
+         max-height: 60vh;
+         padding: 16px;
+       }
+       
+       .mobile-navigation {
+         bottom: 12px;
+       }
+     }
+     
+     /* Very wide screens (tablets in landscape) */
+     @media (min-width: 769px) and (max-width: 1024px) {
+       .mobile-container {
+         max-width: 500px;
+         margin: 0 auto;
+         border-left: 1px solid rgba(255,255,255,0.1);
+         border-right: 1px solid rgba(255,255,255,0.1);
        }
      }
   </style>
@@ -2448,6 +2522,10 @@
          slide.style.display = 'none';
          slide.style.transform = '';
          slide.style.opacity = '';
+         slide.style.top = '0';
+         slide.style.left = '0';
+         slide.style.position = 'absolute';
+         slide.style.width = '100%';
          indicator.classList.remove('active');
        }
 
@@ -2456,6 +2534,10 @@
        const currentIndicator = document.querySelectorAll('.mobile-indicator')[slideIndex];
        
        currentSlideElement.style.display = 'flex';
+       currentSlideElement.style.top = '0';
+       currentSlideElement.style.left = '0';
+       currentSlideElement.style.position = 'absolute';
+       currentSlideElement.style.width = '100%';
        currentSlideElement.classList.add('active');
        currentIndicator.classList.add('active');
 
@@ -2463,12 +2545,20 @@
        const prevIndex = slideIndex === 0 ? totalSlides - 1 : slideIndex - 1;
        const prevSlide = document.getElementById(`mobile-slide-${prevIndex + 1}`);
        prevSlide.style.display = 'flex';
+       prevSlide.style.top = '0';
+       prevSlide.style.left = '0';
+       prevSlide.style.position = 'absolute';
+       prevSlide.style.width = '100%';
        prevSlide.classList.add('prev');
 
        // Set next slide for swipe animation
        const nextIndex = slideIndex === totalSlides - 1 ? 0 : slideIndex + 1;
        const nextSlide = document.getElementById(`mobile-slide-${nextIndex + 1}`);
        nextSlide.style.display = 'flex';
+       nextSlide.style.top = '0';
+       nextSlide.style.left = '0';
+       nextSlide.style.position = 'absolute';
+       nextSlide.style.width = '100%';
        nextSlide.classList.add('next');
      }
 
@@ -2637,10 +2727,64 @@
        }
      }
 
+     // Fix centering issues for current users
+     function fixCenteringIssues() {
+       const mobileContainer = document.querySelector('.mobile-container');
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       const mobileNavigation = document.querySelector('.mobile-navigation');
+       
+       if (mobileContainer) {
+         // Reset container positioning
+         mobileContainer.style.position = 'relative';
+         mobileContainer.style.width = '100vw';
+         mobileContainer.style.height = '100vh';
+         mobileContainer.style.margin = '0';
+         mobileContainer.style.padding = '0';
+         mobileContainer.style.left = '0';
+         mobileContainer.style.top = '0';
+         mobileContainer.style.transform = '';
+       }
+       
+       // Reset all slides positioning
+       mobileSlides.forEach(slide => {
+         slide.style.position = 'absolute';
+         slide.style.top = '0';
+         slide.style.left = '0';
+         slide.style.width = '100%';
+         slide.style.height = '';
+         slide.style.margin = '0';
+         slide.style.transform = '';
+         slide.style.display = 'none';
+       });
+       
+       // Ensure navigation is properly centered
+       if (mobileNavigation) {
+         mobileNavigation.style.position = 'fixed';
+         mobileNavigation.style.bottom = '20px';
+         mobileNavigation.style.left = '50%';
+         mobileNavigation.style.transform = 'translateX(-50%)';
+         mobileNavigation.style.width = 'auto';
+         mobileNavigation.style.maxWidth = '100vw';
+         mobileNavigation.style.padding = '0 20px';
+         mobileNavigation.style.boxSizing = 'border-box';
+       }
+       
+       // Force viewport height recalculation
+       setVH();
+       
+       // Re-show current slide with proper positioning
+       if (currentSlide >= 0 && currentSlide < totalSlides) {
+         showSlide(currentSlide);
+       }
+     }
+
      // Initialize mobile swipe with improved event handling
      function initMobileSwipe() {
        const mobileContainer = document.querySelector('.mobile-container');
        if (mobileContainer) {
+         // Fix any existing centering issues first
+         fixCenteringIssues();
+         
          // Use passive: false for better control over touch events
          mobileContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
          mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -2734,9 +2878,25 @@
        setVH();
        
        // Update on resize and orientation change
-       window.addEventListener('resize', setVH);
+       window.addEventListener('resize', () => {
+         setVH();
+         fixCenteringIssues();
+       });
        window.addEventListener('orientationchange', () => {
-         setTimeout(setVH, 100); // Delay to ensure proper height calculation
+         setTimeout(() => {
+           setVH();
+           fixCenteringIssues();
+         }, 100); // Delay to ensure proper height calculation
+       });
+       
+       // Add visibility change listener to fix issues when returning to tab
+       document.addEventListener('visibilitychange', () => {
+         if (!document.hidden) {
+           setTimeout(() => {
+             setVH();
+             fixCenteringIssues();
+           }, 100);
+         }
        });
      }
      
@@ -2747,15 +2907,27 @@
          mobileContainer.style.top = '';
          mobileContainer.style.transform = '';
          mobileContainer.style.position = '';
+         mobileContainer.style.left = '';
+         mobileContainer.style.right = '';
+         mobileContainer.style.width = '';
+         mobileContainer.style.height = '';
        }
        
        // Reset all mobile slides positioning
        const mobileSlides = document.querySelectorAll('.mobile-slide');
        mobileSlides.forEach(slide => {
-         slide.style.top = '';
+         slide.style.top = '0';
+         slide.style.left = '0';
          slide.style.transform = '';
-         slide.style.position = '';
+         slide.style.position = 'absolute';
+         slide.style.width = '100%';
+         slide.style.height = '';
+         slide.style.margin = '';
+         slide.style.padding = '';
        });
+       
+       // Force recalculation of viewport height
+       setVH();
        
        // Force reflow to ensure changes take effect
        mobileContainer?.offsetHeight;
@@ -3767,6 +3939,11 @@
        
                 // Initialize mobile swipe functionality
        initMobileSwipe();
+       
+       // Fix any existing centering issues for current users
+       setTimeout(() => {
+         fixCenteringIssues();
+       }, 100);
        
        // Initialize mobile slides
        showSlide(0);
