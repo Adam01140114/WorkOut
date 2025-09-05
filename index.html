@@ -208,16 +208,19 @@
     }
      
      .mobile-slide.active {
+       display: flex;
        transform: translateX(0);
        z-index: 10;
      }
      
      .mobile-slide.prev {
+       display: flex;
        transform: translateX(-100%);
        z-index: 5;
      }
      
      .mobile-slide.next {
+       display: flex;
        transform: translateX(100%);
        z-index: 5;
      }
@@ -557,7 +560,7 @@
        }
        
        .mobile-container {
-         display: block;
+         display: block !important;
          position: relative;
          width: 100vw;
          height: 100vh;
@@ -2754,7 +2757,7 @@
          slide.style.height = '';
          slide.style.margin = '0';
          slide.style.transform = '';
-         slide.style.display = 'none';
+         // Don't hide slides here - let showSlide handle visibility
        });
        
        // Ensure navigation is properly centered
@@ -2924,6 +2927,7 @@
          slide.style.height = '';
          slide.style.margin = '';
          slide.style.padding = '';
+         // Don't change display - let showSlide handle visibility
        });
        
        // Force recalculation of viewport height
@@ -3944,6 +3948,13 @@
        setTimeout(() => {
          fixCenteringIssues();
        }, 100);
+       
+       // Ensure first slide is visible as fallback
+       const firstSlide = document.getElementById('mobile-slide-1');
+       if (firstSlide) {
+         firstSlide.style.display = 'flex';
+         firstSlide.classList.add('active');
+       }
        
        // Initialize mobile slides
        showSlide(0);
