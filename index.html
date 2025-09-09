@@ -689,7 +689,7 @@
        
       
        <div class="mobile-slide active" id="mobile-slide-1">
-
+<br>
       <!-- Streak Module -->
        <div class="mobile-slide-content">
          <div class="streak-module">
@@ -3462,11 +3462,14 @@
          // ===== Show More Toggle =====
      document.getElementById('toggleFat').addEventListener('click',()=>{
        const isDetailed = totalChart.data.datasets.length > 1;
+       const labels = getAllDates();
+       const foodCalories = labels.map(d => computeFoodCaloriesForDate(d));
+       
        if (isDetailed) {
          // Switch back to deficit view
          totalChart.data.datasets = [{
            label: 'Calorie Deficit',
-           data: [],
+           data: labels.map(d => (basalByDate[d] || 0) + (activityByDate[d] || 0) - (foodCalories[labels.indexOf(d)] || 0)),
            borderColor: '#6ee7b7',
            backgroundColor: 'rgba(110,231,183,.3)',
            fill: true,
@@ -3474,21 +3477,29 @@
          }];
          document.getElementById('toggleFat').textContent = 'Show More';
        } else {
-         // Switch to detailed view
+         // Switch to detailed view with separate workout and BMR lines
          totalChart.data.datasets = [
            {
-             label: 'Calories Burned',
-             data: [],
-             borderColor: '#6ee7b7',
-             backgroundColor: 'rgba(110,231,183,.3)',
+             label: 'Cals Burned with Workouts',
+             data: labels.map(d => activityByDate[d] || 0),
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Cals Burned with BMR',
+             data: labels.map(d => basalByDate[d] || 0),
+             borderColor: '#8b5cf6',
+             backgroundColor: 'rgba(139,92,246,.3)',
              fill: true,
              tension: 0.25
            },
            {
              label: 'Calories Eaten',
-             data: [],
-             borderColor: '#f59e0b',
-             backgroundColor: 'rgba(245,158,11,.3)',
+             data: foodCalories,
+             borderColor: '#ef4444',
+             backgroundColor: 'rgba(239,68,68,.3)',
              fill: true,
              tension: 0.25
            }
@@ -3501,11 +3512,14 @@
      // Mobile show more toggles
      document.getElementById('mobileToggleFat').addEventListener('click',()=>{
        const isDetailed = mobileTotalChart.data.datasets.length > 1;
+       const labels = getAllDates();
+       const foodCalories = labels.map(d => computeFoodCaloriesForDate(d));
+       
        if (isDetailed) {
          // Switch back to deficit view
          mobileTotalChart.data.datasets = [{
            label: 'Calorie Deficit',
-           data: [],
+           data: labels.map(d => (basalByDate[d] || 0) + (activityByDate[d] || 0) - (foodCalories[labels.indexOf(d)] || 0)),
            borderColor: '#6ee7b7',
            backgroundColor: 'rgba(110,231,183,.3)',
            fill: true,
@@ -3513,21 +3527,29 @@
          }];
          document.getElementById('mobileToggleFat').textContent = 'Show More';
        } else {
-         // Switch to detailed view
+         // Switch to detailed view with separate workout and BMR lines
          mobileTotalChart.data.datasets = [
            {
-             label: 'Calories Burned',
-             data: [],
-             borderColor: '#6ee7b7',
-             backgroundColor: 'rgba(110,231,183,.3)',
+             label: 'Cals Burned with Workouts',
+             data: labels.map(d => activityByDate[d] || 0),
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Cals Burned with BMR',
+             data: labels.map(d => basalByDate[d] || 0),
+             borderColor: '#8b5cf6',
+             backgroundColor: 'rgba(139,92,246,.3)',
              fill: true,
              tension: 0.25
            },
            {
              label: 'Calories Eaten',
-             data: [],
-             borderColor: '#f59e0b',
-             backgroundColor: 'rgba(245,158,11,.3)',
+             data: foodCalories,
+             borderColor: '#ef4444',
+             backgroundColor: 'rgba(239,68,68,.3)',
              fill: true,
              tension: 0.25
            }
