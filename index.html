@@ -357,6 +357,12 @@
       filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.6)) drop-shadow(0 0 16px rgba(255, 150, 0, 0.3)) drop-shadow(0 0 24px rgba(255, 200, 0, 0.2));
     }
     
+    .dead-campfire-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 4px rgba(100, 100, 100, 0.4));
+    }
+    
     .fire-flame-1 {
       animation: fireFlicker1 1.2s ease-in-out infinite alternate;
       transform-origin: bottom center;
@@ -689,7 +695,7 @@
          <div class="streak-module">
          <div class="streak-header">
            <div class="streak-icon">
-            <div class="animated-fire">
+            <div class="animated-fire" id="mobileStreakIcon">
               <svg class="fire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g class="fire-flame-1">
                   <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
@@ -733,8 +739,8 @@
              <span class="stat-label">Best</span>
            </div>
            <div class="streak-stat">
-             <span class="stat-value" id="mobileTotalWorkouts">0</span>
-             <span class="stat-label">Total</span>
+             <span class="stat-value" id="mobileAverageStreak">0</span>
+             <span class="stat-label">Average</span>
            </div>
          </div>
          </div>
@@ -2047,25 +2053,79 @@
        // Update mobile streak display
        const mobileStreakCount = document.getElementById('mobileStreakCount');
        const mobileBestStreak = document.getElementById('mobileBestStreak');
-       const mobileTotalWorkouts = document.getElementById('mobileTotalWorkouts');
+       const mobileAverageStreak = document.getElementById('mobileAverageStreak');
        const mobileStreakBar = document.getElementById('mobileStreakBar');
+       const mobileStreakIcon = document.getElementById('mobileStreakIcon');
        
        console.log('Mobile elements found:', {
          mobileStreakCount: !!mobileStreakCount,
          mobileBestStreak: !!mobileBestStreak,
-         mobileTotalWorkouts: !!mobileTotalWorkouts,
-         mobileStreakBar: !!mobileStreakBar
+         mobileAverageStreak: !!mobileAverageStreak,
+         mobileStreakBar: !!mobileStreakBar,
+         mobileStreakIcon: !!mobileStreakIcon
        });
        
        if (mobileStreakCount) {
          console.log(`Setting mobile streak count to: ${streakData.currentStreak}`);
          mobileStreakCount.textContent = streakData.currentStreak;
          mobileBestStreak.textContent = streakData.bestStreak;
-         mobileTotalWorkouts.textContent = streakData.totalWorkouts;
+         
+         // Calculate average streak length
+         const averageStreak = streakData.totalWorkouts > 0 ? 
+           Math.round((streakData.totalWorkouts / Math.max(streakData.streakCount, 1)) * 10) / 10 : 0;
+         mobileAverageStreak.textContent = averageStreak;
          
          // Update progress bar (max at 30 days for visual appeal)
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          mobileStreakBar.style.width = progressPercent + '%';
+         
+         // Update icon based on streak
+         if (mobileStreakIcon) {
+           if (streakData.currentStreak === 0) {
+             // Show dead campfire
+             mobileStreakIcon.innerHTML = `
+               <svg class="dead-campfire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                 <g>
+                   <path d="M8 18C8 18 6 16 6 14C6 12 8 10 10 8C10 6 8 4 6 4C4 4 2 6 2 8C2 10 4 12 6 14C6 16 8 18 8 18Z" fill="#8B4513"/>
+                   <path d="M16 18C16 18 18 16 18 14C18 12 16 10 14 8C14 6 16 4 18 4C20 4 22 6 22 8C22 10 20 12 18 14C18 16 16 18 16 18Z" fill="#8B4513"/>
+                   <path d="M12 20C12 20 10 18 10 16C10 14 12 12 14 10C14 8 12 6 10 6C8 6 6 8 6 10C6 12 8 14 10 16C10 18 12 20 12 20Z" fill="#654321"/>
+                   <circle cx="12" cy="12" r="2" fill="#2F2F2F"/>
+                 </g>
+               </svg>
+             `;
+           } else {
+             // Show animated fire
+             mobileStreakIcon.innerHTML = `
+               <svg class="fire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                 <g class="fire-flame-1">
+                   <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                 </g>
+                 <g class="fire-flame-2">
+                   <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                 </g>
+                 <g class="fire-flame-3">
+                   <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                 </g>
+                 <defs>
+                   <linearGradient id="fireGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                     <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                     <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
+                     <stop offset="100%" style="stop-color:#ffd23f;stop-opacity:1" />
+                   </linearGradient>
+                   <linearGradient id="fireGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                     <stop offset="0%" style="stop-color:#ff8c42;stop-opacity:1" />
+                     <stop offset="50%" style="stop-color:#ffd23f;stop-opacity:1" />
+                     <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                   </linearGradient>
+                   <linearGradient id="fireGradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+                     <stop offset="0%" style="stop-color:#ffd23f;stop-opacity:1" />
+                     <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                   </linearGradient>
+                 </defs>
+               </svg>
+             `;
+           }
+         }
        }
        
        // Update desktop streak display
