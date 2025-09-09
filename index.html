@@ -95,6 +95,19 @@
       height: 100%;
       filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.7)) drop-shadow(0 0 12px rgba(255, 150, 0, 0.3));
     }
+    
+    /* Dead Campfire Icon Styles */
+    .dead-campfire-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+    }
+    
+    .dead-campfire-svg-large {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
+    }
     .modal-title {
       font-size: 24px;
       font-weight: bold;
@@ -745,6 +758,27 @@
                 </defs>
               </svg>
             </div>
+            <!-- Dead Campfire Icon (shown when streak is 0) -->
+            <div class="dead-campfire-icon" style="display: none;">
+              <svg class="dead-campfire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Campfire base/logs -->
+                <g class="campfire-logs">
+                  <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#8B4513"/>
+                  <path d="M9 17L11 19L13 19L15 17L13 15L11 15Z" fill="#A0522D"/>
+                </g>
+                <!-- Dead/charred logs -->
+                <g class="dead-logs">
+                  <path d="M7 19L9 21L15 21L17 19L15 17L9 17Z" fill="#2F2F2F"/>
+                  <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#1A1A1A"/>
+                </g>
+                <!-- Smoke wisps -->
+                <g class="smoke-wisps">
+                  <path d="M12 14C11 12 10 10 9 8" stroke="#666" stroke-width="1" fill="none" opacity="0.6"/>
+                  <path d="M12 12C13 10 14 8 15 6" stroke="#666" stroke-width="1" fill="none" opacity="0.4"/>
+                  <path d="M12 10C11 8 10 6 9 4" stroke="#666" stroke-width="1" fill="none" opacity="0.3"/>
+                </g>
+              </svg>
+            </div>
           </div>
            <div class="streak-info">
              <div class="streak-count" id="mobileStreakCount">0</div>
@@ -760,8 +794,8 @@
              <span class="stat-label">Best</span>
            </div>
            <div class="streak-stat">
-             <span class="stat-value" id="mobileTotalWorkouts">0</span>
-             <span class="stat-label">Total</span>
+             <span class="stat-value" id="mobileAverageStreak">0</span>
+             <span class="stat-label">Avg Streak</span>
            </div>
          </div>
          </div>
@@ -1223,6 +1257,27 @@
                   </g>
                 </svg>
               </div>
+              <!-- Dead Campfire Icon Large (shown when streak is 0) -->
+              <div class="dead-campfire-icon-large" style="display: none;">
+                <svg class="dead-campfire-svg-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Campfire base/logs -->
+                  <g class="campfire-logs">
+                    <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#8B4513"/>
+                    <path d="M9 17L11 19L13 19L15 17L13 15L11 15Z" fill="#A0522D"/>
+                  </g>
+                  <!-- Dead/charred logs -->
+                  <g class="dead-logs">
+                    <path d="M7 19L9 21L15 21L17 19L15 17L9 17Z" fill="#2F2F2F"/>
+                    <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#1A1A1A"/>
+                  </g>
+                  <!-- Smoke wisps -->
+                  <g class="smoke-wisps">
+                    <path d="M12 14C11 12 10 10 9 8" stroke="#666" stroke-width="1" fill="none" opacity="0.6"/>
+                    <path d="M12 12C13 10 14 8 15 6" stroke="#666" stroke-width="1" fill="none" opacity="0.4"/>
+                    <path d="M12 10C11 8 10 6 9 4" stroke="#666" stroke-width="1" fill="none" opacity="0.3"/>
+                  </g>
+                </svg>
+              </div>
             </div>
             <div class="streak-details">
               <div class="streak-count-large" id="desktopStreakCount">0</div>
@@ -1239,8 +1294,8 @@
               <span class="stat-label-large">Best Streak</span>
             </div>
             <div class="streak-stat-large">
-              <span class="stat-value-large" id="desktopTotalWorkouts">0</span>
-              <span class="stat-label-large">Total Workouts</span>
+              <span class="stat-value-large" id="desktopAverageStreak">0</span>
+              <span class="stat-label-large">Avg Streak</span>
             </div>
             <div class="streak-stat-large">
               <span class="stat-value-large" id="desktopCurrentWeek">0</span>
@@ -1956,104 +2011,171 @@
      function todayStr(){return new Date().toISOString().split('T')[0];}
      
      // ===== Streak Functions =====
-     function calculateStreaks() {
-       const today = todayStr();
-       console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
-       
-       const workoutDates = Object.keys(workoutDataByDate).filter(date => {
-         const day = workoutDataByDate[date];
-         const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
-         const hasStairs = day.stairs && day.stairs.calories > 0;
-         console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
-         return hasTreadmill || hasStairs;
-       }).sort();
-       
-       console.log('Filtered workout dates:', workoutDates);
-       
-       if (workoutDates.length === 0) {
-         streakData.currentStreak = 0;
-         streakData.bestStreak = 0;
-         streakData.totalWorkouts = 0;
-         streakData.lastWorkoutDate = null;
-         streakData.workoutDates = new Set();
-         return;
-       }
-       
-       // Calculate total workouts
-       streakData.totalWorkouts = workoutDates.length;
-       streakData.lastWorkoutDate = workoutDates[workoutDates.length - 1];
-       streakData.workoutDates = new Set(workoutDates);
-       
-       // Calculate current streak
-       let currentStreak = 0;
-       let currentDate = new Date(today);
-       
-       // Check if user worked out today
-       if (workoutDates.includes(today)) {
-         currentStreak = 1;
-         currentDate.setDate(currentDate.getDate() - 1);
-         
-         // Count backwards to find consecutive days
-         while (true) {
-           const checkDate = currentDate.toISOString().split('T')[0];
-           if (workoutDates.includes(checkDate)) {
-             currentStreak++;
-             currentDate.setDate(currentDate.getDate() - 1);
-           } else {
-             break;
-           }
-         }
-       } else {
-         // Check if user worked out yesterday
-         const yesterday = new Date(today);
-         yesterday.setDate(yesterday.getDate() - 1);
-         const yesterdayStr = yesterday.toISOString().split('T')[0];
-         
-         if (workoutDates.includes(yesterdayStr)) {
-           // Count backwards from yesterday
-           currentStreak = 1;
-           currentDate.setDate(currentDate.getDate() - 2);
-           
-           while (true) {
-             const checkDate = currentDate.toISOString().split('T')[0];
-             if (workoutDates.includes(checkDate)) {
-               currentStreak++;
-               currentDate.setDate(currentDate.getDate() - 1);
-             } else {
-               break;
-             }
-           }
-         } else {
-           currentStreak = 0;
-         }
-       }
-       
-       streakData.currentStreak = currentStreak;
-       
-       // Calculate best streak
-       let bestStreak = 0;
-       let tempStreak = 0;
-       
-       for (let i = 0; i < workoutDates.length; i++) {
-         if (i === 0) {
-           tempStreak = 1;
-         } else {
-           const prevDate = new Date(workoutDates[i - 1]);
-           const currDate = new Date(workoutDates[i]);
-           const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
-           
-           if (diffDays === 1) {
-             tempStreak++;
-           } else {
-             bestStreak = Math.max(bestStreak, tempStreak);
-             tempStreak = 1;
-           }
-         }
-       }
-       
-       bestStreak = Math.max(bestStreak, tempStreak);
-       streakData.bestStreak = bestStreak;
-     }
+    function calculateStreaks() {
+      const today = todayStr();
+      console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
+      
+      const workoutDates = Object.keys(workoutDataByDate).filter(date => {
+        const day = workoutDataByDate[date];
+        const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
+        const hasStairs = day.stairs && day.stairs.calories > 0;
+        console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
+        return hasTreadmill || hasStairs;
+      }).sort();
+      
+      console.log('Filtered workout dates:', workoutDates);
+      
+      if (workoutDates.length === 0) {
+        streakData.currentStreak = 0;
+        streakData.bestStreak = 0;
+        streakData.totalWorkouts = 0;
+        streakData.averageStreak = 0;
+        streakData.lastWorkoutDate = null;
+        streakData.workoutDates = new Set();
+        streakData.completedStreaks = [];
+        return;
+      }
+      
+      // Calculate total workouts
+      streakData.totalWorkouts = workoutDates.length;
+      streakData.lastWorkoutDate = workoutDates[workoutDates.length - 1];
+      streakData.workoutDates = new Set(workoutDates);
+      
+      // Calculate all individual streaks
+      const allStreaks = [];
+      let tempStreak = 0;
+      
+      for (let i = 0; i < workoutDates.length; i++) {
+        if (i === 0) {
+          tempStreak = 1;
+        } else {
+          const prevDate = new Date(workoutDates[i - 1]);
+          const currDate = new Date(workoutDates[i]);
+          const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            tempStreak++;
+          } else {
+            // Streak ended, add to completed streaks if it's > 1 day
+            if (tempStreak > 1) {
+              allStreaks.push(tempStreak);
+            }
+            tempStreak = 1;
+          }
+        }
+      }
+      
+      // Add the last streak if it's > 1 day
+      if (tempStreak > 1) {
+        allStreaks.push(tempStreak);
+      }
+      
+      // Calculate current streak
+      let currentStreak = 0;
+      let currentDate = new Date(today);
+      
+      // Check if user worked out today
+      if (workoutDates.includes(today)) {
+        currentStreak = 1;
+        currentDate.setDate(currentDate.getDate() - 1);
+        
+        // Count backwards to find consecutive days
+        while (true) {
+          const checkDate = currentDate.toISOString().split('T')[0];
+          if (workoutDates.includes(checkDate)) {
+            currentStreak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+      } else {
+        // Check if user worked out yesterday
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        if (workoutDates.includes(yesterdayStr)) {
+          // Count backwards from yesterday
+          currentStreak = 1;
+          currentDate.setDate(currentDate.getDate() - 2);
+          
+          while (true) {
+            const checkDate = currentDate.toISOString().split('T')[0];
+            if (workoutDates.includes(checkDate)) {
+              currentStreak++;
+              currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+              break;
+            }
+          }
+        } else {
+          currentStreak = 0;
+        }
+      }
+      
+      streakData.currentStreak = currentStreak;
+      
+      // Calculate best streak
+      const bestStreak = allStreaks.length > 0 ? Math.max(...allStreaks) : 0;
+      streakData.bestStreak = bestStreak;
+      
+      // Calculate average streak (including current streak if it's > 1 day)
+      const streaksForAverage = [...allStreaks];
+      if (currentStreak > 1) {
+        streaksForAverage.push(currentStreak);
+      }
+      
+      if (streaksForAverage.length > 0) {
+        streakData.averageStreak = Math.round((streaksForAverage.reduce((sum, streak) => sum + streak, 0) / streaksForAverage.length) * 10) / 10;
+      } else {
+        streakData.averageStreak = 0;
+      }
+      
+      // Update completed streaks for Firebase storage
+      streakData.completedStreaks = allStreaks;
+      
+      // Check if a streak just ended and save it
+      checkAndSaveCompletedStreak();
+    }
+    
+    // Function to detect when a streak ends and save the completed streak length
+    function checkAndSaveCompletedStreak() {
+      // This function will be called after calculateStreaks to check if a streak just ended
+      // and save the completed streak length to Firebase
+      
+      // Get the previous streak data from localStorage to compare
+      const previousStreakData = JSON.parse(localStorage.getItem('previousStreakData') || '{}');
+      
+      // If we had a current streak before and now it's 0, a streak just ended
+      if (previousStreakData.currentStreak > 0 && streakData.currentStreak === 0) {
+        console.log(`Streak ended! Length was: ${previousStreakData.currentStreak} days`);
+        
+        // Add the completed streak to the completedStreaks array
+        if (previousStreakData.currentStreak > 1) {
+          streakData.completedStreaks.push(previousStreakData.currentStreak);
+          
+          // Recalculate average streak
+          const streaksForAverage = [...streakData.completedStreaks];
+          if (streakData.currentStreak > 1) {
+            streaksForAverage.push(streakData.currentStreak);
+          }
+          
+          if (streaksForAverage.length > 0) {
+            streakData.averageStreak = Math.round((streaksForAverage.reduce((sum, streak) => sum + streak, 0) / streaksForAverage.length) * 10) / 10;
+          }
+          
+          // Save updated data to Firebase
+          saveUserData();
+        }
+      }
+      
+      // Save current streak data for next comparison
+      localStorage.setItem('previousStreakData', JSON.stringify({
+        currentStreak: streakData.currentStreak,
+        completedStreaks: [...streakData.completedStreaks]
+      }));
+    }
      
      function checkAndHideSwipeHint() {
        // Hide swipe hint if user has logged any workouts
@@ -2074,13 +2196,13 @@
        // Update mobile streak display
        const mobileStreakCount = document.getElementById('mobileStreakCount');
        const mobileBestStreak = document.getElementById('mobileBestStreak');
-       const mobileTotalWorkouts = document.getElementById('mobileTotalWorkouts');
+       const mobileAverageStreak = document.getElementById('mobileAverageStreak');
        const mobileStreakBar = document.getElementById('mobileStreakBar');
        
        console.log('Mobile elements found:', {
          mobileStreakCount: !!mobileStreakCount,
          mobileBestStreak: !!mobileBestStreak,
-         mobileTotalWorkouts: !!mobileTotalWorkouts,
+         mobileAverageStreak: !!mobileAverageStreak,
          mobileStreakBar: !!mobileStreakBar
        });
        
@@ -2088,24 +2210,36 @@
          console.log(`Setting mobile streak count to: ${streakData.currentStreak}`);
          mobileStreakCount.textContent = streakData.currentStreak;
          mobileBestStreak.textContent = streakData.bestStreak;
-         mobileTotalWorkouts.textContent = streakData.totalWorkouts;
+         mobileAverageStreak.textContent = streakData.averageStreak;
          
          // Update progress bar (max at 30 days for visual appeal)
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          mobileStreakBar.style.width = progressPercent + '%';
+         
+         // Update mobile icons based on streak
+         const mobileFireIcon = document.querySelector('.streak-icon .animated-fire');
+         const mobileDeadCampfireIcon = document.querySelector('.dead-campfire-icon');
+         
+         if (streakData.currentStreak === 0) {
+           if (mobileFireIcon) mobileFireIcon.style.display = 'none';
+           if (mobileDeadCampfireIcon) mobileDeadCampfireIcon.style.display = 'block';
+         } else {
+           if (mobileFireIcon) mobileFireIcon.style.display = 'block';
+           if (mobileDeadCampfireIcon) mobileDeadCampfireIcon.style.display = 'none';
+         }
        }
        
        // Update desktop streak display
        const desktopStreakCount = document.getElementById('desktopStreakCount');
        const desktopBestStreak = document.getElementById('desktopBestStreak');
-       const desktopTotalWorkouts = document.getElementById('desktopTotalWorkouts');
+       const desktopAverageStreak = document.getElementById('desktopAverageStreak');
        const desktopCurrentWeek = document.getElementById('desktopCurrentWeek');
        const desktopStreakBar = document.getElementById('desktopStreakBar');
        
        console.log('Desktop elements found:', {
          desktopStreakCount: !!desktopStreakCount,
          desktopBestStreak: !!desktopBestStreak,
-         desktopTotalWorkouts: !!desktopTotalWorkouts,
+         desktopAverageStreak: !!desktopAverageStreak,
          desktopCurrentWeek: !!desktopCurrentWeek,
          desktopStreakBar: !!desktopStreakBar
        });
@@ -2114,7 +2248,7 @@
          console.log(`Setting desktop streak count to: ${streakData.currentStreak}`);
          desktopStreakCount.textContent = streakData.currentStreak;
          desktopBestStreak.textContent = streakData.bestStreak;
-         desktopTotalWorkouts.textContent = streakData.totalWorkouts;
+         desktopAverageStreak.textContent = streakData.averageStreak;
          
          // Calculate workouts this week
          const today = new Date();
@@ -2138,6 +2272,18 @@
          // Update progress bar
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          desktopStreakBar.style.width = progressPercent + '%';
+         
+         // Update desktop icons based on streak
+         const desktopFireIcon = document.querySelector('.streak-icon-large .animated-fire-large');
+         const desktopDeadCampfireIcon = document.querySelector('.dead-campfire-icon-large');
+         
+         if (streakData.currentStreak === 0) {
+           if (desktopFireIcon) desktopFireIcon.style.display = 'none';
+           if (desktopDeadCampfireIcon) desktopDeadCampfireIcon.style.display = 'block';
+         } else {
+           if (desktopFireIcon) desktopFireIcon.style.display = 'block';
+           if (desktopDeadCampfireIcon) desktopDeadCampfireIcon.style.display = 'none';
+         }
        }
      }
 
@@ -2373,13 +2519,15 @@
      let currentTheme = 'dark'; // current theme setting
      
      // ===== Streak Tracking =====
-     let streakData = {
-       currentStreak: 0,
-       bestStreak: 0,
-       totalWorkouts: 0,
-       lastWorkoutDate: null,
-       workoutDates: new Set()
-     };
+    let streakData = {
+      currentStreak: 0,
+      bestStreak: 0,
+      totalWorkouts: 0,
+      averageStreak: 0,
+      lastWorkoutDate: null,
+      workoutDates: new Set(),
+      completedStreaks: [] // Array to store individual streak lengths
+    };
 
          // ===== Theme Management =====
      function applyTheme(theme) {
@@ -3036,8 +3184,8 @@
              return { labels: [], actual: [], projected: [] };
            }
 
-           // Build recent slice for trend (up to last 3 actual points)
-           const recentDates = actualDates.slice(-3);
+          // Build recent slice for trend (up to last 7 actual points)
+          const recentDates = actualDates.slice(-7);
            const recentPoints = recentDates.map(d => ({
              date: d,
              ts: new Date(d).getTime(),
