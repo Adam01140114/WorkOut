@@ -777,7 +777,12 @@
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
 
+           <br><br>
            
+           <h2>Weight Trajectory</h2>
+           <canvas id="mobileWeightChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
+           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
            
          </div>
        </div>
@@ -803,18 +808,9 @@
          </div>
        </div>
 
-       <!-- Slide 4: Weight Trajectory -->
-       <div class="mobile-slide next" id="mobile-slide-4">
-         <div class="mobile-slide-content">
-           <h2>Weight Trajectory</h2>
-           <canvas id="mobileWeightChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
-           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
-         </div>
-       </div>
 
-       <!-- Slide 5: User Profile -->
-       <div class="mobile-slide next" id="mobile-slide-5">
+       <!-- Slide 4: User Profile -->
+       <div class="mobile-slide next" id="mobile-slide-4">
          <div class="mobile-slide-content">
            <h2>User Profile</h2>
            <div class="user-actions">
@@ -833,7 +829,6 @@
         </div>
         <div class="mobile-indicators">
           <div class="mobile-indicator active"></div>
-          <div class="mobile-indicator"></div>
           <div class="mobile-indicator"></div>
           <div class="mobile-indicator"></div>
           <div class="mobile-indicator"></div>
@@ -2624,7 +2619,7 @@
 
      // ===== Mobile Swipe Navigation =====
      let currentSlide = 0;
-     const totalSlides = 5;
+     const totalSlides = 4;
      let startX = 0;
      let currentX = 0;
      let isDragging = false;
