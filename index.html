@@ -819,7 +819,7 @@
            <h2>User Profile</h2>
            <div class="user-actions">
              <button class="settings-btn" id="mobileOpenSettings" disabled>Settings</button>
-             <button class="ghost" id="mobileFixLayoutBtn" onclick="emergencyLayoutFix()">Fix Layout</button>
+             <button class="ghost" id="mobileFixLayoutBtn" style="display: none;" onclick="emergencyLayoutFix()">Fix Layout</button>
              <button class="danger-btn" id="mobileDeleteAccountBtn">Delete Account</button>
              <button class="logout-btn" id="mobileLogoutBtn">Logout</button>
            </div>
@@ -1544,7 +1544,14 @@
          }
          // Check for broken layout and fix it
          detectAndFixBrokenLayout();
+         // Auto-fix layout on page reload for users with broken layouts
+         autoFixLayoutOnReload();
        }, 100);
+       
+       // Immediate layout fix for users with broken layouts
+       setTimeout(() => {
+         emergencyLayoutFix();
+       }, 200);
      }
 
      function showAddCaloriesModal() {
@@ -3068,6 +3075,45 @@
       }
     }
 
+    // Auto-fix layout on page reload for users with broken layouts
+    function autoFixLayoutOnReload() {
+      try {
+        console.log('Checking for layout issues on page load...');
+        
+        // Wait a bit for the page to fully load, then check for layout issues
+        setTimeout(() => {
+          const mobileSlides = document.querySelectorAll('.mobile-slide');
+          const mobileContainer = document.querySelector('.mobile-container');
+          
+          if (mobileSlides.length > 0 && mobileContainer) {
+            // Check if any slides are misaligned
+            let needsFix = false;
+            
+            mobileSlides.forEach(slide => {
+              const rect = slide.getBoundingClientRect();
+              const containerRect = mobileContainer.getBoundingClientRect();
+              
+              // Check if slide is not properly centered or has unusual positioning
+              if (rect.left < containerRect.left - 100 || 
+                  rect.right > containerRect.left + containerRect.width + 100 ||
+                  rect.width < containerRect.width * 0.8) {
+                needsFix = true;
+              }
+            });
+            
+            if (needsFix) {
+              console.log('Layout issues detected, applying automatic fix...');
+              emergencyLayoutFix();
+            } else {
+              console.log('Layout looks good');
+            }
+          }
+        }, 500); // Wait 500ms for page to fully load
+      } catch (error) {
+        console.error('Error in auto-fix layout on reload:', error);
+      }
+    }
+
     // Emergency layout fix for users with broken layouts
     function emergencyLayoutFix() {
       try {
@@ -3101,10 +3147,10 @@
         showSlide(0);
         
         console.log('Emergency layout fix completed');
-        alert('Layout has been fixed! If you still see issues, please refresh the page.');
+        //alert('Layout has been fixed! If you still see issues, please refresh the page.');
       } catch (error) {
         console.error('Emergency layout fix failed:', error);
-        alert('Layout fix failed. Please refresh the page.');
+        //alert('Layout fix failed. Please refresh the page.');
       }
     }
 
