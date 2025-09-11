@@ -772,7 +772,7 @@
        
          <div class="mobile-slide-content">
 
-          <h2>Calories Burnt With Workouts</h2>
+          <h2>Calories Burnt With Workoutz</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
@@ -819,6 +819,7 @@
            <h2>User Profile</h2>
            <div class="user-actions">
              <button class="settings-btn" id="mobileOpenSettings" disabled>Settings</button>
+             <button class="ghost" id="mobileFixLayoutBtn" onclick="emergencyLayoutFix()">Fix Layout</button>
              <button class="danger-btn" id="mobileDeleteAccountBtn">Delete Account</button>
              <button class="logout-btn" id="mobileLogoutBtn">Logout</button>
            </div>
@@ -1351,6 +1352,7 @@
 
          <div class="user-actions">
            <button class="settings-btn" id="openSettings" disabled>Settings</button>
+           <button class="ghost" id="fixLayoutBtn" onclick="emergencyLayoutFix()">Fix Mobile Layout</button>
            <button class="danger-btn" id="deleteAccountBtn">Delete Account</button>
            <button class="logout-btn" id="logoutBtn">Logout</button>
          </div>
@@ -1534,6 +1536,15 @@
        if (desk) desk.disabled = false;
        const mob = document.getElementById('mobileOpenSettings');
        if (mob) mob.disabled = false;  // it was left disabled in HTML
+       
+       // Initialize mobile layout to prevent breaking
+       setTimeout(() => {
+         if (typeof reinitializeMobileLayout === 'function') {
+           reinitializeMobileLayout();
+         }
+         // Check for broken layout and fix it
+         detectAndFixBrokenLayout();
+       }, 100);
      }
 
      function showAddCaloriesModal() {
@@ -1709,8 +1720,11 @@
                  // Update BMR calculation
          renderBMR(age, weight, heightFt, heightIn);
          
-         // Apply theme
-         applyTheme(theme);
+        // Apply theme
+        applyTheme(theme);
+        
+        // Reinitialize mobile layout to prevent breaking
+        reinitializeMobileLayout();
         
         errorDiv.classList.add('hidden');
         successDiv.textContent = 'Settings saved successfully!';
@@ -2991,9 +3005,114 @@
        console.log('Forced mobile slide centering reset completed');
      }
 
-     // Make centering fix available globally for manual use
-     window.fixCentering = forceMobileSlideCentering;
-     window.fixStreakPositioning = fixStreakModulePositioning;
+    // Reinitialize mobile layout after settings changes
+    function reinitializeMobileLayout() {
+      try {
+        // Force reset all mobile slides
+        forceMobileSlideCentering();
+        
+        // Reinitialize mobile slides
+        showSlide(0);
+        
+        // Fix streak module positioning
+        fixStreakModulePositioning();
+        
+        // Reset mobile container
+        resetMobileContainer();
+        
+        console.log('Mobile layout reinitialized after settings save');
+      } catch (error) {
+        console.error('Error reinitializing mobile layout:', error);
+        // Fallback: try basic reset
+        try {
+          const mobileSlides = document.querySelectorAll('.mobile-slide');
+          mobileSlides.forEach(slide => {
+            slide.style.left = '0';
+            slide.style.right = '0';
+            slide.style.marginLeft = 'auto';
+            slide.style.marginRight = 'auto';
+            slide.style.transform = slide.classList.contains('active') ? 'translateX(0)' : 'translateX(0)';
+          });
+          showSlide(0);
+        } catch (fallbackError) {
+          console.error('Fallback mobile layout reset failed:', fallbackError);
+        }
+      }
+    }
+
+    // Detect and automatically fix broken layouts
+    function detectAndFixBrokenLayout() {
+      try {
+        const mobileSlides = document.querySelectorAll('.mobile-slide');
+        const mobileContainer = document.querySelector('.mobile-container');
+        
+        // Check if slides are misaligned (not centered)
+        let needsFix = false;
+        
+        mobileSlides.forEach(slide => {
+          const rect = slide.getBoundingClientRect();
+          const containerRect = mobileContainer ? mobileContainer.getBoundingClientRect() : { left: 0, width: window.innerWidth };
+          
+          // Check if slide is not properly centered
+          if (rect.left < containerRect.left - 50 || rect.right > containerRect.left + containerRect.width + 50) {
+            needsFix = true;
+          }
+        });
+        
+        if (needsFix) {
+          console.log('Broken layout detected, applying automatic fix...');
+          emergencyLayoutFix();
+        }
+      } catch (error) {
+        console.error('Error detecting broken layout:', error);
+      }
+    }
+
+    // Emergency layout fix for users with broken layouts
+    function emergencyLayoutFix() {
+      try {
+        console.log('Running emergency layout fix...');
+        
+        // Reset all mobile slides
+        const mobileSlides = document.querySelectorAll('.mobile-slide');
+        mobileSlides.forEach(slide => {
+          slide.style.left = '0';
+          slide.style.right = '0';
+          slide.style.marginLeft = 'auto';
+          slide.style.marginRight = 'auto';
+          slide.style.position = 'absolute';
+          slide.style.width = '100%';
+          slide.style.transform = '';
+          slide.style.opacity = '';
+          slide.style.display = 'none';
+        });
+        
+        // Reset mobile container
+        const mobileContainer = document.querySelector('.mobile-container');
+        if (mobileContainer) {
+          mobileContainer.style.left = '0';
+          mobileContainer.style.right = '0';
+          mobileContainer.style.marginLeft = 'auto';
+          mobileContainer.style.marginRight = 'auto';
+          mobileContainer.style.transform = '';
+        }
+        
+        // Reinitialize slides
+        showSlide(0);
+        
+        console.log('Emergency layout fix completed');
+        alert('Layout has been fixed! If you still see issues, please refresh the page.');
+      } catch (error) {
+        console.error('Emergency layout fix failed:', error);
+        alert('Layout fix failed. Please refresh the page.');
+      }
+    }
+
+    // Make centering fix available globally for manual use
+    window.fixCentering = forceMobileSlideCentering;
+    window.fixStreakPositioning = fixStreakModulePositioning;
+    window.reinitializeMobileLayout = reinitializeMobileLayout;
+    window.emergencyLayoutFix = emergencyLayoutFix;
 
      // Fix streak module positioning for consistent spacing
      function fixStreakModulePositioning() {
