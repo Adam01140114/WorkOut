@@ -768,24 +768,28 @@
          </div>
        </div>
        
-       <!-- Slide 1: Calories Burned With Workouts -->
-       <div class="mobile-slide active" id="mobile-slide-1">
+       <!-- Slide 1: Total Calories Burned -->
+       
          <div class="mobile-slide-content">
-           <h2>Calories Burnt With Workouts</h2>
+
+          <h2>Calories Burnt With Workouts</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+
+           
+           
          </div>
        </div>
 
        <br><br>
-       <!-- Slide 2: Total Calorie Deficit -->
+       <!-- Slide 2: Calories Burned With Workouts -->
        <div class="mobile-slide next" id="mobile-slide-2">
          <div class="mobile-slide-content">
-           <h2>Total Calorie Deficit</h2>
-           <canvas id="mobileTotalChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleFat">Show More</button>
-           <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
+          <h2>Total Calorie Deficit</h2>
+          <canvas id="mobileTotalChart" height="200"></canvas>
+          <button class="ghost" id="mobileToggleFat">Show More</button>
+          <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
          </div>
        </div>
 
@@ -1251,12 +1255,20 @@
         </div>
       </section>
 
-             <!-- Show/Hide Workouts Button -->
-       <section class="card" id="workoutToggleSection">
-         <h2>Calories Burnt With Workouts</h2>
-         <canvas id="workoutChart" height="200"></canvas>
-         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
-         <button class="primary" id="showWorkouts">Show Workouts</button>
+      <!-- Total Burned -->
+      <section class="card">
+        <h2>Total Calorie Deficit</h2>
+        <canvas id="totalChart" height="200"></canvas>
+        <button class="ghost" id="toggleFat">Show More</button>
+        <button class="primary" id="addCaloriesBtn">Add Calories</button>
+      </section>
+
+             <!-- Weight Trajectory -->
+       <section class="card">
+         <h2>Weight Trajectory</h2>
+         <canvas id="weightChart" height="200"></canvas>
+         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+         <button class="primary" id="addWeightBtn">Add Weight</button>
        </section>
 
       <!-- Workouts Menu (hidden by default) -->
@@ -1275,20 +1287,12 @@
         <button class="ghost" id="hideWorkouts">Hide Workouts</button>
       </section>
 
-      <!-- Total Burned -->
-      <section class="card">
-        <h2>Total Calorie Deficit</h2>
-        <canvas id="totalChart" height="200"></canvas>
-        <button class="ghost" id="toggleFat">Show More</button>
-        <button class="primary" id="addCaloriesBtn">Add Calories</button>
-      </section>
-
-             <!-- Weight Trajectory -->
-       <section class="card">
-         <h2>Weight Trajectory</h2>
-         <canvas id="weightChart" height="200"></canvas>
-         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
-         <button class="primary" id="addWeightBtn">Add Weight</button>
+             <!-- Show/Hide Workouts Button -->
+       <section class="card" id="workoutToggleSection">
+         <h2>Calories Burnt With Workouts</h2>
+         <canvas id="workoutChart" height="200"></canvas>
+         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="primary" id="showWorkouts">Show Workouts</button>
        </section>
 
                             <!-- Treadmill Section -->
@@ -2162,12 +2166,11 @@
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          mobileStreakBar.style.width = progressPercent + '%';
          
-         // Update mobile icons based on streak
-         const mobileFireIcon = document.querySelector('.streak-icon .animated-fire');
-         
-         if (mobileFireIcon) {
-           mobileFireIcon.style.display = 'block';
-         }
+        // Update mobile icons based on streak
+        const mobileFireIcon = document.querySelector('.streak-icon .animated-fire');
+        
+        // Always show the fire icon
+        if (mobileFireIcon) mobileFireIcon.style.display = 'block';
        }
        
        // Update desktop streak display
@@ -2214,12 +2217,11 @@
          const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
          desktopStreakBar.style.width = progressPercent + '%';
          
-         // Update desktop icons based on streak
-         const desktopFireIcon = document.querySelector('.streak-icon-large .animated-fire-large');
-         
-         if (desktopFireIcon) {
-           desktopFireIcon.style.display = 'block';
-         }
+        // Update desktop icons based on streak
+        const desktopFireIcon = document.querySelector('.streak-icon-large .animated-fire-large');
+        
+        // Always show the fire icon
+        if (desktopFireIcon) desktopFireIcon.style.display = 'block';
        }
      }
 
