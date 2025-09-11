@@ -96,18 +96,6 @@
       filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.7)) drop-shadow(0 0 12px rgba(255, 150, 0, 0.3));
     }
     
-    /* Dead Campfire Icon Styles */
-    .dead-campfire-svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
-    }
-    
-    .dead-campfire-svg-large {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.4));
-    }
     .modal-title {
       font-size: 24px;
       font-weight: bold;
@@ -758,27 +746,6 @@
                 </defs>
               </svg>
             </div>
-            <!-- Dead Campfire Icon (shown when streak is 0) -->
-            <div class="dead-campfire-icon" style="display: none;">
-              <svg class="dead-campfire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Campfire base/logs -->
-                <g class="campfire-logs">
-                  <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#8B4513"/>
-                  <path d="M9 17L11 19L13 19L15 17L13 15L11 15Z" fill="#A0522D"/>
-                </g>
-                <!-- Dead/charred logs -->
-                <g class="dead-logs">
-                  <path d="M7 19L9 21L15 21L17 19L15 17L9 17Z" fill="#2F2F2F"/>
-                  <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#1A1A1A"/>
-                </g>
-                <!-- Smoke wisps -->
-                <g class="smoke-wisps">
-                  <path d="M12 14C11 12 10 10 9 8" stroke="#666" stroke-width="1" fill="none" opacity="0.6"/>
-                  <path d="M12 12C13 10 14 8 15 6" stroke="#666" stroke-width="1" fill="none" opacity="0.4"/>
-                  <path d="M12 10C11 8 10 6 9 4" stroke="#666" stroke-width="1" fill="none" opacity="0.3"/>
-                </g>
-              </svg>
-            </div>
           </div>
            <div class="streak-info">
              <div class="streak-count" id="mobileStreakCount">0</div>
@@ -801,24 +768,24 @@
          </div>
        </div>
        
-       <!-- Slide 1: Total Calories Burned -->
-       
-         <div class="mobile-slide-content">
-           <h2>Total Calorie Deficit</h2>
-           <canvas id="mobileTotalChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleFat">Show More</button>
-           <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
-         </div>
-       </div>
-
-       <br><br>
-       <!-- Slide 2: Calories Burned With Workouts -->
-       <div class="mobile-slide next" id="mobile-slide-2">
+       <!-- Slide 1: Calories Burned With Workouts -->
+       <div class="mobile-slide active" id="mobile-slide-1">
          <div class="mobile-slide-content">
            <h2>Calories Burnt With Workouts</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+         </div>
+       </div>
+
+       <br><br>
+       <!-- Slide 2: Total Calorie Deficit -->
+       <div class="mobile-slide next" id="mobile-slide-2">
+         <div class="mobile-slide-content">
+           <h2>Total Calorie Deficit</h2>
+           <canvas id="mobileTotalChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleFat">Show More</button>
+           <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
          </div>
        </div>
 
@@ -1257,27 +1224,6 @@
                   </g>
                 </svg>
               </div>
-              <!-- Dead Campfire Icon Large (shown when streak is 0) -->
-              <div class="dead-campfire-icon-large" style="display: none;">
-                <svg class="dead-campfire-svg-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <!-- Campfire base/logs -->
-                  <g class="campfire-logs">
-                    <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#8B4513"/>
-                    <path d="M9 17L11 19L13 19L15 17L13 15L11 15Z" fill="#A0522D"/>
-                  </g>
-                  <!-- Dead/charred logs -->
-                  <g class="dead-logs">
-                    <path d="M7 19L9 21L15 21L17 19L15 17L9 17Z" fill="#2F2F2F"/>
-                    <path d="M8 18L10 20L14 20L16 18L14 16L10 16Z" fill="#1A1A1A"/>
-                  </g>
-                  <!-- Smoke wisps -->
-                  <g class="smoke-wisps">
-                    <path d="M12 14C11 12 10 10 9 8" stroke="#666" stroke-width="1" fill="none" opacity="0.6"/>
-                    <path d="M12 12C13 10 14 8 15 6" stroke="#666" stroke-width="1" fill="none" opacity="0.4"/>
-                    <path d="M12 10C11 8 10 6 9 4" stroke="#666" stroke-width="1" fill="none" opacity="0.3"/>
-                  </g>
-                </svg>
-              </div>
             </div>
             <div class="streak-details">
               <div class="streak-count-large" id="desktopStreakCount">0</div>
@@ -1305,20 +1251,12 @@
         </div>
       </section>
 
-      <!-- Total Burned -->
-      <section class="card">
-        <h2>Total Calorie Deficit</h2>
-        <canvas id="totalChart" height="200"></canvas>
-        <button class="ghost" id="toggleFat">Show More</button>
-        <button class="primary" id="addCaloriesBtn">Add Calories</button>
-      </section>
-
-             <!-- Weight Trajectory -->
-       <section class="card">
-         <h2>Weight Trajectory</h2>
-         <canvas id="weightChart" height="200"></canvas>
-         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
-         <button class="primary" id="addWeightBtn">Add Weight</button>
+             <!-- Show/Hide Workouts Button -->
+       <section class="card" id="workoutToggleSection">
+         <h2>Calories Burnt With Workouts</h2>
+         <canvas id="workoutChart" height="200"></canvas>
+         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="primary" id="showWorkouts">Show Workouts</button>
        </section>
 
       <!-- Workouts Menu (hidden by default) -->
@@ -1337,12 +1275,20 @@
         <button class="ghost" id="hideWorkouts">Hide Workouts</button>
       </section>
 
-             <!-- Show/Hide Workouts Button -->
-       <section class="card" id="workoutToggleSection">
-         <h2>Calories Burnt With Workouts</h2>
-         <canvas id="workoutChart" height="200"></canvas>
-         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
-         <button class="primary" id="showWorkouts">Show Workouts</button>
+      <!-- Total Burned -->
+      <section class="card">
+        <h2>Total Calorie Deficit</h2>
+        <canvas id="totalChart" height="200"></canvas>
+        <button class="ghost" id="toggleFat">Show More</button>
+        <button class="primary" id="addCaloriesBtn">Add Calories</button>
+      </section>
+
+             <!-- Weight Trajectory -->
+       <section class="card">
+         <h2>Weight Trajectory</h2>
+         <canvas id="weightChart" height="200"></canvas>
+         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+         <button class="primary" id="addWeightBtn">Add Weight</button>
        </section>
 
                             <!-- Treadmill Section -->
@@ -2218,14 +2164,9 @@
          
          // Update mobile icons based on streak
          const mobileFireIcon = document.querySelector('.streak-icon .animated-fire');
-         const mobileDeadCampfireIcon = document.querySelector('.dead-campfire-icon');
          
-         if (streakData.currentStreak === 0) {
-           if (mobileFireIcon) mobileFireIcon.style.display = 'none';
-           if (mobileDeadCampfireIcon) mobileDeadCampfireIcon.style.display = 'block';
-         } else {
-           if (mobileFireIcon) mobileFireIcon.style.display = 'block';
-           if (mobileDeadCampfireIcon) mobileDeadCampfireIcon.style.display = 'none';
+         if (mobileFireIcon) {
+           mobileFireIcon.style.display = 'block';
          }
        }
        
@@ -2275,14 +2216,9 @@
          
          // Update desktop icons based on streak
          const desktopFireIcon = document.querySelector('.streak-icon-large .animated-fire-large');
-         const desktopDeadCampfireIcon = document.querySelector('.dead-campfire-icon-large');
          
-         if (streakData.currentStreak === 0) {
-           if (desktopFireIcon) desktopFireIcon.style.display = 'none';
-           if (desktopDeadCampfireIcon) desktopDeadCampfireIcon.style.display = 'block';
-         } else {
-           if (desktopFireIcon) desktopFireIcon.style.display = 'block';
-           if (desktopDeadCampfireIcon) desktopDeadCampfireIcon.style.display = 'none';
+         if (desktopFireIcon) {
+           desktopFireIcon.style.display = 'block';
          }
        }
      }
