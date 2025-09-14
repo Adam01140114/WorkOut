@@ -533,6 +533,7 @@
            console.log('Streaks calculated, updating display...');
            updateStreakDisplay();
            
+           console.log('About to call updateCharts from loadUserData...');
            updateCharts();
          }
 
@@ -1410,6 +1411,8 @@
 
          function updateCharts(){
            const labels = getAllDates();
+           console.log('updateCharts called with labels:', labels);
+           console.log('workoutDataByDate:', workoutDataByDate);
 
            // calories burned per day
            const burned = labels.map(d => (basalByDate[d] || 0) + (activityByDate[d] || 0));
@@ -1452,9 +1455,12 @@
              return t;
            });
 
+           console.log('workoutPerDay data:', workoutPerDay);
+
            workoutChart.data.labels = labels;
            const isWorkoutFat = workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
            workoutChart.data.datasets[0].data = isWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
+           console.log('Updating workoutChart with data:', workoutChart.data.datasets[0].data);
            workoutChart.update();
 
            mobileWorkoutChart.data.labels = labels;
@@ -1515,8 +1521,12 @@
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
-       workoutDataByDate[today].treadmill = inputs;
-       saveUserData();
+       // Only save inputs if there's no existing treadmill data with calories
+       // This prevents overwriting workout data when user just changes input values
+       if (!workoutDataByDate[today].treadmill || !workoutDataByDate[today].treadmill.calories) {
+         workoutDataByDate[today].treadmill = inputs;
+         saveUserData();
+       }
      }
 
      function loadTreadmillInputs() {
@@ -1583,6 +1593,7 @@
        
        // Save workout data to Firebase for graphs
        const today=todayStr();
+       console.log('Saving treadmill workout for date:', today, 'calories:', Math.round(total));
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -1609,6 +1620,7 @@
          };
        }
        
+       console.log('Updated workoutDataByDate:', workoutDataByDate);
        saveUserData();
        
        // Update treadmill chart with cumulative total
@@ -1656,6 +1668,7 @@
        
        // Save workout data to Firebase for graphs
        const today=todayStr();
+       console.log('Saving stairs workout for date:', today, 'calories:', Math.round(total));
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -1682,6 +1695,7 @@
          };
        }
        
+       console.log('Updated workoutDataByDate:', workoutDataByDate);
        saveUserData();
        
        // Update stairs chart with cumulative total
@@ -1984,6 +1998,7 @@
        
        // Save workout data to Firebase for graphs
        const today = todayStr();
+       console.log('Saving mobile treadmill workout for date:', today, 'calories:', Math.round(total));
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -2009,6 +2024,7 @@
            }]
          };
        }
+       console.log('Updated workoutDataByDate (mobile treadmill):', workoutDataByDate);
        saveUserData();
        
        // Update charts
@@ -2044,6 +2060,7 @@
        
        // Save workout data to Firebase for graphs
        const today = todayStr();
+       console.log('Saving mobile stairs workout for date:', today, 'calories:', Math.round(total));
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -2069,6 +2086,7 @@
            }]
          };
        }
+       console.log('Updated workoutDataByDate (mobile stairs):', workoutDataByDate);
        saveUserData();
        
        // Update charts
