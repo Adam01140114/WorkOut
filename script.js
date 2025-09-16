@@ -42,41 +42,50 @@
      let userProfile = null;
      let authStateInitialized = false;
 
-     auth.onAuthStateChanged(async (user) => {
-       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
-       
-       if (user) {
-         currentUser = user;
-         console.log('User signed in:', user.email);
-         
-         // Check if user has profile
-         try {
-           const profileDoc = await db.collection('users').doc(user.uid).get();
-           if (profileDoc.exists) {
-             userProfile = profileDoc.data();
-             console.log('Profile found, showing app');
-             showApp();
-             loadUserData();
-           } else {
-             console.log('No profile found, showing profile setup');
-             showProfileSetup();
-           }
-         } catch (error) {
-           console.error('Error checking profile:', error);
-           showAuthModal();
-         }
-       } else {
-         currentUser = null;
-         userProfile = null;
-         console.log('No user, showing auth modal');
-         // Ensure all modals are hidden first
-         hideAllModals();
-         showAuthModal();
-       }
-       
-       // Mark auth state as initialized
-       authStateInitialized = true;
-     });
+    auth.onAuthStateChanged(async (user) => {
+      console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+      
+      if (user) {
+        currentUser = user;
+        console.log('User signed in:', user.email);
+        
+        // Check if user has profile
+        try {
+          const profileDoc = await db.collection('users').doc(user.uid).get();
+          if (profileDoc.exists) {
+            userProfile = profileDoc.data();
+            console.log('Profile found, showing app');
+            showApp();
+            loadUserData();
+          } else {
+            console.log('No profile found, showing profile setup');
+            showProfileSetup();
+          }
+        } catch (error) {
+          console.error('Error checking profile:', error);
+          showAuthModal();
+        }
+      } else {
+        // Only clear data if we're sure the user is actually logged out
+        // Add a small delay to prevent race conditions during token refresh
+        setTimeout(() => {
+          if (!currentUser) {
+            console.log('No user, showing auth modal');
+            // Only clear data if it's safe to do so
+            if (clearDataSafely()) {
+              currentUser = null;
+              userProfile = null;
+            }
+            // Ensure all modals are hidden first
+            hideAllModals();
+            showAuthModal();
+          }
+        }, 100);
+      }
+      
+      // Mark auth state as initialized
+      authStateInitialized = true;
+    });
 
      // Show auth modal immediately for first-time users
      setTimeout(() => {
@@ -367,6 +376,8 @@
 
          // ===== Logout =====
      document.getElementById('logoutBtn').addEventListener('click', () => {
+       // Unprotect data before logout
+       unprotectData();
        auth.signOut();
      });
 
@@ -498,44 +509,66 @@
 
     // ===== Data Management =====
          async function loadUserData() {
-       if (!currentUser) return;
+      if (!currentUser) return;
 
-       try {
-         // Load user's progress data
-         const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
-         if (progressDoc.exists) {
-           const data = progressDoc.data();
-           console.log('Loading user data from Firebase:', data);
-           
-           basalByDate = data.basalByDate || {};
-           activityByDate = data.activityByDate || {};
-           weightByDate = data.weightByDate || {};
-           workoutDataByDate = data.workoutDataByDate || {};
-           foodDataByDate = data.foodDataByDate || {};
-           customFoods = data.customFoods || {};
-           weightLoggingClosed = data.weightLoggingClosed || {};
-           currentTheme = data.currentTheme || 'dark';
-           
-           console.log('Loaded workoutDataByDate:', workoutDataByDate);
-           
-           // Load streak data if it exists
-           if (data.streakData) {
-             streakData = { ...streakData, ...data.streakData };
-             // Convert workoutDates back to Set if it exists
-             if (data.streakData.workoutDates) {
-               streakData.workoutDates = new Set(data.streakData.workoutDates);
-             }
-           }
-           
-           // Recalculate streaks after loading data to ensure accuracy
-           console.log('About to recalculate streaks...');
-           calculateStreaks();
-           console.log('Streaks calculated, updating display...');
-           updateStreakDisplay();
-           
-           console.log('About to call updateCharts from loadUserData...');
-           updateCharts();
-         }
+      try {
+        // Load user's progress data
+        const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
+        if (progressDoc.exists) {
+          const data = progressDoc.data();
+          console.log('Loading user data from Firebase:', data);
+          
+          basalByDate = data.basalByDate || {};
+          activityByDate = data.activityByDate || {};
+          weightByDate = data.weightByDate || {};
+          workoutDataByDate = data.workoutDataByDate || {};
+          foodDataByDate = data.foodDataByDate || {};
+          customFoods = data.customFoods || {};
+          weightLoggingClosed = data.weightLoggingClosed || {};
+          currentTheme = data.currentTheme || 'dark';
+          
+          console.log('Loaded workoutDataByDate from Firebase:', workoutDataByDate);
+          
+          // Protect data once it's loaded
+          protectData();
+          
+          // Load streak data if it exists
+          if (data.streakData) {
+            streakData = { ...streakData, ...data.streakData };
+            // Convert workoutDates back to Set if it exists
+            if (data.streakData.workoutDates) {
+              streakData.workoutDates = new Set(data.streakData.workoutDates);
+            }
+          }
+        } else {
+          console.log('No Firebase data found, checking localStorage backup...');
+          // Try to load from localStorage backup
+          try {
+            const backup = localStorage.getItem('workoutDataBackup');
+            if (backup) {
+              const backupData = JSON.parse(backup);
+              if (backupData.workoutDataByDate) {
+                workoutDataByDate = backupData.workoutDataByDate;
+                console.log('Restored workoutDataByDate from localStorage backup:', workoutDataByDate);
+                // Protect the restored data
+                protectData();
+                // Save the restored data back to Firebase
+                await saveUserData();
+              }
+            }
+          } catch (backupError) {
+            console.error('Error loading from localStorage backup:', backupError);
+          }
+        }
+
+        // Recalculate streaks after loading data to ensure accuracy
+        console.log('About to recalculate streaks...');
+        calculateStreaks();
+        console.log('Streaks calculated, updating display...');
+        updateStreakDisplay();
+        
+        console.log('About to call updateCharts from loadUserData...');
+        updateCharts();
 
                   // Calculate and display BMR from user profile
          if (userProfile) {
@@ -556,40 +589,101 @@
          if (userProfile) {
            checkDailyWeightLogging();
          }
-       } catch (error) {
-         console.error('Error loading user data:', error);
-       }
-     }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        // Try to load from localStorage backup as fallback
+        try {
+          const backup = localStorage.getItem('workoutDataBackup');
+          if (backup) {
+            const backupData = JSON.parse(backup);
+            if (backupData.workoutDataByDate) {
+              workoutDataByDate = backupData.workoutDataByDate;
+              console.log('Restored workoutDataByDate from localStorage backup after error:', workoutDataByDate);
+              // Protect the restored data
+              protectData();
+              updateCharts();
+            }
+          }
+        } catch (backupError) {
+          console.error('Error loading from localStorage backup after error:', backupError);
+        }
+      }
+    }
 
          async function saveUserData() {
-       if (!currentUser) return;
+      if (!currentUser) {
+        console.warn('Cannot save data - no authenticated user');
+        return;
+      }
 
-       try {
-         // Convert Set to Array for Firebase storage
-         const streakDataForStorage = {
-           ...streakData,
-           workoutDates: Array.from(streakData.workoutDates)
-         };
-         
-         await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
-           basalByDate,
-           activityByDate,
-           weightByDate,
-           workoutDataByDate,
-           foodDataByDate,
-           customFoods,
-           weightLoggingClosed,
-           currentTheme,
-           streakData: streakDataForStorage,
-           lastUpdated: new Date()
-         });
-       } catch (error) {
-         console.error('Error saving user data:', error);
-       }
-     }
+      try {
+        // Validate data before saving
+        if (!workoutDataByDate || typeof workoutDataByDate !== 'object') {
+          console.warn('Invalid workoutDataByDate, skipping save');
+          return;
+        }
+
+        // Convert Set to Array for Firebase storage
+        const streakDataForStorage = {
+          ...streakData,
+          workoutDates: Array.from(streakData.workoutDates || new Set())
+        };
+        
+        const dataToSave = {
+          basalByDate: basalByDate || {},
+          activityByDate: activityByDate || {},
+          weightByDate: weightByDate || {},
+          workoutDataByDate: workoutDataByDate || {},
+          foodDataByDate: foodDataByDate || {},
+          customFoods: customFoods || {},
+          weightLoggingClosed: weightLoggingClosed || {},
+          currentTheme: currentTheme || 'dark',
+          streakData: streakDataForStorage,
+          lastUpdated: new Date()
+        };
+
+        console.log('Saving user data to Firebase:', dataToSave);
+        
+        // Use set with merge option to avoid overwriting existing data
+        await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set(dataToSave, { merge: true });
+        
+        console.log('Data saved successfully');
+      } catch (error) {
+        console.error('Error saving user data:', error);
+        // Try to save to localStorage as backup
+        try {
+          localStorage.setItem('workoutDataBackup', JSON.stringify({
+            workoutDataByDate,
+            timestamp: new Date().toISOString()
+          }));
+          console.log('Data backed up to localStorage');
+        } catch (backupError) {
+          console.error('Failed to backup data to localStorage:', backupError);
+        }
+      }
+    }
 
          // ===== Helper Functions =====
      function todayStr(){return new Date().toISOString().split('T')[0];}
+     
+     // Data protection functions
+     function protectData() {
+       dataProtected = true;
+       console.log('Data protection enabled');
+     }
+     
+     function unprotectData() {
+       dataProtected = false;
+       console.log('Data protection disabled');
+     }
+     
+     function clearDataSafely() {
+       if (dataProtected) {
+         console.log('Data is protected, skipping clear operation');
+         return false;
+       }
+       return true;
+     }
      
      // ===== Streak Functions =====
      function calculateStreaks() {
@@ -984,6 +1078,9 @@
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
      let currentTheme = 'dark'; // current theme setting
+     
+     // Data protection flag to prevent accidental clearing
+     let dataProtected = false;
      
      // ===== Streak Tracking =====
      let streakData = {
@@ -1958,6 +2055,8 @@
        }
      });
      document.getElementById('mobileLogoutBtn').addEventListener('click', () => {
+       // Unprotect data before logout
+       unprotectData();
        auth.signOut();
      });
      
@@ -2317,3 +2416,35 @@
          }
        }, 200);
      });
+
+     // Add backup mechanism for data persistence
+     window.addEventListener('beforeunload', () => {
+       if (currentUser && workoutDataByDate && Object.keys(workoutDataByDate).length > 0) {
+         console.log('Page unloading, saving data backup...');
+         try {
+           localStorage.setItem('workoutDataBackup', JSON.stringify({
+             workoutDataByDate,
+             timestamp: new Date().toISOString()
+           }));
+           // Also try to save to Firebase one last time
+           saveUserData();
+         } catch (error) {
+           console.error('Error saving backup on page unload:', error);
+         }
+       }
+     });
+
+     // Add periodic backup every 30 seconds
+     setInterval(() => {
+       if (currentUser && workoutDataByDate && Object.keys(workoutDataByDate).length > 0) {
+         try {
+           localStorage.setItem('workoutDataBackup', JSON.stringify({
+             workoutDataByDate,
+             timestamp: new Date().toISOString()
+           }));
+           console.log('Periodic backup saved');
+         } catch (error) {
+           console.error('Error saving periodic backup:', error);
+         }
+       }
+     }, 30000); // 30 seconds
