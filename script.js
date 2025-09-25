@@ -760,29 +760,54 @@
        
        streakData.currentStreak = currentStreak;
        
-       // Calculate best streak
-       let bestStreak = 0;
-       let tempStreak = 0;
-       
-       for (let i = 0; i < workoutDates.length; i++) {
-         if (i === 0) {
-           tempStreak = 1;
-         } else {
-           const prevDate = new Date(workoutDates[i - 1]);
-           const currDate = new Date(workoutDates[i]);
-           const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
-           
-           if (diffDays === 1) {
-             tempStreak++;
-           } else {
-             bestStreak = Math.max(bestStreak, tempStreak);
-             tempStreak = 1;
-           }
-         }
-       }
-       
-       bestStreak = Math.max(bestStreak, tempStreak);
-       streakData.bestStreak = bestStreak;
+      // Calculate all individual streaks
+      const allStreaks = [];
+      let tempStreak = 0;
+      
+      for (let i = 0; i < workoutDates.length; i++) {
+        if (i === 0) {
+          tempStreak = 1;
+        } else {
+          const prevDate = new Date(workoutDates[i - 1]);
+          const currDate = new Date(workoutDates[i]);
+          const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            tempStreak++;
+          } else {
+            // Streak ended, add to completed streaks if it's > 1 day
+            if (tempStreak > 1) {
+              allStreaks.push(tempStreak);
+            }
+            tempStreak = 1;
+          }
+        }
+      }
+      
+      // Add the last streak if it's > 1 day
+      if (tempStreak > 1) {
+        allStreaks.push(tempStreak);
+      }
+      
+      // Calculate best streak (include current streak if it's the best)
+      const allPossibleStreaks = [...allStreaks];
+      if (currentStreak > 0) {
+        allPossibleStreaks.push(currentStreak);
+      }
+      const bestStreak = allPossibleStreaks.length > 0 ? Math.max(...allPossibleStreaks) : 0;
+      streakData.bestStreak = bestStreak;
+      
+      // Calculate average streak (including current streak if it's > 0)
+      const streaksForAverage = [...allStreaks];
+      if (currentStreak > 0) {
+        streaksForAverage.push(currentStreak);
+      }
+      
+      if (streaksForAverage.length > 0) {
+        streakData.averageStreak = Math.round((streaksForAverage.reduce((sum, streak) => sum + streak, 0) / streaksForAverage.length) * 10) / 10;
+      } else {
+        streakData.averageStreak = 0;
+      }
      }
      
      function updateStreakDisplay() {
@@ -1088,7 +1113,8 @@
        bestStreak: 0,
        totalWorkouts: 0,
        lastWorkoutDate: null,
-       workoutDates: new Set()
+       workoutDates: new Set(),
+       averageStreak: 0
      };
 
          // ===== Theme Management =====
@@ -1160,7 +1186,7 @@
          {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
          {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{responsive:true,scales:{y:{beginAtZero:false,ticks:{callback:function(value){return value.toFixed(1)}}}}}
      });
 
      let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
@@ -1170,7 +1196,7 @@
          {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25},
          {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{responsive:true,scales:{y:{beginAtZero:false,ticks:{callback:function(value){return value.toFixed(1)}}}}}
      });
 
      let workoutCtx=document.getElementById('workoutChart').getContext('2d');
@@ -1202,13 +1228,46 @@
      });
 
                   function getAllDates(){
-           const set = new Set([
+           // Get all existing dates from all data sources
+           const existingDates = new Set([
              ...Object.keys(basalByDate || {}),
              ...Object.keys(activityByDate || {}),
              ...Object.keys(foodDataByDate || {}),
              ...Object.keys(workoutDataByDate || {})
            ]);
-           return Array.from(set).sort();
+           
+           if (existingDates.size === 0) {
+             // If no data exists, start from 30 days ago to today
+             const today = new Date();
+             const startDate = new Date(today);
+             startDate.setDate(today.getDate() - 30);
+             
+             const allDates = [];
+             const currentDate = new Date(startDate);
+             
+             while (currentDate <= today) {
+               allDates.push(currentDate.toISOString().split('T')[0]);
+               currentDate.setDate(currentDate.getDate() + 1);
+             }
+             
+             return allDates;
+           }
+           
+           // Find the earliest date and extend to today
+           const sortedDates = Array.from(existingDates).sort();
+           const startDate = new Date(sortedDates[0]);
+           const today = new Date();
+           
+           // Generate a complete date range from start to today
+           const allDates = [];
+           const currentDate = new Date(startDate);
+           
+           while (currentDate <= today) {
+             allDates.push(currentDate.toISOString().split('T')[0]);
+             currentDate.setDate(currentDate.getDate() + 1);
+           }
+           
+           return allDates;
          }
 
          function computeFoodCaloriesForDate(d){
@@ -1464,22 +1523,28 @@
              return { labels: [], actual: [], projected: [] };
            }
 
-           // Build recent slice for trend (up to last 3 actual points)
-           const recentDates = actualDates.slice(-3);
+           // Use up to 7 days of recent data for trend calculation, or all available data if less than 7 days
+           const maxDaysForTrend = Math.min(7, actualDates.length);
+           const recentDates = actualDates.slice(-maxDaysForTrend);
            const recentPoints = recentDates.map(d => ({
              date: d,
              ts: new Date(d).getTime(),
              w: weightByDate[d]
            }));
 
-           // Average daily change
+           // Calculate average daily change using linear regression for better trend
            let slopePerDay = 0;
            if (recentPoints.length >= 2) {
-             const first = recentPoints[0];
-             const last = recentPoints[recentPoints.length - 1];
-             const days = Math.max(1, Math.round((last.ts - first.ts) / (1000 * 60 * 60 * 24)));
-             slopePerDay = (last.w - first.w) / days;
-           } // if only one point, slope remains 0
+             // Use linear regression to get a more accurate slope
+             const n = recentPoints.length;
+             const sumX = recentPoints.reduce((sum, p, i) => sum + i, 0);
+             const sumY = recentPoints.reduce((sum, p) => sum + p.w, 0);
+             const sumXY = recentPoints.reduce((sum, p, i) => sum + i * p.w, 0);
+             const sumXX = recentPoints.reduce((sum, p, i) => sum + i * i, 0);
+             
+             // Calculate slope using linear regression formula
+             slopePerDay = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+           }
 
            // Labels = all actual dates + next N future dates
            const lastDate = new Date(actualDates[actualDates.length - 1]);
@@ -1576,6 +1641,21 @@
              const { labels: wLabels, actual: wActual, projected: wProjected } =
                computeWeightSeries(weightByDate, 3);
 
+             // Calculate Y-axis range based on weight data
+             const allWeightValues = [...wActual, ...wProjected].filter(w => w !== null && !isNaN(w));
+             if (allWeightValues.length > 0) {
+               const minWeight = Math.min(...allWeightValues);
+               const maxWeight = Math.max(...allWeightValues);
+               const yMin = minWeight - 5;
+               const yMax = maxWeight + 5;
+               
+               // Set Y-axis range for both desktop and mobile weight charts
+               weightChart.options.scales.y.min = yMin;
+               weightChart.options.scales.y.max = yMax;
+               mobileWeightChart.options.scales.y.min = yMin;
+               mobileWeightChart.options.scales.y.max = yMax;
+             }
+
              // desktop
              weightChart.data.labels = wLabels;
              const isWeightFat = weightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
@@ -1644,33 +1724,35 @@
      }
 
      function loadTreadmillChart() {
+       // Use the same date range as other charts for consistency
+       const labels = getAllDates();
+       
        // Clear existing chart data
        tchart.data.labels = [];
        tchart.data.datasets[0].data = [];
        
-       // Load treadmill data from Firebase - shows cumulative daily totals
-       const dates = Object.keys(workoutDataByDate).sort();
-       dates.forEach(date => {
-         if (workoutDataByDate[date].treadmill && workoutDataByDate[date].treadmill.calories) {
-           tchart.data.labels.push(date);
-           tchart.data.datasets[0].data.push(workoutDataByDate[date].treadmill.calories);
-         }
+       // Load treadmill data for all dates, showing 0 for days without workouts
+       labels.forEach(date => {
+         tchart.data.labels.push(date);
+         const calories = workoutDataByDate[date]?.treadmill?.calories || 0;
+         tchart.data.datasets[0].data.push(calories);
        });
        tchart.update();
      }
 
      function loadStairsChart() {
+       // Use the same date range as other charts for consistency
+       const labels = getAllDates();
+       
        // Clear existing chart data
        schart.data.labels = [];
        schart.data.datasets[0].data = [];
        
-       // Load stairs data from Firebase - shows cumulative daily totals
-       const dates = Object.keys(workoutDataByDate).sort();
-       dates.forEach(date => {
-         if (workoutDataByDate[date].stairs && workoutDataByDate[date].stairs.calories) {
-           schart.data.labels.push(date);
-           schart.data.datasets[0].data.push(workoutDataByDate[date].stairs.calories);
-         }
+       // Load stairs data for all dates, showing 0 for days without workouts
+       labels.forEach(date => {
+         schart.data.labels.push(date);
+         const calories = workoutDataByDate[date]?.stairs?.calories || 0;
+         schart.data.datasets[0].data.push(calories);
        });
        schart.update();
      }
