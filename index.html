@@ -36,7 +36,10 @@
     .math{background:#0c1218;border:1px dashed rgba(255,255,255,.2);padding:8px;border-radius:10px;font-family:monospace;white-space:pre-wrap}
     canvas{background:#0e141b;border-radius:10px;padding:10px}
     .hidden{display:none}
+    .workout-container{border:2px solid #6b7280;border-radius:12px;padding:16px;background:rgba(107,114,128,0.05);margin:8px 0}
+    .workout-container.hidden{display:none !important}
     .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .no-data-message{text-align:center;padding:20px;color:var(--muted)}
     .menu-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:#0e141b;cursor:pointer}
     .menu-emoji{font-size:28px}
     .row{display:flex;gap:8px;justify-content:flex-start}
@@ -781,11 +784,36 @@
        
          <div class="mobile-slide-content">
 
-          <h2>Calories Burnt With Workout</h2>
+           <h2>Total Calories Burnt</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
 
+           <br><br>
+           <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
+           <br>
+           
+           <h2 style="cursor: pointer;" id="mobileWeightLiftedTitle" title="Double-click to set custom title">Weight Lifted</h2>
+           <canvas id="mobileWeightLiftedChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWeightLiftedReps">Show Reps Instead</button>
+           <div style="text-align: center; margin: 10px 0;">
+             <button class="primary" id="mobileShowWeightLiftedWorkouts">Show Workouts</button>
+           </div>
+           <br>
+           <div id="mobileWorkoutContainer" class="workout-container hidden">
+             <h3 style="text-align: center; color: white; font-size: 24px; margin: 0 0 16px 0; font-weight: 600;">My Workouts</h3>
+             <div id="mobileWorkoutMenu" class="menu-grid">
+               <!-- Workout buttons will be dynamically added here -->
+             </div>
+             <div id="mobileNoWorkoutsMessage" class="no-data-message" style="text-align: center;">
+               <p>You have no weight workouts yet.</p>
+             </div>
+             <br>
+             <div style="text-align: center; margin: 10px 0;">
+               <button class="primary" id="mobileAddWorkoutsBtnAlways" style="display: none;">Add Workouts</button>
+             </div>
+           </div>
+           
            <br><br>
            <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
            <br>
@@ -820,7 +848,7 @@
        </div>
 
 
-       <!-- Slide 4: User Profile -->
+       <!-- Slide 5: User Profile -->
        <div class="mobile-slide next" id="mobile-slide-4">
          <div class="mobile-slide-content">
            <h2>User Profile</h2>
@@ -1214,6 +1242,102 @@
        </div>
      </div>
 
+     <!-- Add Workout Type Modal -->
+     <div id="addWorkoutModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="workoutIcon">🏋️</div>
+           <div>
+             <h3 class="modal-title">Add Workout Type</h3>
+             <p class="modal-subtitle">Create a new weight workout</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="workoutName">Workout Name</label>
+           <input id="workoutName" type="text" placeholder="e.g., Bench Press" />
+         </div>
+         <div class="result" id="workoutResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="addWorkoutSubmit">Add Workout</button>
+           <button class="ghost" id="cancelAddWorkout">Cancel</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Workout Entry Modal -->
+     <div id="workoutEntryModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="workoutEntryIcon">🏋️</div>
+           <div>
+             <h3 class="modal-title" id="workoutEntryTitle">Workout Entry</h3>
+             <p class="modal-subtitle" id="workoutEntrySubtitle">Enter your workout details</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="workoutWeight">Weight (lbs)</label>
+           <input id="workoutWeight" type="number" step="0.1" placeholder="Enter weight" />
+         </div>
+         <div class="field">
+           <label class="label" for="workoutReps">Reps</label>
+           <input id="workoutReps" type="number" placeholder="Enter reps" />
+         </div>
+         <div class="result" id="workoutEntryResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="workoutEntrySubmit">Log Workout</button>
+           <button class="ghost" id="cancelWorkoutEntry">Cancel</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Add Workout Type Modal -->
+     <div id="mobileAddWorkoutModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="mobileWorkoutIcon">🏋️</div>
+           <div>
+             <h3 class="modal-title">Add Workout Type</h3>
+             <p class="modal-subtitle">Create a new weight workout</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileWorkoutName">Workout Name</label>
+           <input id="mobileWorkoutName" type="text" placeholder="e.g., Bench Press" />
+         </div>
+         <div class="result" id="mobileWorkoutResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileAddWorkoutSubmit">Add Workout</button>
+           <button class="ghost" id="mobileCancelAddWorkout">Cancel</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Workout Entry Modal -->
+     <div id="mobileWorkoutEntryModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="mobileWorkoutEntryIcon">🏋️</div>
+           <div>
+             <h3 class="modal-title" id="mobileWorkoutEntryTitle">Workout Entry</h3>
+             <p class="modal-subtitle" id="mobileWorkoutEntrySubtitle">Enter your workout details</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileWorkoutWeight">Weight (lbs)</label>
+           <input id="mobileWorkoutWeight" type="number" step="0.1" placeholder="Enter weight" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileWorkoutReps">Reps</label>
+           <input id="mobileWorkoutReps" type="number" placeholder="Enter reps" />
+         </div>
+         <div class="result" id="mobileWorkoutEntryResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileWorkoutEntrySubmit">Log Workout</button>
+           <button class="ghost" id="mobileCancelWorkoutEntry">Cancel</button>
+         </div>
+       </div>
+     </div>
+
          <!-- Main App Content (hidden until authenticated) -->
      <div id="appContent" class="hidden">
 
@@ -1270,12 +1394,44 @@
         <button class="primary" id="addCaloriesBtn">Add Calories</button>
       </section>
 
-             <!-- Weight Trajectory -->
+             <!-- Total Calories Burnt -->
        <section class="card">
-         <h2>Weight Trajectory</h2>
-         <canvas id="weightChart" height="200"></canvas>
-         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
-         <button class="primary" id="addWeightBtn">Add Weight</button>
+         <h2>Total Calories Burnt</h2>
+         <canvas id="workoutChart" height="200"></canvas>
+         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="primary" id="showWorkouts">Show Workouts</button>
+         
+         <!-- Weight Lifted Section (integrated) -->
+         <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+           <h2 style="margin-bottom: 16px; cursor: pointer;" id="weightLiftedTitle" title="Double-click to set custom title">Weight Lifted</h2>
+           <canvas id="weightLiftedChart" height="200"></canvas>
+           <button class="ghost" id="toggleWeightLiftedReps">Show Reps Instead</button>
+           <div style="text-align: center; margin: 10px 0;">
+             <button class="primary" id="showWeightLiftedWorkouts">Show Workouts</button>
+           </div>
+           <br>
+           <div id="workoutContainer" class="workout-container hidden">
+             <h3 style="text-align: center; color: white; font-size: 24px; margin: 0 0 16px 0; font-weight: 600;">My Workouts</h3>
+             <div id="workoutMenu" class="menu-grid">
+               <!-- Workout buttons will be dynamically added here -->
+             </div>
+             <div id="noWorkoutsMessage" class="no-data-message" style="text-align: center;">
+               <p>You have no weight workouts yet.</p>
+             </div>
+             <br>
+             <div style="text-align: center; margin: 10px 0;">
+               <button class="primary" id="addWorkoutsBtnAlways" style="display: none;">Add Workouts</button>
+             </div>
+           </div>
+         </div>
+         
+         <!-- Weight Trajectory Section (integrated) -->
+         <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+           <h2 style="margin-bottom: 16px;">Weight Trajectory</h2>
+           <canvas id="weightChart" height="200"></canvas>
+           <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+           <button class="primary" id="addWeightBtn">Add Weight</button>
+         </div>
        </section>
 
       <!-- Workouts Menu (hidden by default) -->
@@ -1294,13 +1450,7 @@
         <button class="ghost" id="hideWorkouts">Hide Workouts</button>
       </section>
 
-             <!-- Show/Hide Workouts Button -->
-       <section class="card" id="workoutToggleSection">
-         <h2>Calories Burnt With Workouts</h2>
-         <canvas id="workoutChart" height="200"></canvas>
-         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
-         <button class="primary" id="showWorkouts">Show Workouts</button>
-       </section>
+
 
                             <!-- Treadmill Section -->
        <section class="card hidden" id="treadmillSection">
@@ -1397,7 +1547,11 @@
         'mobileTreadmillModal',
         'mobileStairsModal',
         'mobileFoodModal',
-        'mobileCustomFoodModal'
+        'mobileCustomFoodModal',
+        'addWorkoutModal',
+        'workoutEntryModal',
+        'mobileAddWorkoutModal',
+        'mobileWorkoutEntryModal'
       ];
       ids.forEach(id => {
         const el = document.getElementById(id);
@@ -1478,6 +1632,10 @@
        mobileTreadmillModal.classList.add('hidden');
        const mobileStairsModal = document.getElementById('mobileStairsModal');
        mobileStairsModal.classList.add('hidden');
+       const mobileAddWorkoutModal = document.getElementById('mobileAddWorkoutModal');
+       mobileAddWorkoutModal.classList.add('hidden');
+       const mobileWorkoutEntryModal = document.getElementById('mobileWorkoutEntryModal');
+       mobileWorkoutEntryModal.classList.add('hidden');
        
        document.getElementById('appContent').classList.add('hidden');
      }
@@ -1905,10 +2063,16 @@
            activityByDate = data.activityByDate || {};
            weightByDate = data.weightByDate || {};
            workoutDataByDate = data.workoutDataByDate || {};
+           weightLiftedByDate = data.weightLiftedByDate || {};
+           workoutTypes = data.workoutTypes || {};
            foodDataByDate = data.foodDataByDate || {};
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
            currentTheme = data.currentTheme || 'dark';
+           customTitles = data.customTitles || {};
+           
+           // Apply custom titles
+           applyCustomTitles();
            
            console.log('Loaded workoutDataByDate:', workoutDataByDate);
            
@@ -1931,6 +2095,44 @@
            checkAndHideSwipeHint();
            
            updateCharts();
+           updateWorkoutMenu();
+           
+           // Force workout container to be hidden after data loads
+           console.log('=== FORCE HIDE START ===');
+           workoutMenuVisible = false;
+           const workoutContainer = document.getElementById('workoutContainer');
+           const mobileWorkoutContainer = document.getElementById('mobileWorkoutContainer');
+           console.log('Force hiding workout container:', { 
+             workoutMenuVisible, 
+             hasClass: workoutContainer.classList.contains('hidden'),
+             workoutContainerClasses: workoutContainer.className,
+             mobileHasClass: mobileWorkoutContainer.classList.contains('hidden'),
+             mobileWorkoutContainerClasses: mobileWorkoutContainer.className
+           });
+           workoutContainer.classList.add('hidden');
+           mobileWorkoutContainer.classList.add('hidden');
+           console.log('After force hide:', { 
+             hasClass: workoutContainer.classList.contains('hidden'),
+             mobileHasClass: mobileWorkoutContainer.classList.contains('hidden'),
+             workoutContainerComputedStyle: window.getComputedStyle(workoutContainer).display,
+             mobileWorkoutContainerComputedStyle: window.getComputedStyle(mobileWorkoutContainer).display
+           });
+           console.log('=== FORCE HIDE END ===');
+           
+           // Final check after a short delay to see if something is overriding our hide
+           setTimeout(() => {
+             console.log('=== FINAL CHECK AFTER 500ms ===');
+             const finalWorkoutContainer = document.getElementById('workoutContainer');
+             const finalMobileWorkoutContainer = document.getElementById('mobileWorkoutContainer');
+             console.log('Final check - workoutContainer classes:', finalWorkoutContainer.className);
+             console.log('Final check - mobileWorkoutContainer classes:', finalMobileWorkoutContainer.className);
+             console.log('Final check - workoutContainer has hidden class:', finalWorkoutContainer.classList.contains('hidden'));
+             console.log('Final check - mobileWorkoutContainer has hidden class:', finalMobileWorkoutContainer.classList.contains('hidden'));
+             console.log('Final check - workoutContainer computed style:', window.getComputedStyle(finalWorkoutContainer).display);
+             console.log('Final check - mobileWorkoutContainer computed style:', window.getComputedStyle(finalMobileWorkoutContainer).display);
+             console.log('Final check - workoutMenuVisible:', workoutMenuVisible);
+             console.log('=== FINAL CHECK END ===');
+           }, 500);
          }
 
                   // Calculate and display BMR from user profile
@@ -1972,10 +2174,13 @@
            activityByDate,
            weightByDate,
            workoutDataByDate,
+           weightLiftedByDate,
+           workoutTypes,
            foodDataByDate,
            customFoods,
            weightLoggingClosed,
            currentTheme,
+           customTitles,
            streakData: streakDataForStorage,
            lastUpdated: new Date()
          });
@@ -1984,7 +2189,34 @@
        }
      }
 
-         // ===== Helper Functions =====
+         // ===== Custom Titles Functions =====
+     function applyCustomTitles() {
+       // Apply custom titles to all chart titles
+       Object.keys(customTitles).forEach(titleId => {
+         const element = document.getElementById(titleId);
+         if (element) {
+           element.textContent = customTitles[titleId];
+         }
+       });
+     }
+
+     function setCustomTitle(titleId, defaultTitle) {
+       const currentTitle = customTitles[titleId] || defaultTitle;
+       const newTitle = prompt(`Enter custom title for "${defaultTitle}":`, currentTitle);
+       
+       if (newTitle !== null && newTitle.trim() !== '') {
+         customTitles[titleId] = newTitle.trim();
+         document.getElementById(titleId).textContent = newTitle.trim();
+         saveUserData();
+       } else if (newTitle === '') {
+         // Empty string means reset to default
+         delete customTitles[titleId];
+         document.getElementById(titleId).textContent = defaultTitle;
+         saveUserData();
+       }
+     }
+
+     // ===== Helper Functions =====
      function todayStr(){return new Date().toISOString().split('T')[0];}
      
      // ===== Streak Functions =====
@@ -2393,10 +2625,260 @@
        mobileCustomFoodModal.classList.add('hidden');
      }
 
+
+     function showAddWorkoutModal() {
+       const addWorkoutModal = document.getElementById('addWorkoutModal');
+       addWorkoutModal.classList.remove('hidden');
+       addWorkoutModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('workoutName').value = '';
+       document.getElementById('workoutResult').innerHTML = '';
+     }
+
+     function hideAddWorkoutModal() {
+       const addWorkoutModal = document.getElementById('addWorkoutModal');
+       addWorkoutModal.classList.add('hidden');
+     }
+
+     function showWorkoutEntryModal(workoutName) {
+       const workoutEntryModal = document.getElementById('workoutEntryModal');
+       const workout = workoutTypes[workoutName];
+       
+       workoutEntryModal.classList.remove('hidden');
+       workoutEntryModal.style.zIndex = '2000';
+       
+       // Update modal content
+       document.getElementById('workoutEntryTitle').textContent = workout.name;
+       document.getElementById('workoutEntrySubtitle').textContent = 'Enter your workout details';
+       document.getElementById('workoutEntryIcon').textContent = workout.icon;
+       
+       // Preload last entry data
+       if (workout.lastEntry) {
+         document.getElementById('workoutWeight').value = workout.lastEntry.weight || '';
+         document.getElementById('workoutReps').value = workout.lastEntry.reps || '';
+       } else {
+         document.getElementById('workoutWeight').value = '';
+         document.getElementById('workoutReps').value = '';
+       }
+       
+       document.getElementById('workoutEntryResult').innerHTML = '';
+       workoutEntryModal.dataset.workoutName = workoutName;
+     }
+
+     function hideWorkoutEntryModal() {
+       const workoutEntryModal = document.getElementById('workoutEntryModal');
+       workoutEntryModal.classList.add('hidden');
+     }
+
+     function showMobileAddWorkoutModal() {
+       const mobileAddWorkoutModal = document.getElementById('mobileAddWorkoutModal');
+       mobileAddWorkoutModal.classList.remove('hidden');
+       mobileAddWorkoutModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('mobileWorkoutName').value = '';
+       document.getElementById('mobileWorkoutResult').innerHTML = '';
+     }
+
+     function hideMobileAddWorkoutModal() {
+       const mobileAddWorkoutModal = document.getElementById('mobileAddWorkoutModal');
+       mobileAddWorkoutModal.classList.add('hidden');
+     }
+
+     function showMobileWorkoutEntryModal(workoutName) {
+       const mobileWorkoutEntryModal = document.getElementById('mobileWorkoutEntryModal');
+       const workout = workoutTypes[workoutName];
+       
+       mobileWorkoutEntryModal.classList.remove('hidden');
+       mobileWorkoutEntryModal.style.zIndex = '2000';
+       
+       // Update modal content
+       document.getElementById('mobileWorkoutEntryTitle').textContent = workout.name;
+       document.getElementById('mobileWorkoutEntrySubtitle').textContent = 'Enter your workout details';
+       document.getElementById('mobileWorkoutEntryIcon').textContent = workout.icon;
+       
+       // Preload last entry data
+       if (workout.lastEntry) {
+         document.getElementById('mobileWorkoutWeight').value = workout.lastEntry.weight || '';
+         document.getElementById('mobileWorkoutReps').value = workout.lastEntry.reps || '';
+       } else {
+         document.getElementById('mobileWorkoutWeight').value = '';
+         document.getElementById('mobileWorkoutReps').value = '';
+       }
+       
+       document.getElementById('mobileWorkoutEntryResult').innerHTML = '';
+       mobileWorkoutEntryModal.dataset.workoutName = workoutName;
+     }
+
+     function hideMobileWorkoutEntryModal() {
+       const mobileWorkoutEntryModal = document.getElementById('mobileWorkoutEntryModal');
+       mobileWorkoutEntryModal.classList.add('hidden');
+     }
+
      function updateCustomFoodIcon() {
        const foodName = document.getElementById('mobileCustomFoodName').value;
        const icon = pickEmoji(foodName);
        document.getElementById('customFoodIcon').textContent = icon;
+     }
+
+     function updateWorkoutIcon() {
+       const workoutName = document.getElementById('workoutName').value;
+       const icon = pickWorkoutEmoji(workoutName);
+       document.getElementById('workoutIcon').textContent = icon;
+     }
+
+     function updateMobileWorkoutIcon() {
+       const workoutName = document.getElementById('mobileWorkoutName').value;
+       const icon = pickWorkoutEmoji(workoutName);
+       document.getElementById('mobileWorkoutIcon').textContent = icon;
+     }
+
+     function updateWorkoutMenu() {
+       console.log('=== updateWorkoutMenu START ===');
+       const workoutContainer = document.getElementById('workoutContainer');
+       const mobileWorkoutContainer = document.getElementById('mobileWorkoutContainer');
+       const workoutMenu = document.getElementById('workoutMenu');
+       const mobileWorkoutMenu = document.getElementById('mobileWorkoutMenu');
+       const noWorkoutsMessage = document.getElementById('noWorkoutsMessage');
+       const mobileNoWorkoutsMessage = document.getElementById('mobileNoWorkoutsMessage');
+       
+       console.log('Elements found:', {
+         workoutContainer: !!workoutContainer,
+         mobileWorkoutContainer: !!mobileWorkoutContainer,
+         workoutMenu: !!workoutMenu,
+         mobileWorkoutMenu: !!mobileWorkoutMenu,
+         noWorkoutsMessage: !!noWorkoutsMessage,
+         mobileNoWorkoutsMessage: !!mobileNoWorkoutsMessage
+       });
+       
+       // Check if user has any workout types
+       const hasWorkouts = Object.keys(workoutTypes).length > 0;
+       console.log('Workout types:', workoutTypes);
+       console.log('hasWorkouts:', hasWorkouts);
+       
+       // Show/hide no workouts message - only show if no workouts exist AND workout menu is visible
+       const shouldShowNoWorkoutsMessage = !hasWorkouts && workoutMenuVisible;
+       noWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
+       mobileNoWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
+       console.log('No workouts message display:', {
+         shouldShowNoWorkoutsMessage,
+         desktop: noWorkoutsMessage.style.display,
+         mobile: mobileNoWorkoutsMessage.style.display
+       });
+       
+       // Show/hide workout containers based on both hasWorkouts and workoutMenuVisible
+       const shouldHide = !hasWorkouts || !workoutMenuVisible;
+       console.log('Visibility logic:', { hasWorkouts, workoutMenuVisible, shouldHide });
+       
+       console.log('Before hide/show - workoutContainer classes:', workoutContainer.className);
+       console.log('Before hide/show - mobileWorkoutContainer classes:', mobileWorkoutContainer.className);
+       
+       if (shouldHide) {
+         console.log('HIDING workout containers');
+         workoutContainer.classList.add('hidden');
+         mobileWorkoutContainer.classList.add('hidden');
+       } else {
+         console.log('SHOWING workout containers');
+         workoutContainer.classList.remove('hidden');
+         mobileWorkoutContainer.classList.remove('hidden');
+       }
+       
+       console.log('After hide/show - workoutContainer classes:', workoutContainer.className);
+       console.log('After hide/show - mobileWorkoutContainer classes:', mobileWorkoutContainer.className);
+       console.log('After hide/show - workoutContainer has hidden class:', workoutContainer.classList.contains('hidden'));
+       console.log('After hide/show - mobileWorkoutContainer has hidden class:', mobileWorkoutContainer.classList.contains('hidden'));
+       console.log('After hide/show - workoutContainer computed style:', window.getComputedStyle(workoutContainer).display);
+       console.log('After hide/show - mobileWorkoutContainer computed style:', window.getComputedStyle(mobileWorkoutContainer).display);
+       console.log('=== updateWorkoutMenu END ===');
+       
+       if (hasWorkouts) {
+         // Clear existing buttons
+         workoutMenu.innerHTML = '';
+         mobileWorkoutMenu.innerHTML = '';
+         
+         // Add workout buttons
+         Object.keys(workoutTypes).forEach(workoutName => {
+           const workout = workoutTypes[workoutName];
+           
+           // Desktop workout button
+           const workoutBtn = document.createElement('div');
+           workoutBtn.className = `menu-tile ${filteredWorkout === workoutName ? 'filtered' : ''}`;
+           workoutBtn.style.border = filteredWorkout === workoutName ? '2px solid #60a5fa' : '';
+           workoutBtn.innerHTML = `
+             <div class="menu-emoji">${workout.icon}</div>
+             <div>${workout.name}</div>
+             <button class="delete-btn" onclick="deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
+           `;
+           
+           // Single click to filter
+           workoutBtn.addEventListener('click', (e) => {
+             if (e.target.classList.contains('delete-btn')) return; // Don't filter on delete click
+             filterWorkout(workoutName);
+           });
+           
+           // Double click to edit
+           workoutBtn.addEventListener('dblclick', () => showWorkoutEntryModal(workoutName));
+           workoutMenu.appendChild(workoutBtn);
+           
+           // Mobile workout button
+           const mobileWorkoutBtn = document.createElement('div');
+           mobileWorkoutBtn.className = `menu-tile ${filteredWorkout === workoutName ? 'filtered' : ''}`;
+           mobileWorkoutBtn.style.border = filteredWorkout === workoutName ? '2px solid #60a5fa' : '';
+           mobileWorkoutBtn.innerHTML = `
+             <div class="menu-emoji">${workout.icon}</div>
+             <div>${workout.name}</div>
+             <button class="delete-btn" onclick="deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
+           `;
+           
+           // Single click to filter
+           mobileWorkoutBtn.addEventListener('click', (e) => {
+             if (e.target.classList.contains('delete-btn')) return; // Don't filter on delete click
+             filterWorkout(workoutName);
+           });
+           
+           // Double click to edit
+           mobileWorkoutBtn.addEventListener('dblclick', () => showMobileWorkoutEntryModal(workoutName));
+           mobileWorkoutMenu.appendChild(mobileWorkoutBtn);
+         });
+       }
+     }
+
+     function deleteWorkout(workoutName) {
+       if (confirm(`Are you sure you want to delete "${workoutName}"? This will remove all workout entries for this exercise.`)) {
+         // Remove from workout types
+         delete workoutTypes[workoutName];
+         
+         // Remove all entries from weightLiftedByDate
+         Object.keys(weightLiftedByDate).forEach(date => {
+           if (weightLiftedByDate[date]) {
+             Object.keys(weightLiftedByDate[date]).forEach(key => {
+               if (weightLiftedByDate[date][key].workoutName === workoutName) {
+                 delete weightLiftedByDate[date][key];
+               }
+             });
+             // Clean up empty dates
+             if (Object.keys(weightLiftedByDate[date]).length === 0) {
+               delete weightLiftedByDate[date];
+             }
+           }
+         });
+         
+         // Clear filter if this workout was filtered
+         if (filteredWorkout === workoutName) {
+           filteredWorkout = null;
+         }
+         
+         saveUserData();
+         updateWorkoutMenu();
+         updateCharts();
+       }
+     }
+
+     function filterWorkout(workoutName) {
+       filteredWorkout = filteredWorkout === workoutName ? null : workoutName;
+       updateCharts();
+       updateWorkoutMenu();
      }
 
      function updateFoodMenu() {
@@ -2482,6 +2964,11 @@
      let activityByDate={};  // date -> sum of activity kcal for that date
      let weightByDate={};    // date -> weight for that date
      let workoutDataByDate={}; // date -> workout data for that date
+     let weightLiftedByDate={}; // date -> weight lifted data for that date
+     let workoutTypes={}; // workout name -> {name, icon, lastEntry: {weight, reps, date}}
+     let filteredWorkout=null; // currently filtered workout name, null for all
+     let workoutMenuVisible=false; // whether workout menu should be visible
+     let customTitles={}; // chart title -> custom title value
      let foodDataByDate={};  // date -> food data for that date
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
@@ -2589,6 +3076,16 @@
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
+     // Weight Lifted Chart
+     let weightLiftedCtx=document.getElementById('weightLiftedChart').getContext('2d');
+     let weightLiftedChart=new Chart(weightLiftedCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Weight Lifted',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Weight (lbs)'}}}}
+     });
+
      let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
      let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
        type:'line',
@@ -2606,6 +3103,16 @@
          {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+     // Mobile Weight Lifted Chart
+     let mobileWeightLiftedCtx=document.getElementById('mobileWeightLiftedChart').getContext('2d');
+     let mobileWeightLiftedChart=new Chart(mobileWeightLiftedCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Weight Lifted',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Weight (lbs)'}}}}
      });
 
                   function getAllDates(){
@@ -3319,6 +3826,154 @@
            return '🍽️'; // Default food emoji
          }
 
+         // Workout icon helper function
+         function pickWorkoutEmoji(input) {
+           const hasEmoji = /\p{Extended_Pictographic}/u.test(input);
+           if (hasEmoji) {
+             // Return the first emoji char
+             const match = input.match(/\p{Extended_Pictographic}(\uFE0F\u20E3|\uFE0F|\u200D\p{Extended_Pictographic})*/u);
+             if (match) return match[0];
+           }
+           
+           const t = normalizeTerm(input);
+           
+           // Workout-specific emoji mapping
+           const WORKOUT_MAP = new Map([
+             // Upper body exercises
+             ['bench press', '🏋️'],
+             ['push up', '💪'],
+             ['pushup', '💪'],
+             ['push ups', '💪'],
+             ['pushups', '💪'],
+             ['chest press', '🏋️'],
+             ['incline press', '🏋️'],
+             ['decline press', '🏋️'],
+             ['shoulder press', '🏋️'],
+             ['overhead press', '🏋️'],
+             ['lateral raise', '💪'],
+             ['front raise', '💪'],
+             ['rear delt', '💪'],
+             ['bicep curl', '💪'],
+             ['biceps', '💪'],
+             ['tricep', '💪'],
+             ['triceps', '💪'],
+             ['dip', '💪'],
+             ['pull up', '💪'],
+             ['pullup', '💪'],
+             ['pull ups', '💪'],
+             ['pullups', '💪'],
+             ['chin up', '💪'],
+             ['chinup', '💪'],
+             ['lat pulldown', '💪'],
+             ['row', '💪'],
+             ['rowing', '💪'],
+             ['back', '💪'],
+             ['chest', '🏋️'],
+             ['shoulders', '💪'],
+             ['arms', '💪'],
+             
+             // Lower body exercises
+             ['squat', '🦵'],
+             ['squats', '🦵'],
+             ['leg press', '🦵'],
+             ['legs', '🦵'],
+             ['deadlift', '🏋️'],
+             ['dead lift', '🏋️'],
+             ['lunges', '🦵'],
+             ['lunge', '🦵'],
+             ['leg curl', '🦵'],
+             ['leg extension', '🦵'],
+             ['calf raise', '🦵'],
+             ['calves', '🦵'],
+             ['glutes', '🍑'],
+             ['glute', '🍑'],
+             ['hip thrust', '🍑'],
+             ['bulgarian split squat', '🦵'],
+             ['romanian deadlift', '🏋️'],
+             ['rdl', '🏋️'],
+             
+             // Core exercises
+             ['plank', '🤸'],
+             ['planks', '🤸'],
+             ['sit up', '🤸'],
+             ['situp', '🤸'],
+             ['sit ups', '🤸'],
+             ['situps', '🤸'],
+             ['crunch', '🤸'],
+             ['crunches', '🤸'],
+             ['russian twist', '🤸'],
+             ['mountain climber', '🤸'],
+             ['burpee', '🤸'],
+             ['burpees', '🤸'],
+             ['core', '🤸'],
+             ['abs', '🤸'],
+             ['abdominal', '🤸'],
+             
+             // Cardio exercises
+             ['running', '🏃'],
+             ['run', '🏃'],
+             ['jog', '🏃'],
+             ['jogging', '🏃'],
+             ['sprint', '🏃'],
+             ['sprinting', '🏃'],
+             ['cycling', '🚴'],
+             ['bike', '🚴'],
+             ['biking', '🚴'],
+             ['swimming', '🏊'],
+             ['swim', '🏊'],
+             ['rowing machine', '🚣'],
+             ['elliptical', '🏃'],
+             ['treadmill', '🏃'],
+             ['stair master', '🧗'],
+             ['stairs', '🧗'],
+             ['climbing', '🧗'],
+             ['hiking', '🥾'],
+             ['walking', '🚶'],
+             ['walk', '🚶'],
+             
+             // General workout terms
+             ['workout', '🏋️'],
+             ['exercise', '🏋️'],
+             ['training', '🏋️'],
+             ['gym', '🏋️'],
+             ['fitness', '💪'],
+             ['strength', '💪'],
+             ['cardio', '❤️'],
+             ['endurance', '❤️'],
+             ['flexibility', '🤸'],
+             ['stretching', '🤸'],
+             ['yoga', '🧘'],
+             ['pilates', '🤸'],
+             ['crossfit', '🏋️'],
+             ['hiit', '⚡'],
+             ['circuit', '🔄'],
+             ['superset', '🔄'],
+             ['drop set', '📉'],
+             ['pyramid', '🔺'],
+             ['amrap', '⏱️'],
+             ['emom', '⏱️'],
+             ['tabata', '⏱️']
+           ]);
+           
+           if (WORKOUT_MAP.has(t)) return WORKOUT_MAP.get(t);
+           
+           // Try simple plural trim
+           if (t.endsWith('es') && WORKOUT_MAP.has(t.slice(0, -2))) return WORKOUT_MAP.get(t.slice(0, -2));
+           if (t.endsWith('s') && WORKOUT_MAP.has(t.slice(0, -1))) return WORKOUT_MAP.get(t.slice(0, -1));
+           
+           // Try removing common words
+           const simplified = t.replace(/^(a|an|the)\s+/g, '').replace(/\s+(exercise|workout|training)$/g, '');
+           if (WORKOUT_MAP.has(simplified)) return WORKOUT_MAP.get(simplified);
+           
+           // Light fuzzy fallback
+           const keys = Array.from(WORKOUT_MAP.keys()).sort((a,b)=>b.length - a.length);
+           for (const k of keys) {
+             if (simplified.includes(k) || k.includes(simplified)) return WORKOUT_MAP.get(k);
+           }
+           
+           return '🏋️'; // Default workout emoji
+         }
+
          // Put this helper above updateCharts()
          function computeWeightSeries(weightByDate, futureDays = 3) {
            // Collect actual points, sorted
@@ -3432,11 +4087,177 @@
            mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
            mobileWorkoutChart.update();
 
+           // ----- Weight Lifted chart -----
+           weightLiftedChart.data.labels = labels;
+           const isWeightLiftedReps = weightLiftedChart.options.scales.y.title?.text === 'Reps';
+           
+           if (filteredWorkout) {
+             // Show only the filtered workout
+             const filteredData = labels.map(d => {
+               const weightLiftedData = weightLiftedByDate[d];
+               if (!weightLiftedData) return null;
+               
+               let totalValue = 0;
+               Object.values(weightLiftedData).forEach(workout => {
+                 if (workout.workoutName === filteredWorkout) {
+                   if (isWeightLiftedReps && workout.reps) {
+                     totalValue += workout.reps;
+                   } else if (!isWeightLiftedReps && workout.weight && workout.reps) {
+                     totalValue += workout.weight * workout.reps;
+                   }
+                 }
+               });
+               return totalValue > 0 ? totalValue : null;
+             });
+             
+             // Use single dataset for filtered workout
+             weightLiftedChart.data.datasets = [{
+               label: filteredWorkout,
+               data: filteredData,
+               borderColor: '#3b82f6',
+               backgroundColor: 'rgba(59,130,246,.3)',
+               fill: true,
+               tension: 0.25,
+               pointRadius: 6,
+               pointHoverRadius: 9
+             }];
+           } else {
+             // Show all workouts with different shades of blue
+             const workoutNames = Object.keys(workoutTypes);
+             const blueShades = [
+               '#3b82f6', // Blue 500
+               '#60a5fa', // Blue 400
+               '#93c5fd', // Blue 300
+               '#bfdbfe', // Blue 200
+               '#dbeafe', // Blue 100
+               '#1d4ed8', // Blue 700
+               '#1e40af', // Blue 800
+               '#1e3a8a'  // Blue 900
+             ];
+             
+             const datasets = workoutNames.map((workoutName, index) => {
+               const workoutData = labels.map(d => {
+                 const weightLiftedData = weightLiftedByDate[d];
+                 if (!weightLiftedData) return null;
+                 
+                 let totalValue = 0;
+                 Object.values(weightLiftedData).forEach(workout => {
+                   if (workout.workoutName === workoutName) {
+                     if (isWeightLiftedReps && workout.reps) {
+                       totalValue += workout.reps;
+                     } else if (!isWeightLiftedReps && workout.weight && workout.reps) {
+                       totalValue += workout.weight * workout.reps;
+                     }
+                   }
+                 });
+                 return totalValue > 0 ? totalValue : null;
+               });
+               
+               return {
+                 label: workoutName,
+                 data: workoutData,
+                 borderColor: blueShades[index % blueShades.length],
+                 backgroundColor: blueShades[index % blueShades.length] + '30', // Add transparency
+                 fill: false,
+                 tension: 0.25,
+                 pointRadius: 4,
+                 pointHoverRadius: 7
+               };
+             });
+             
+             weightLiftedChart.data.datasets = datasets;
+           }
+           
+           weightLiftedChart.update();
+
            // ----- Food chart (mobile) -----
            mobileFoodChart.data.labels = labels;
            const isMobileFoodFat = mobileFoodChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
            mobileFoodChart.data.datasets[0].data = isMobileFoodFat ? foodCalories.map(v => v/3500) : foodCalories;
            mobileFoodChart.update();
+
+           // ----- Weight Lifted chart (mobile) -----
+           mobileWeightLiftedChart.data.labels = labels;
+           const isMobileWeightLiftedReps = mobileWeightLiftedChart.options.scales.y.title?.text === 'Reps';
+           
+           if (filteredWorkout) {
+             // Show only the filtered workout
+             const mobileFilteredData = labels.map(d => {
+               const weightLiftedData = weightLiftedByDate[d];
+               if (!weightLiftedData) return null;
+               
+               let totalValue = 0;
+               Object.values(weightLiftedData).forEach(workout => {
+                 if (workout.workoutName === filteredWorkout) {
+                   if (isMobileWeightLiftedReps && workout.reps) {
+                     totalValue += workout.reps;
+                   } else if (!isMobileWeightLiftedReps && workout.weight && workout.reps) {
+                     totalValue += workout.weight * workout.reps;
+                   }
+                 }
+               });
+               return totalValue > 0 ? totalValue : null;
+             });
+             
+             // Use single dataset for filtered workout
+             mobileWeightLiftedChart.data.datasets = [{
+               label: filteredWorkout,
+               data: mobileFilteredData,
+               borderColor: '#3b82f6',
+               backgroundColor: 'rgba(59,130,246,.3)',
+               fill: true,
+               tension: 0.25,
+               pointRadius: 6,
+               pointHoverRadius: 9
+             }];
+           } else {
+             // Show all workouts with different shades of blue
+             const workoutNames = Object.keys(workoutTypes);
+             const blueShades = [
+               '#3b82f6', // Blue 500
+               '#60a5fa', // Blue 400
+               '#93c5fd', // Blue 300
+               '#bfdbfe', // Blue 200
+               '#dbeafe', // Blue 100
+               '#1d4ed8', // Blue 700
+               '#1e40af', // Blue 800
+               '#1e3a8a'  // Blue 900
+             ];
+             
+             const mobileDatasets = workoutNames.map((workoutName, index) => {
+               const mobileWorkoutData = labels.map(d => {
+                 const weightLiftedData = weightLiftedByDate[d];
+                 if (!weightLiftedData) return null;
+                 
+                 let totalValue = 0;
+                 Object.values(weightLiftedData).forEach(workout => {
+                   if (workout.workoutName === workoutName) {
+                     if (isMobileWeightLiftedReps && workout.reps) {
+                       totalValue += workout.reps;
+                     } else if (!isMobileWeightLiftedReps && workout.weight && workout.reps) {
+                       totalValue += workout.weight * workout.reps;
+                     }
+                   }
+                 });
+                 return totalValue > 0 ? totalValue : null;
+               });
+               
+               return {
+                 label: workoutName,
+                 data: mobileWorkoutData,
+                 borderColor: blueShades[index % blueShades.length],
+                 backgroundColor: blueShades[index % blueShades.length] + '30', // Add transparency
+                 fill: false,
+                 tension: 0.25,
+                 pointRadius: 4,
+                 pointHoverRadius: 7
+               };
+             });
+             
+             mobileWeightLiftedChart.data.datasets = mobileDatasets;
+           }
+           
+           mobileWeightLiftedChart.update();
 
            // ----- Weight charts -----
            if (userProfile) {
@@ -3554,6 +4375,7 @@
        });
        schart.update();
      }
+
     function previewTreadmill(){
       const {w,s,g,m}=treadmillInputs();
       if(w>0 && s>0 && g>=0 && m>0){
@@ -3833,6 +4655,12 @@
        updateCharts();
      });
 
+     document.getElementById('mobileToggleWeightLiftedReps').addEventListener('click',()=>{
+       const isReps=mobileWeightLiftedChart.options.scales.y.title?.text==='Reps';
+       mobileWeightLiftedChart.options.scales.y.title={display:true,text: isReps ? 'Weight (lbs)' : 'Reps'};
+       updateCharts();
+     });
+
      document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
        const isDetailed = mobileFoodChart.data.datasets.length > 1;
        if (isDetailed) {
@@ -3893,6 +4721,45 @@
        updateCharts();
      });
 
+     document.getElementById('toggleWeightLiftedReps').addEventListener('click',()=>{
+       const isReps=weightLiftedChart.options.scales.y.title?.text==='Reps';
+       weightLiftedChart.options.scales.y.title={display:true,text: isReps ? 'Weight (lbs)' : 'Reps'};
+       updateCharts();
+     });
+
+     document.getElementById('addWorkoutsBtnAlways').addEventListener('click', showAddWorkoutModal);
+     
+     // Double-click event listeners for custom titles
+     document.getElementById('weightLiftedTitle').addEventListener('dblclick', () => {
+       setCustomTitle('weightLiftedTitle', 'Weight Lifted');
+     });
+     
+     document.getElementById('mobileWeightLiftedTitle').addEventListener('dblclick', () => {
+       setCustomTitle('mobileWeightLiftedTitle', 'Weight Lifted');
+     });
+     document.getElementById('showWeightLiftedWorkouts').addEventListener('click', () => {
+       console.log('=== SHOW/HIDE WORKOUTS BUTTON CLICKED ===');
+       const addWorkoutsBtn = document.getElementById('addWorkoutsBtnAlways');
+       const showWorkoutsBtn = document.getElementById('showWeightLiftedWorkouts');
+       
+       console.log('Before toggle:', { workoutMenuVisible, buttonText: showWorkoutsBtn.textContent });
+       
+       // Toggle the workout menu visibility state
+       workoutMenuVisible = !workoutMenuVisible;
+       
+       console.log('After toggle:', { workoutMenuVisible });
+       
+       // Update button text
+       showWorkoutsBtn.textContent = workoutMenuVisible ? 'Hide Workouts' : 'Show Workouts';
+       console.log('Button text updated to:', showWorkoutsBtn.textContent);
+       
+       // Update the UI
+       updateWorkoutMenu();
+       addWorkoutsBtn.style.display = workoutMenuVisible ? 'block' : 'none';
+       console.log('Add workouts button display:', addWorkoutsBtn.style.display);
+       console.log('=== SHOW/HIDE WORKOUTS BUTTON CLICK END ===');
+     });
+
      document.getElementById('toggleWeightFat').addEventListener('click',()=>{
        const isFat=weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
        weightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
@@ -3924,6 +4791,32 @@
      document.getElementById('mobileShowFoods').addEventListener('click', () => {
        // Show mobile food menu modal
        showMobileFoodMenu();
+     });
+     document.getElementById('mobileAddWorkoutsBtnAlways').addEventListener('click', () => {
+       // Show mobile add workout modal
+       showMobileAddWorkoutModal();
+     });
+     document.getElementById('mobileShowWeightLiftedWorkouts').addEventListener('click', () => {
+       console.log('=== MOBILE SHOW/HIDE WORKOUTS BUTTON CLICKED ===');
+       const mobileAddWorkoutsBtn = document.getElementById('mobileAddWorkoutsBtnAlways');
+       const mobileShowWorkoutsBtn = document.getElementById('mobileShowWeightLiftedWorkouts');
+       
+       console.log('Mobile before toggle:', { workoutMenuVisible, buttonText: mobileShowWorkoutsBtn.textContent });
+       
+       // Toggle the workout menu visibility state
+       workoutMenuVisible = !workoutMenuVisible;
+       
+       console.log('Mobile after toggle:', { workoutMenuVisible });
+       
+       // Update button text
+       mobileShowWorkoutsBtn.textContent = workoutMenuVisible ? 'Hide Workouts' : 'Show Workouts';
+       console.log('Mobile button text updated to:', mobileShowWorkoutsBtn.textContent);
+       
+       // Update the UI
+       updateWorkoutMenu();
+       mobileAddWorkoutsBtn.style.display = workoutMenuVisible ? 'block' : 'none';
+       console.log('Mobile add workouts button display:', mobileAddWorkoutsBtn.style.display);
+       console.log('=== MOBILE SHOW/HIDE WORKOUTS BUTTON CLICK END ===');
      });
      document.getElementById('mobileOpenSettings').addEventListener('click', showSettings);
      document.getElementById('mobileDeleteAccountBtn').addEventListener('click', async () => {
@@ -4209,6 +5102,167 @@
      
      // Mobile food modal close event listeners
      document.getElementById('closeMobileCustomFood').addEventListener('click', hideMobileCustomFoodModal);
+     
+     
+     // Add Workout Type Modal Event Listeners
+     document.getElementById('addWorkoutSubmit').addEventListener('click', () => {
+       const name = document.getElementById('workoutName').value.trim();
+       if (!name) {
+         document.getElementById('workoutResult').innerHTML = '<p>Please enter a workout name</p>';
+         return;
+       }
+       
+       // Save workout type to Firebase
+       const icon = pickWorkoutEmoji(name);
+       workoutTypes[name] = {
+         name: name,
+         icon: icon,
+         lastEntry: null
+       };
+       
+       saveUserData();
+       updateWorkoutMenu();
+       updateCharts();
+       
+       document.getElementById('workoutResult').innerHTML = `<div class='math'>Added: ${name}</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideAddWorkoutModal();
+       }, 2000);
+     });
+     
+     document.getElementById('cancelAddWorkout').addEventListener('click', hideAddWorkoutModal);
+     
+     // Workout Entry Modal Event Listeners
+     document.getElementById('workoutEntrySubmit').addEventListener('click', () => {
+       const workoutName = document.getElementById('workoutEntryModal').dataset.workoutName;
+       const weight = parseFloat(document.getElementById('workoutWeight').value);
+       const reps = parseInt(document.getElementById('workoutReps').value);
+       
+       if (!weight || !reps || weight <= 0 || reps <= 0) {
+         document.getElementById('workoutEntryResult').innerHTML = '<p>Please enter valid weight and reps</p>';
+         return;
+       }
+       
+       // Save workout entry
+       const today = todayStr();
+       if (!weightLiftedByDate[today]) {
+         weightLiftedByDate[today] = {};
+       }
+       
+       // Generate unique key for this workout entry
+       const timestamp = new Date().toISOString();
+       const workoutKey = `${workoutName}_${timestamp}`;
+       
+       weightLiftedByDate[today][workoutKey] = {
+         workoutName: workoutName,
+         weight: weight,
+         reps: reps,
+         timestamp: timestamp
+       };
+       
+       // Update last entry for this workout type
+       workoutTypes[workoutName].lastEntry = {
+         weight: weight,
+         reps: reps,
+         date: today
+       };
+       
+       saveUserData();
+       updateCharts();
+       
+       document.getElementById('workoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideWorkoutEntryModal();
+       }, 2000);
+     });
+     
+     document.getElementById('cancelWorkoutEntry').addEventListener('click', hideWorkoutEntryModal);
+     
+     // Mobile Add Workout Type Modal Event Listeners
+     document.getElementById('mobileAddWorkoutSubmit').addEventListener('click', () => {
+       const name = document.getElementById('mobileWorkoutName').value.trim();
+       if (!name) {
+         document.getElementById('mobileWorkoutResult').innerHTML = '<p>Please enter a workout name</p>';
+         return;
+       }
+       
+       // Save workout type to Firebase
+       const icon = pickWorkoutEmoji(name);
+       workoutTypes[name] = {
+         name: name,
+         icon: icon,
+         lastEntry: null
+       };
+       
+       saveUserData();
+       updateWorkoutMenu();
+       updateCharts();
+       
+       document.getElementById('mobileWorkoutResult').innerHTML = `<div class='math'>Added: ${name}</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileAddWorkoutModal();
+       }, 2000);
+     });
+     
+     document.getElementById('mobileCancelAddWorkout').addEventListener('click', hideMobileAddWorkoutModal);
+     
+     // Mobile Workout Entry Modal Event Listeners
+     document.getElementById('mobileWorkoutEntrySubmit').addEventListener('click', () => {
+       const workoutName = document.getElementById('mobileWorkoutEntryModal').dataset.workoutName;
+       const weight = parseFloat(document.getElementById('mobileWorkoutWeight').value);
+       const reps = parseInt(document.getElementById('mobileWorkoutReps').value);
+       
+       if (!weight || !reps || weight <= 0 || reps <= 0) {
+         document.getElementById('mobileWorkoutEntryResult').innerHTML = '<p>Please enter valid weight and reps</p>';
+         return;
+       }
+       
+       // Save workout entry
+       const today = todayStr();
+       if (!weightLiftedByDate[today]) {
+         weightLiftedByDate[today] = {};
+       }
+       
+       // Generate unique key for this workout entry
+       const timestamp = new Date().toISOString();
+       const workoutKey = `${workoutName}_${timestamp}`;
+       
+       weightLiftedByDate[today][workoutKey] = {
+         workoutName: workoutName,
+         weight: weight,
+         reps: reps,
+         timestamp: timestamp
+       };
+       
+       // Update last entry for this workout type
+       workoutTypes[workoutName].lastEntry = {
+         weight: weight,
+         reps: reps,
+         date: today
+       };
+       
+       saveUserData();
+       updateCharts();
+       
+       document.getElementById('mobileWorkoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileWorkoutEntryModal();
+       }, 2000);
+     });
+     
+     document.getElementById('mobileCancelWorkoutEntry').addEventListener('click', hideMobileWorkoutEntryModal);
+     
+     // Input event listeners for emoji matching
+     document.getElementById('workoutName').addEventListener('input', updateWorkoutIcon);
+     document.getElementById('mobileWorkoutName').addEventListener('input', updateMobileWorkoutIcon);
      
      // Add Calories Modal Event Listeners
      document.getElementById('cancelAddCalories').addEventListener('click', hideAddCaloriesModal);
