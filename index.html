@@ -810,7 +810,7 @@
              </div>
              <br>
              <div style="text-align: center; margin: 10px 0;">
-               <button class="primary" id="mobileAddWorkoutsBtnAlways" style="display: none;">Add Workouts</button>
+               <button class="primary" id="mobileAddWorkoutsBtnAlways">Add Workouts</button>
              </div>
            </div>
            
@@ -1420,7 +1420,7 @@
              </div>
              <br>
              <div style="text-align: center; margin: 10px 0;">
-               <button class="primary" id="addWorkoutsBtnAlways" style="display: none;">Add Workouts</button>
+               <button class="primary" id="addWorkoutsBtnAlways">Add Workouts</button>
              </div>
            </div>
          </div>
@@ -2200,6 +2200,48 @@
        });
      }
 
+     // Test function to debug emoji picking
+     function testEmojiPicking() {
+       console.log('=== TESTING EMOJI PICKING ===');
+       console.log('Bench Press:', pickWorkoutEmoji('Bench Press'));
+       console.log('Squats:', pickWorkoutEmoji('Squats'));
+       console.log('Push Ups:', pickWorkoutEmoji('Push Ups'));
+       console.log('Deadlift:', pickWorkoutEmoji('Deadlift'));
+       console.log('Curls:', pickWorkoutEmoji('Curls'));
+       console.log('Planks:', pickWorkoutEmoji('Planks'));
+     }
+
+     // Make testEmojiPicking available globally for console testing
+     window.testEmojiPicking = testEmojiPicking;
+     
+     // Function to test current workoutTypes data
+     function testWorkoutTypes() {
+       console.log('=== CURRENT WORKOUT TYPES ===');
+       console.log(workoutTypes);
+       Object.keys(workoutTypes).forEach(name => {
+         console.log(`${name}: ${workoutTypes[name].icon}`);
+       });
+     }
+     window.testWorkoutTypes = testWorkoutTypes;
+     
+     // Function to test adding a workout
+     function testAddWorkout(name) {
+       console.log('=== TESTING ADD WORKOUT ===');
+       console.log('Input name:', name);
+       const icon = pickWorkoutEmoji(name);
+       console.log('Picked emoji:', icon);
+       
+       workoutTypes[name] = {
+         name: name,
+         icon: icon,
+         lastEntry: null
+       };
+       
+       console.log('Saved workoutTypes:', workoutTypes);
+       updateWorkoutMenu();
+     }
+     window.testAddWorkout = testAddWorkout;
+
      function setCustomTitle(titleId, defaultTitle) {
        const currentTitle = customTitles[titleId] || defaultTitle;
        const newTitle = prompt(`Enter custom title for "${defaultTitle}":`, currentTitle);
@@ -2735,7 +2777,6 @@
      }
 
      function updateWorkoutMenu() {
-       console.log('=== updateWorkoutMenu START ===');
        const workoutContainer = document.getElementById('workoutContainer');
        const mobileWorkoutContainer = document.getElementById('mobileWorkoutContainer');
        const workoutMenu = document.getElementById('workoutMenu');
@@ -2743,54 +2784,29 @@
        const noWorkoutsMessage = document.getElementById('noWorkoutsMessage');
        const mobileNoWorkoutsMessage = document.getElementById('mobileNoWorkoutsMessage');
        
-       console.log('Elements found:', {
-         workoutContainer: !!workoutContainer,
-         mobileWorkoutContainer: !!mobileWorkoutContainer,
-         workoutMenu: !!workoutMenu,
-         mobileWorkoutMenu: !!mobileWorkoutMenu,
-         noWorkoutsMessage: !!noWorkoutsMessage,
-         mobileNoWorkoutsMessage: !!mobileNoWorkoutsMessage
-       });
-       
        // Check if user has any workout types
        const hasWorkouts = Object.keys(workoutTypes).length > 0;
-       console.log('Workout types:', workoutTypes);
-       console.log('hasWorkouts:', hasWorkouts);
        
        // Show/hide no workouts message - only show if no workouts exist AND workout menu is visible
        const shouldShowNoWorkoutsMessage = !hasWorkouts && workoutMenuVisible;
-       noWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
-       mobileNoWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
-       console.log('No workouts message display:', {
-         shouldShowNoWorkoutsMessage,
-         desktop: noWorkoutsMessage.style.display,
-         mobile: mobileNoWorkoutsMessage.style.display
-       });
-       
-       // Show/hide workout containers based on both hasWorkouts and workoutMenuVisible
-       const shouldHide = !hasWorkouts || !workoutMenuVisible;
-       console.log('Visibility logic:', { hasWorkouts, workoutMenuVisible, shouldHide });
-       
-       console.log('Before hide/show - workoutContainer classes:', workoutContainer.className);
-       console.log('Before hide/show - mobileWorkoutContainer classes:', mobileWorkoutContainer.className);
-       
-       if (shouldHide) {
-         console.log('HIDING workout containers');
-         workoutContainer.classList.add('hidden');
-         mobileWorkoutContainer.classList.add('hidden');
-       } else {
-         console.log('SHOWING workout containers');
-         workoutContainer.classList.remove('hidden');
-         mobileWorkoutContainer.classList.remove('hidden');
+       if (noWorkoutsMessage) {
+         noWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
+       }
+       if (mobileNoWorkoutsMessage) {
+         mobileNoWorkoutsMessage.style.display = shouldShowNoWorkoutsMessage ? 'block' : 'none';
        }
        
-       console.log('After hide/show - workoutContainer classes:', workoutContainer.className);
-       console.log('After hide/show - mobileWorkoutContainer classes:', mobileWorkoutContainer.className);
-       console.log('After hide/show - workoutContainer has hidden class:', workoutContainer.classList.contains('hidden'));
-       console.log('After hide/show - mobileWorkoutContainer has hidden class:', mobileWorkoutContainer.classList.contains('hidden'));
-       console.log('After hide/show - workoutContainer computed style:', window.getComputedStyle(workoutContainer).display);
-       console.log('After hide/show - mobileWorkoutContainer computed style:', window.getComputedStyle(mobileWorkoutContainer).display);
-       console.log('=== updateWorkoutMenu END ===');
+       // Show/hide workout containers based on workoutMenuVisible only
+       const shouldHide = !workoutMenuVisible;
+       
+       if (shouldHide) {
+         if (workoutContainer) workoutContainer.classList.add('hidden');
+         if (mobileWorkoutContainer) mobileWorkoutContainer.classList.add('hidden');
+       } else {
+         if (workoutContainer) workoutContainer.classList.remove('hidden');
+         if (mobileWorkoutContainer) mobileWorkoutContainer.classList.remove('hidden');
+       }
+       
        
        if (hasWorkouts) {
          // Clear existing buttons
@@ -2805,6 +2821,8 @@
            const workoutBtn = document.createElement('div');
            workoutBtn.className = `menu-tile ${filteredWorkout === workoutName ? 'filtered' : ''}`;
            workoutBtn.style.border = filteredWorkout === workoutName ? '2px solid #60a5fa' : '';
+           
+           
            workoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
@@ -2825,6 +2843,8 @@
            const mobileWorkoutBtn = document.createElement('div');
            mobileWorkoutBtn.className = `menu-tile ${filteredWorkout === workoutName ? 'filtered' : ''}`;
            mobileWorkoutBtn.style.border = filteredWorkout === workoutName ? '2px solid #60a5fa' : '';
+           
+           
            mobileWorkoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
@@ -3841,6 +3861,8 @@
            const WORKOUT_MAP = new Map([
              // Upper body exercises
              ['bench press', '🏋️'],
+             ['bench', '🏋️'],
+             ['benchpress', '🏋️'],
              ['push up', '💪'],
              ['pushup', '💪'],
              ['push ups', '💪'],
@@ -3855,6 +3877,8 @@
              ['rear delt', '💪'],
              ['bicep curl', '💪'],
              ['biceps', '💪'],
+             ['curl', '💪'],
+             ['curls', '💪'],
              ['tricep', '💪'],
              ['triceps', '💪'],
              ['dip', '💪'],
@@ -3875,6 +3899,7 @@
              // Lower body exercises
              ['squat', '🦵'],
              ['squats', '🦵'],
+             ['leg squat', '🦵'],
              ['leg press', '🦵'],
              ['legs', '🦵'],
              ['deadlift', '🏋️'],
@@ -4738,26 +4763,16 @@
        setCustomTitle('mobileWeightLiftedTitle', 'Weight Lifted');
      });
      document.getElementById('showWeightLiftedWorkouts').addEventListener('click', () => {
-       console.log('=== SHOW/HIDE WORKOUTS BUTTON CLICKED ===');
-       const addWorkoutsBtn = document.getElementById('addWorkoutsBtnAlways');
        const showWorkoutsBtn = document.getElementById('showWeightLiftedWorkouts');
-       
-       console.log('Before toggle:', { workoutMenuVisible, buttonText: showWorkoutsBtn.textContent });
        
        // Toggle the workout menu visibility state
        workoutMenuVisible = !workoutMenuVisible;
        
-       console.log('After toggle:', { workoutMenuVisible });
-       
        // Update button text
        showWorkoutsBtn.textContent = workoutMenuVisible ? 'Hide Workouts' : 'Show Workouts';
-       console.log('Button text updated to:', showWorkoutsBtn.textContent);
        
        // Update the UI
        updateWorkoutMenu();
-       addWorkoutsBtn.style.display = workoutMenuVisible ? 'block' : 'none';
-       console.log('Add workouts button display:', addWorkoutsBtn.style.display);
-       console.log('=== SHOW/HIDE WORKOUTS BUTTON CLICK END ===');
      });
 
      document.getElementById('toggleWeightFat').addEventListener('click',()=>{
@@ -4797,26 +4812,16 @@
        showMobileAddWorkoutModal();
      });
      document.getElementById('mobileShowWeightLiftedWorkouts').addEventListener('click', () => {
-       console.log('=== MOBILE SHOW/HIDE WORKOUTS BUTTON CLICKED ===');
-       const mobileAddWorkoutsBtn = document.getElementById('mobileAddWorkoutsBtnAlways');
        const mobileShowWorkoutsBtn = document.getElementById('mobileShowWeightLiftedWorkouts');
-       
-       console.log('Mobile before toggle:', { workoutMenuVisible, buttonText: mobileShowWorkoutsBtn.textContent });
        
        // Toggle the workout menu visibility state
        workoutMenuVisible = !workoutMenuVisible;
        
-       console.log('Mobile after toggle:', { workoutMenuVisible });
-       
        // Update button text
        mobileShowWorkoutsBtn.textContent = workoutMenuVisible ? 'Hide Workouts' : 'Show Workouts';
-       console.log('Mobile button text updated to:', mobileShowWorkoutsBtn.textContent);
        
        // Update the UI
        updateWorkoutMenu();
-       mobileAddWorkoutsBtn.style.display = workoutMenuVisible ? 'block' : 'none';
-       console.log('Mobile add workouts button display:', mobileAddWorkoutsBtn.style.display);
-       console.log('=== MOBILE SHOW/HIDE WORKOUTS BUTTON CLICK END ===');
      });
      document.getElementById('mobileOpenSettings').addEventListener('click', showSettings);
      document.getElementById('mobileDeleteAccountBtn').addEventListener('click', async () => {
@@ -5114,11 +5119,17 @@
        
        // Save workout type to Firebase
        const icon = pickWorkoutEmoji(name);
+       console.log('=== ADDING WORKOUT ===');
+       console.log('Name:', name);
+       console.log('Picked emoji:', icon);
+       
        workoutTypes[name] = {
          name: name,
          icon: icon,
          lastEntry: null
        };
+       
+       console.log('Saved workoutTypes:', workoutTypes);
        
        saveUserData();
        updateWorkoutMenu();
@@ -5192,11 +5203,17 @@
        
        // Save workout type to Firebase
        const icon = pickWorkoutEmoji(name);
+       console.log('=== ADDING MOBILE WORKOUT ===');
+       console.log('Name:', name);
+       console.log('Picked emoji:', icon);
+       
        workoutTypes[name] = {
          name: name,
          icon: icon,
          lastEntry: null
        };
+       
+       console.log('Saved workoutTypes:', workoutTypes);
        
        saveUserData();
        updateWorkoutMenu();
