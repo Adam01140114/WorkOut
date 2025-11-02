@@ -1719,8 +1719,8 @@
      }
 
      function showAddCaloriesModal() {
-       // Set today's date as default
-       const today = new Date().toISOString().split('T')[0];
+       // Set today's date as default (local timezone)
+       const today = todayStr();
        document.getElementById('caloriesDate').value = today;
        document.getElementById('caloriesAmount').value = '';
        
@@ -2259,7 +2259,18 @@
      }
 
      // ===== Helper Functions =====
-     function todayStr(){return new Date().toISOString().split('T')[0];}
+     // Convert a Date object to YYYY-MM-DD string in local timezone
+     function dateToLocalString(date) {
+       const year = date.getFullYear();
+       const month = String(date.getMonth() + 1).padStart(2, '0');
+       const day = String(date.getDate()).padStart(2, '0');
+       return `${year}-${month}-${day}`;
+     }
+     
+     // Get today's date string in local timezone (not UTC)
+     function todayStr(){
+       return dateToLocalString(new Date());
+     }
      
      // ===== Streak Functions =====
     function calculateStreaks() {
@@ -2323,7 +2334,9 @@
       
       // Calculate current streak
       let currentStreak = 0;
-      let currentDate = new Date(today);
+      // Parse today string to Date in local timezone (midnight local time)
+      const todayParts = today.split('-');
+      let currentDate = new Date(parseInt(todayParts[0]), parseInt(todayParts[1]) - 1, parseInt(todayParts[2]));
       
       // Check if user worked out today
       if (workoutDates.includes(today)) {
@@ -2332,7 +2345,7 @@
         
         // Count backwards to find consecutive days
         while (true) {
-          const checkDate = currentDate.toISOString().split('T')[0];
+          const checkDate = dateToLocalString(currentDate);
           if (workoutDates.includes(checkDate)) {
             currentStreak++;
             currentDate.setDate(currentDate.getDate() - 1);
@@ -2342,9 +2355,9 @@
         }
       } else {
         // Check if user worked out yesterday
-        const yesterday = new Date(today);
+        const yesterday = new Date(currentDate);
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayStr = dateToLocalString(yesterday);
         
         if (workoutDates.includes(yesterdayStr)) {
           // Count backwards from yesterday
@@ -2352,7 +2365,7 @@
           currentDate.setDate(currentDate.getDate() - 2);
           
           while (true) {
-            const checkDate = currentDate.toISOString().split('T')[0];
+            const checkDate = dateToLocalString(currentDate);
             if (workoutDates.includes(checkDate)) {
               currentStreak++;
               currentDate.setDate(currentDate.getDate() - 1);
@@ -2503,13 +2516,13 @@
          const today = new Date();
          const weekStart = new Date(today);
          weekStart.setDate(today.getDate() - today.getDay());
-         const weekStartStr = weekStart.toISOString().split('T')[0];
+         const weekStartStr = dateToLocalString(weekStart);
          
          let weekWorkouts = 0;
          for (let i = 0; i < 7; i++) {
            const checkDate = new Date(weekStart);
            checkDate.setDate(weekStart.getDate() + i);
-           const checkDateStr = checkDate.toISOString().split('T')[0];
+           const checkDateStr = dateToLocalString(checkDate);
            
            if (streakData.workoutDates.has(checkDateStr)) {
              weekWorkouts++;
@@ -2556,7 +2569,7 @@
      }
 
      function showAddWeightModal() {
-       const today = new Date().toISOString().split('T')[0];
+       const today = todayStr();
        document.getElementById('weightDate').value = today;
        document.getElementById('weightAmount').value = '';
        
@@ -3144,38 +3157,40 @@
              ...Object.keys(workoutDataByDate || {})
            ]);
            
-           if (existingDates.size === 0) {
-             // If no data exists, start from 30 days ago to today
-             const today = new Date();
-             const startDate = new Date(today);
-             startDate.setDate(today.getDate() - 30);
-             
-             const allDates = [];
-             const currentDate = new Date(startDate);
-             
-             while (currentDate <= today) {
-               allDates.push(currentDate.toISOString().split('T')[0]);
-               currentDate.setDate(currentDate.getDate() + 1);
-             }
-             
-             return allDates;
-           }
-           
-           // Find the earliest date and extend to today
-           const sortedDates = Array.from(existingDates).sort();
-           const startDate = new Date(sortedDates[0]);
-           const today = new Date();
-           
-           // Generate a complete date range from start to today
-           const allDates = [];
-           const currentDate = new Date(startDate);
-           
-           while (currentDate <= today) {
-             allDates.push(currentDate.toISOString().split('T')[0]);
-             currentDate.setDate(currentDate.getDate() + 1);
-           }
-           
-           return allDates;
+          if (existingDates.size === 0) {
+            // If no data exists, start from 30 days ago to today
+            const today = new Date();
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - 30);
+            
+            const allDates = [];
+            const currentDate = new Date(startDate);
+            
+            while (currentDate <= today) {
+              allDates.push(dateToLocalString(currentDate));
+              currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return allDates;
+          }
+          
+          // Find the earliest date and extend to today
+          const sortedDates = Array.from(existingDates).sort();
+          // Parse date string to local Date (midnight local time)
+          const startParts = sortedDates[0].split('-');
+          const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+          const today = new Date();
+          
+          // Generate a complete date range from start to today
+          const allDates = [];
+          const currentDate = new Date(startDate);
+          
+          while (currentDate <= today) {
+            allDates.push(dateToLocalString(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+          
+          return allDates;
          }
 
          function computeFoodCaloriesForDate(d){
@@ -4033,14 +4048,16 @@
              slopePerDay = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
            }
 
-           // Labels = all actual dates + next N future dates
-           const lastDate = new Date(actualDates[actualDates.length - 1]);
-           const futureLabels = [];
-           for (let i = 1; i <= futureDays; i++) {
-             const d = new Date(lastDate.getTime() + i * 24 * 60 * 60 * 1000);
-             futureLabels.push(d.toISOString().split('T')[0]);
-           }
-           const labels = [...actualDates, ...futureLabels];
+          // Labels = all actual dates + next N future dates
+          // Parse last date string to local Date (midnight local time)
+          const lastParts = actualDates[actualDates.length - 1].split('-');
+          const lastDate = new Date(parseInt(lastParts[0]), parseInt(lastParts[1]) - 1, parseInt(lastParts[2]));
+          const futureLabels = [];
+          for (let i = 1; i <= futureDays; i++) {
+            const d = new Date(lastDate.getTime() + i * 24 * 60 * 60 * 1000);
+            futureLabels.push(dateToLocalString(d));
+          }
+          const labels = [...actualDates, ...futureLabels];
 
            // Actual values align to labels, null for future
            const actual = labels.map(d => (weightByDate[d] ?? null));
