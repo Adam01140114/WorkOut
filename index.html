@@ -2792,18 +2792,11 @@
      // Double-tap detection helper (works on both desktop and mobile)
      let lastTapTime = 0;
      let lastTappedElement = null;
-     let singleClickTimer = null;
      const DOUBLE_TAP_DELAY = 1000; // 1 second
      
      function handleDoubleTap(element, doubleTapCallback, singleClickCallback) {
        const currentTime = Date.now();
        const isDoubleTap = (currentTime - lastTapTime < DOUBLE_TAP_DELAY) && (element === lastTappedElement);
-       
-       // Clear any pending single-click action
-       if (singleClickTimer) {
-         clearTimeout(singleClickTimer);
-         singleClickTimer = null;
-       }
        
        if (isDoubleTap) {
          // Double tap detected - clear tracking and call callback
@@ -2811,22 +2804,22 @@
          lastTappedElement = null;
          doubleTapCallback();
        } else {
-         // First tap - wait to see if there's a second
+         // First tap - execute single-click immediately, but track for potential double-tap
+         if (singleClickCallback) {
+           singleClickCallback();
+         }
+         
+         // Track this tap for potential double-tap detection
          lastTapTime = currentTime;
          lastTappedElement = element;
          
-         // Set a timer for single-click action (after delay to allow for double-tap)
-         if (singleClickCallback) {
-           singleClickTimer = setTimeout(() => {
-             singleClickTimer = null;
-             // Reset tracking if too much time has passed
-             if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
-               lastTapTime = 0;
-               lastTappedElement = null;
-             }
-             singleClickCallback();
-           }, DOUBLE_TAP_DELAY);
-         }
+         // Reset tracking after delay if no second tap
+         setTimeout(() => {
+           if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
+             lastTapTime = 0;
+             lastTappedElement = null;
+           }
+         }, DOUBLE_TAP_DELAY);
        }
      }
 
