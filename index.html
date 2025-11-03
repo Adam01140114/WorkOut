@@ -2789,6 +2789,47 @@
        document.getElementById('mobileWorkoutIcon').textContent = icon;
      }
 
+     // Double-tap detection helper (works on both desktop and mobile)
+     let lastTapTime = 0;
+     let lastTappedElement = null;
+     let singleClickTimer = null;
+     const DOUBLE_TAP_DELAY = 1000; // 1 second
+     
+     function handleDoubleTap(element, doubleTapCallback, singleClickCallback) {
+       const currentTime = Date.now();
+       const isDoubleTap = (currentTime - lastTapTime < DOUBLE_TAP_DELAY) && (element === lastTappedElement);
+       
+       // Clear any pending single-click action
+       if (singleClickTimer) {
+         clearTimeout(singleClickTimer);
+         singleClickTimer = null;
+       }
+       
+       if (isDoubleTap) {
+         // Double tap detected - clear tracking and call callback
+         lastTapTime = 0;
+         lastTappedElement = null;
+         doubleTapCallback();
+       } else {
+         // First tap - wait to see if there's a second
+         lastTapTime = currentTime;
+         lastTappedElement = element;
+         
+         // Set a timer for single-click action (after delay to allow for double-tap)
+         if (singleClickCallback) {
+           singleClickTimer = setTimeout(() => {
+             singleClickTimer = null;
+             // Reset tracking if too much time has passed
+             if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
+               lastTapTime = 0;
+               lastTappedElement = null;
+             }
+             singleClickCallback();
+           }, DOUBLE_TAP_DELAY);
+         }
+       }
+     }
+
      function updateWorkoutMenu() {
        const workoutContainer = document.getElementById('workoutContainer');
        const mobileWorkoutContainer = document.getElementById('mobileWorkoutContainer');
@@ -2839,17 +2880,29 @@
            workoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
-             <button class="ghost open-btn" onclick="event.stopPropagation(); showWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,.2);">Open</button>
+             <button class="primary open-btn" onclick="event.stopPropagation(); showWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; display: inline-block; margin: 4px auto; color: white;">Open</button>
              <button class="delete-btn" onclick="event.stopPropagation(); deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
            `;
            
-           // Single click to filter
+           // Handle clicks with double-tap detection (works on both desktop and mobile)
            workoutBtn.addEventListener('click', (e) => {
              if (e.target.classList.contains('delete-btn') || e.target.classList.contains('open-btn') || e.target.closest('.delete-btn') || e.target.closest('.open-btn')) return; // Don't filter on button clicks
-             filterWorkout(workoutName);
+             
+             // Check for double-tap
+             handleDoubleTap(
+               workoutBtn, 
+               () => {
+                 // Double tap detected - open workout entry modal
+                 showWorkoutEntryModal(workoutName);
+               },
+               () => {
+                 // Single tap - filter workout
+                 filterWorkout(workoutName);
+               }
+             );
            });
            
-           // Double click to edit (keep for convenience)
+           // Also support traditional double-click on desktop for convenience
            workoutBtn.addEventListener('dblclick', () => showWorkoutEntryModal(workoutName));
            workoutMenu.appendChild(workoutBtn);
            
@@ -2862,17 +2915,29 @@
            mobileWorkoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
-             <button class="ghost open-btn" onclick="event.stopPropagation(); showMobileWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,.2);">Open</button>
+             <button class="primary open-btn" onclick="event.stopPropagation(); showMobileWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; display: inline-block; margin: 4px auto; color: white;">Open</button>
              <button class="delete-btn" onclick="event.stopPropagation(); deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
            `;
            
-           // Single click to filter
+           // Handle clicks with double-tap detection (works on both desktop and mobile)
            mobileWorkoutBtn.addEventListener('click', (e) => {
              if (e.target.classList.contains('delete-btn') || e.target.classList.contains('open-btn') || e.target.closest('.delete-btn') || e.target.closest('.open-btn')) return; // Don't filter on button clicks
-             filterWorkout(workoutName);
+             
+             // Check for double-tap
+             handleDoubleTap(
+               mobileWorkoutBtn, 
+               () => {
+                 // Double tap detected - open workout entry modal
+                 showMobileWorkoutEntryModal(workoutName);
+               },
+               () => {
+                 // Single tap - filter workout
+                 filterWorkout(workoutName);
+               }
+             );
            });
            
-           // Double click to edit (keep for convenience)
+           // Also support traditional double-click on desktop for convenience
            mobileWorkoutBtn.addEventListener('dblclick', () => showMobileWorkoutEntryModal(workoutName));
            mobileWorkoutMenu.appendChild(mobileWorkoutBtn);
          });
