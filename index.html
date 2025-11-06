@@ -29,6 +29,8 @@
     .field{margin-bottom:12px;text-align:left}
     .label{font-size:14px;color:var(--muted);margin-bottom:4px;display:block;text-align:left}
     input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0e141b;color:var(--text)}
+    input[type="date"]{cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none}
+    input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:1}
     button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;display:block;margin:8px auto}
     .primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#081018}
     .ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.2)}
@@ -767,16 +769,20 @@
          <div class="streak-progress">
            <div class="streak-bar" id="mobileStreakBar"></div>
          </div>
-         <div class="streak-stats">
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileBestStreak">0</span>
-             <span class="stat-label">Best</span>
-           </div>
-           <div class="streak-stat">
-             <span class="stat-value" id="mobileAverageStreak">0</span>
-             <span class="stat-label">Avg Streak</span>
-           </div>
-         </div>
+        <div class="streak-stats">
+          <div class="streak-stat">
+            <span class="stat-value" id="mobileBestStreak">0</span>
+            <span class="stat-label">Best</span>
+          </div>
+          <div class="streak-stat">
+            <span class="stat-value" id="mobileAverageStreak">0</span>
+            <span class="stat-label">Avg Streak</span>
+          </div>
+          <div class="streak-stat" id="mobileGoalStreakStat" style="cursor: pointer;">
+            <span class="stat-value" id="mobileGoalStreak">5</span>
+            <span class="stat-label">Goal</span>
+          </div>
+        </div>
          </div>
        </div>
        
@@ -1132,10 +1138,14 @@
              <p class="modal-subtitle">ACSM Walking Equation</p>
            </div>
          </div>
-         <div class="field">
-           <label class="label" for="mobileTspeed">Speed (mph)</label>
-           <input id="mobileTspeed" type="number" step="0.1" placeholder="3.5" />
-         </div>
+        <div class="field">
+          <label class="label" for="mobileTdate">Date</label>
+          <input id="mobileTdate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileTspeed">Speed (mph)</label>
+          <input id="mobileTspeed" type="number" step="0.1" placeholder="3.5" />
+        </div>
          <div class="field">
            <label class="label" for="mobileTgrade">Incline (%)</label>
            <input id="mobileTgrade" type="number" step="0.1" placeholder="7.5" />
@@ -1162,10 +1172,14 @@
              <p class="modal-subtitle">MET Method</p>
            </div>
          </div>
-         <div class="field">
-           <label class="label" for="mobileSdur">Duration (min)</label>
-           <input id="mobileSdur" type="number" placeholder="20" />
-         </div>
+        <div class="field">
+          <label class="label" for="mobileSdate">Date</label>
+          <input id="mobileSdate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileSdur">Duration (min)</label>
+          <input id="mobileSdur" type="number" placeholder="20" />
+        </div>
          <div class="field">
            <label class="label" for="mobileSintensity">Intensity</label>
            <select id="mobileSintensity">
@@ -1274,10 +1288,14 @@
              <p class="modal-subtitle" id="workoutEntrySubtitle">Enter your workout details</p>
            </div>
          </div>
-         <div class="field">
-           <label class="label" for="workoutWeight">Weight (lbs)</label>
-           <input id="workoutWeight" type="number" step="0.1" placeholder="Enter weight" />
-         </div>
+        <div class="field">
+          <label class="label" for="workoutDate">Date</label>
+          <input id="workoutDate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="workoutWeight">Weight (lbs)</label>
+          <input id="workoutWeight" type="number" step="0.1" placeholder="Enter weight" />
+        </div>
          <div class="field">
            <label class="label" for="workoutReps">Reps</label>
            <input id="workoutReps" type="number" placeholder="Enter reps" />
@@ -1322,10 +1340,14 @@
              <p class="modal-subtitle" id="mobileWorkoutEntrySubtitle">Enter your workout details</p>
            </div>
          </div>
-         <div class="field">
-           <label class="label" for="mobileWorkoutWeight">Weight (lbs)</label>
-           <input id="mobileWorkoutWeight" type="number" step="0.1" placeholder="Enter weight" />
-         </div>
+        <div class="field">
+          <label class="label" for="mobileWorkoutDate">Date</label>
+          <input id="mobileWorkoutDate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileWorkoutWeight">Weight (lbs)</label>
+          <input id="mobileWorkoutWeight" type="number" step="0.1" placeholder="Enter weight" />
+        </div>
          <div class="field">
            <label class="label" for="mobileWorkoutReps">Reps</label>
            <input id="mobileWorkoutReps" type="number" placeholder="Enter reps" />
@@ -1377,6 +1399,10 @@
             <div class="streak-stat-large">
               <span class="stat-value-large" id="desktopAverageStreak">0</span>
               <span class="stat-label-large">Avg Streak</span>
+            </div>
+            <div class="streak-stat-large" id="desktopGoalStreakStat" style="cursor: pointer;">
+              <span class="stat-value-large" id="desktopGoalStreak">5</span>
+              <span class="stat-label-large">Goal</span>
             </div>
             <div class="streak-stat-large">
               <span class="stat-value-large" id="desktopCurrentWeek">0</span>
@@ -1456,6 +1482,10 @@
        <section class="card hidden" id="treadmillSection">
         <h2>Treadmill Calories · ACSM Walking Equation</h2>
         <div class="field">
+          <label class="label" for="tdate">Date</label>
+          <input id="tdate" type="date" />
+        </div>
+        <div class="field">
           <label class="label" for="tspeed">Speed (mph)</label>
           <input id="tspeed" type="number" step="0.1" placeholder="3.5" />
         </div>
@@ -1477,6 +1507,10 @@
       <!-- Stair Master Section -->
       <section class="card hidden" id="stairSection">
         <h2>Stair Master Calories · MET Method</h2>
+        <div class="field">
+          <label class="label" for="sdate">Date</label>
+          <input id="sdate" type="date" />
+        </div>
         <div class="field">
           <label class="label" for="sdur">Duration (min)</label>
           <input id="sdur" type="number" placeholder="20" />
@@ -2070,6 +2104,7 @@
            weightLoggingClosed = data.weightLoggingClosed || {};
            currentTheme = data.currentTheme || 'dark';
            customTitles = data.customTitles || {};
+           lastTreadmillInputs = data.lastTreadmillInputs || {speed: 3.5, incline: 7.5, duration: 30};
            
            // Apply custom titles
            applyCustomTitles();
@@ -2082,6 +2117,10 @@
              // Convert workoutDates back to Set if it exists
              if (data.streakData.workoutDates) {
                streakData.workoutDates = new Set(data.streakData.workoutDates);
+             }
+             // Ensure goal has a default value if not loaded
+             if (!streakData.goal) {
+               streakData.goal = 5;
              }
            }
            
@@ -2182,6 +2221,7 @@
            currentTheme,
            customTitles,
            streakData: streakDataForStorage,
+           lastTreadmillInputs,
            lastUpdated: new Date()
          });
        } catch (error) {
@@ -2272,6 +2312,66 @@
        return dateToLocalString(new Date());
      }
      
+     // Make date inputs clickable anywhere to open calendar
+     function setupDateInputClickable(dateInput) {
+       if (!dateInput || dateInput.dataset.clickableSetup) return dateInput;
+       
+       // Mark as set up to avoid duplicate listeners
+       dateInput.dataset.clickableSetup = 'true';
+       
+       // Add click listener to open date picker anywhere on the input
+       dateInput.addEventListener('click', function(e) {
+         if (this.type === 'date') {
+           // Try modern showPicker() method first (Chrome 99+, Edge 99+, Safari 16.4+)
+           if (this.showPicker && typeof this.showPicker === 'function') {
+             try {
+               this.showPicker();
+               e.preventDefault();
+               e.stopPropagation();
+               return false;
+             } catch (err) {
+               // Fall back to focus method
+               console.log('showPicker not available, using focus fallback');
+             }
+           }
+           
+           // Fallback: focus the input which will show the picker on mobile
+           // On desktop browsers, this may still require clicking the icon
+           // but focusing makes it easier to interact with
+           this.focus();
+           
+           // For browsers that need it, try to programmatically click the calendar icon
+           // This is a workaround for browsers that don't support showPicker
+           setTimeout(() => {
+             if (document.activeElement === this) {
+               // Try to trigger the calendar by simulating a click on the right edge
+               // where the calendar icon typically appears
+               const rect = this.getBoundingClientRect();
+               const clickEvent = new MouseEvent('mousedown', {
+                 bubbles: true,
+                 cancelable: true,
+                 view: window,
+                 clientX: rect.right - 5,
+                 clientY: rect.top + rect.height / 2
+               });
+               this.dispatchEvent(clickEvent);
+               
+               const clickEvent2 = new MouseEvent('mouseup', {
+                 bubbles: true,
+                 cancelable: true,
+                 view: window,
+                 clientX: rect.right - 5,
+                 clientY: rect.top + rect.height / 2
+               });
+               this.dispatchEvent(clickEvent2);
+             }
+           }, 10);
+         }
+       });
+       
+       return dateInput;
+     }
+     
      // ===== Streak Functions =====
     function calculateStreaks() {
       const today = todayStr();
@@ -2295,6 +2395,7 @@
         streakData.lastWorkoutDate = null;
         streakData.workoutDates = new Set();
         streakData.completedStreaks = [];
+        streakData.goal = streakData.goal || 5; // Preserve goal if it exists
         return;
       }
       
@@ -2480,8 +2581,15 @@
          mobileBestStreak.textContent = streakData.bestStreak;
          mobileAverageStreak.textContent = streakData.averageStreak;
          
-         // Update progress bar (max at 30 days for visual appeal)
-         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         // Update goal display
+         const mobileGoalStreak = document.getElementById('mobileGoalStreak');
+         if (mobileGoalStreak) {
+           mobileGoalStreak.textContent = streakData.goal || 5;
+         }
+         
+         // Update progress bar based on current streak / goal
+         const goal = streakData.goal || 5;
+         const progressPercent = Math.min((streakData.currentStreak / goal) * 100, 100);
          mobileStreakBar.style.width = progressPercent + '%';
          
         // Update mobile icons based on streak
@@ -2512,6 +2620,12 @@
          desktopBestStreak.textContent = streakData.bestStreak;
          desktopAverageStreak.textContent = streakData.averageStreak;
          
+         // Update goal display
+         const desktopGoalStreak = document.getElementById('desktopGoalStreak');
+         if (desktopGoalStreak) {
+           desktopGoalStreak.textContent = streakData.goal || 5;
+         }
+         
          // Calculate workouts this week
          const today = new Date();
          const weekStart = new Date(today);
@@ -2531,8 +2645,9 @@
          
          desktopCurrentWeek.textContent = weekWorkouts;
          
-         // Update progress bar
-         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         // Update progress bar based on current streak / goal
+         const goal = streakData.goal || 5;
+         const progressPercent = Math.min((streakData.currentStreak / goal) * 100, 100);
          desktopStreakBar.style.width = progressPercent + '%';
          
         // Update desktop icons based on streak
@@ -2540,6 +2655,62 @@
         
         // Always show the fire icon
         if (desktopFireIcon) desktopFireIcon.style.display = 'block';
+       }
+       
+       // Set up double-tap to edit goal for mobile
+       const mobileGoalStat = document.getElementById('mobileGoalStreakStat');
+       if (mobileGoalStat && !mobileGoalStat.dataset.listenerAdded) {
+         mobileGoalStat.dataset.listenerAdded = 'true';
+         handleDoubleTap(
+           mobileGoalStat,
+           () => {
+             // Double tap - edit goal
+             const newGoal = prompt('Enter your streak goal (days):', streakData.goal || 5);
+             if (newGoal !== null && !isNaN(newGoal) && parseInt(newGoal) > 0) {
+               streakData.goal = parseInt(newGoal);
+               saveUserData();
+               updateStreakDisplay();
+             }
+           },
+           null // No single click action
+         );
+         // Also support double-click on desktop
+         mobileGoalStat.addEventListener('dblclick', () => {
+           const newGoal = prompt('Enter your streak goal (days):', streakData.goal || 5);
+           if (newGoal !== null && !isNaN(newGoal) && parseInt(newGoal) > 0) {
+             streakData.goal = parseInt(newGoal);
+             saveUserData();
+             updateStreakDisplay();
+           }
+         });
+       }
+       
+       // Set up double-tap to edit goal for desktop
+       const desktopGoalStat = document.getElementById('desktopGoalStreakStat');
+       if (desktopGoalStat && !desktopGoalStat.dataset.listenerAdded) {
+         desktopGoalStat.dataset.listenerAdded = 'true';
+         handleDoubleTap(
+           desktopGoalStat,
+           () => {
+             // Double tap - edit goal
+             const newGoal = prompt('Enter your streak goal (days):', streakData.goal || 5);
+             if (newGoal !== null && !isNaN(newGoal) && parseInt(newGoal) > 0) {
+               streakData.goal = parseInt(newGoal);
+               saveUserData();
+               updateStreakDisplay();
+             }
+           },
+           null // No single click action
+         );
+         // Also support double-click on desktop
+         desktopGoalStat.addEventListener('dblclick', () => {
+           const newGoal = prompt('Enter your streak goal (days):', streakData.goal || 5);
+           if (newGoal !== null && !isNaN(newGoal) && parseInt(newGoal) > 0) {
+             streakData.goal = parseInt(newGoal);
+             saveUserData();
+             updateStreakDisplay();
+           }
+         });
        }
      }
 
@@ -2606,10 +2777,22 @@
        mobileTreadmillModal.classList.remove('hidden');
        mobileTreadmillModal.style.zIndex = '2000';
        
-       // Set default values
-       document.getElementById('mobileTspeed').value = 3.5;
-       document.getElementById('mobileTgrade').value = 7.5;
-       document.getElementById('mobileTdur').value = 30;
+       // Set default values - use setTimeout to ensure DOM is ready for date input
+       setTimeout(() => {
+         const mobileTdateInput = document.getElementById('mobileTdate');
+         const today = todayStr();
+         mobileTdateInput.value = today;
+         mobileTdateInput.setAttribute('value', today);
+         // Ensure the input is properly configured
+         mobileTdateInput.type = 'date';
+         // Make the entire input clickable to open calendar
+         setupDateInputClickable(mobileTdateInput);
+       }, 0);
+       
+       // Load last saved inputs (speed, incline, duration) - date always defaults to today
+       document.getElementById('mobileTspeed').value = lastTreadmillInputs.speed || 3.5;
+       document.getElementById('mobileTgrade').value = lastTreadmillInputs.incline || 7.5;
+       document.getElementById('mobileTdur').value = lastTreadmillInputs.duration || 30;
        previewMobileTreadmill();
      }
 
@@ -2625,7 +2808,16 @@
        mobileStairsModal.classList.remove('hidden');
        mobileStairsModal.style.zIndex = '2000';
        
-       // Set default values
+       // Set default values - ensure value attribute is set
+       setTimeout(() => {
+         const mobileSdateInput = document.getElementById('mobileSdate');
+         const today = todayStr();
+         mobileSdateInput.value = today;
+         mobileSdateInput.setAttribute('value', today);
+         mobileSdateInput.type = 'date';
+         // Make the entire input clickable to open calendar
+         setupDateInputClickable(mobileSdateInput);
+       }, 0);
        document.getElementById('mobileSdur').value = 20;
        document.getElementById('mobileSintensity').value = '8.8';
      }
@@ -2708,6 +2900,15 @@
        document.getElementById('workoutEntrySubtitle').textContent = 'Enter your workout details';
        document.getElementById('workoutEntryIcon').textContent = workout.icon;
        
+       // Initialize date input to today - ensure value attribute is set
+       const workoutDateInput = document.getElementById('workoutDate');
+       const today = todayStr();
+       workoutDateInput.value = today;
+       workoutDateInput.setAttribute('value', today);
+       workoutDateInput.type = 'date';
+       // Make the entire input clickable to open calendar
+       setupDateInputClickable(workoutDateInput);
+       
        // Preload last entry data
        if (workout.lastEntry) {
          document.getElementById('workoutWeight').value = workout.lastEntry.weight || '';
@@ -2752,6 +2953,15 @@
        document.getElementById('mobileWorkoutEntryTitle').textContent = workout.name;
        document.getElementById('mobileWorkoutEntrySubtitle').textContent = 'Enter your workout details';
        document.getElementById('mobileWorkoutEntryIcon').textContent = workout.icon;
+       
+       // Initialize date input to today - ensure value attribute is set
+       const mobileWorkoutDateInput = document.getElementById('mobileWorkoutDate');
+       const today = todayStr();
+       mobileWorkoutDateInput.value = today;
+       mobileWorkoutDateInput.setAttribute('value', today);
+       mobileWorkoutDateInput.type = 'date';
+       // Make the entire input clickable to open calendar
+       setupDateInputClickable(mobileWorkoutDateInput);
        
        // Preload last entry data
        if (workout.lastEntry) {
@@ -3062,6 +3272,7 @@
      let filteredWorkout=null; // currently filtered workout name, null for all
      let workoutMenuVisible=false; // whether workout menu should be visible
      let customTitles={}; // chart title -> custom title value
+     let lastTreadmillInputs={speed: 3.5, incline: 7.5, duration: 30}; // last saved treadmill inputs
      let foodDataByDate={};  // date -> food data for that date
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
@@ -3075,7 +3286,8 @@
       averageStreak: 0,
       lastWorkoutDate: null,
       workoutDates: new Set(),
-      completedStreaks: [] // Array to store individual streak lengths
+      completedStreaks: [], // Array to store individual streak lengths
+      goal: 5 // Default goal is 5 days
     };
 
          // ===== Theme Management =====
@@ -3106,8 +3318,8 @@
       updateCharts();
       saveUserData();
     }
-    function addActivityForToday(value){
-      const d=todayStr();
+    function addActivityForToday(value, dateStr = null){
+      const d = dateStr || todayStr();
       if(!activityByDate[d]) activityByDate[d]=0;
       activityByDate[d]+=Math.round(value);
       updateCharts();
@@ -4428,20 +4640,20 @@
      }
 
      function loadTreadmillInputs() {
+       // Initialize date input to today - ensure value attribute is set
+       const tdateInput = document.getElementById('tdate');
        const today = todayStr();
-       if (workoutDataByDate[today] && workoutDataByDate[today].treadmill) {
-         const data = workoutDataByDate[today].treadmill;
-         tspeed.value = data.s || 3.5;
-         tgrade.value = data.g || 7.5;
-         tdur.value = data.m || 30;
-         previewTreadmill();
-       } else {
-         // Set default values if no saved data
-         tspeed.value = 3.5;
-         tgrade.value = 7.5;
-         tdur.value = 30;
-         previewTreadmill();
-       }
+       tdateInput.value = today;
+       tdateInput.setAttribute('value', today);
+       tdateInput.type = 'date';
+       // Make the entire input clickable to open calendar
+       setupDateInputClickable(tdateInput);
+       
+       // Load last saved inputs (speed, incline, duration) - date always defaults to today
+       tspeed.value = lastTreadmillInputs.speed || 3.5;
+       tgrade.value = lastTreadmillInputs.incline || 7.5;
+       tdur.value = lastTreadmillInputs.duration || 30;
+       previewTreadmill();
      }
 
      function loadTreadmillChart() {
@@ -4490,10 +4702,21 @@
          function renderTreadmill(lbs,mph,gradePct,minutes){
        const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
        tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       addActivityForToday(total);
+       
+       // Save last inputs for next time (speed, incline, duration only - not date)
+       lastTreadmillInputs = {
+         speed: mph,
+         incline: gradePct,
+         duration: minutes
+       };
+       saveUserData();
+       
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('tdate').value || todayStr();
+       addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
-       const today=todayStr();
+       const today = selectedDate;
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -4566,10 +4789,13 @@
          function renderStairs(lbs, minutes, met){
        const total=calcStairKcal(lbs, minutes, met);
        sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
-       addActivityForToday(total);
+       
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('sdate').value || todayStr();
+       addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
-       const today=todayStr();
+       const today = selectedDate;
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -4652,6 +4878,14 @@
        setMenuVisible(false);
        document.getElementById('stairSection').classList.remove('hidden');
        setShowBtnVisible(false);
+       // Initialize date input to today - ensure value attribute is set
+       const sdateInput = document.getElementById('sdate');
+       const today = todayStr();
+       sdateInput.value = today;
+       sdateInput.setAttribute('value', today);
+       sdateInput.type = 'date';
+       // Make the entire input clickable to open calendar
+       setupDateInputClickable(sdateInput);
        loadStairsChart();
      });
          document.getElementById('backFromTreadmill').addEventListener('click',()=>{
@@ -4962,12 +5196,23 @@
          return;
        }
        
+       // Save last inputs for next time (speed, incline, duration only - not date)
+       lastTreadmillInputs = {
+         speed: s,
+         incline: g,
+         duration: m
+       };
+       saveUserData();
+       
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('mobileTdate').value || todayStr();
+       
        const total = calcTreadmillKcal(w, s, g, m);
        document.getElementById('mobileTresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       addActivityForToday(total);
+       addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
-       const today = todayStr();
+       const today = selectedDate;
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -5022,12 +5267,15 @@
          return;
        }
        
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('mobileSdate').value || todayStr();
+       
        const total = calcStairKcal(w, m, met);
        document.getElementById('mobileSresult').innerHTML = `<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
-       addActivityForToday(total);
+       addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
-       const today = todayStr();
+       const today = selectedDate;
        if (!workoutDataByDate[today]) {
          workoutDataByDate[today] = {};
        }
@@ -5247,8 +5495,11 @@
          return;
        }
        
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('workoutDate').value || todayStr();
+       
        // Save workout entry
-       const today = todayStr();
+       const today = selectedDate;
        if (!weightLiftedByDate[today]) {
          weightLiftedByDate[today] = {};
        }
@@ -5331,8 +5582,11 @@
          return;
        }
        
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('mobileWorkoutDate').value || todayStr();
+       
        // Save workout entry
-       const today = todayStr();
+       const today = selectedDate;
        if (!weightLiftedByDate[today]) {
          weightLiftedByDate[today] = {};
        }
