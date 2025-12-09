@@ -38,7 +38,7 @@
     .math{background:#0c1218;border:1px dashed rgba(255,255,255,.2);padding:8px;border-radius:10px;font-family:monospace;white-space:pre-wrap}
     canvas{background:#0e141b;border-radius:10px;padding:10px}
     .hidden{display:none}
-    .workout-container{border:2px solid #6b7280;border-radius:12px;padding:16px;background:rgba(107,114,128,0.05);margin:8px 0}
+    .workout-container{border:2px solid rgba(255,255,255,.2);border-radius:12px;padding:16px;background:rgba(107,114,128,0.05);margin:8px 0}
     .workout-container.hidden{display:none !important}
     .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .no-data-message{text-align:center;padding:20px;color:var(--muted)}
@@ -792,7 +792,7 @@
 
            <h2>Total Calories Burnt</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
+           <button class="ghost hidden" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
 
            <br><br>
@@ -801,7 +801,7 @@
            
            <h2 style="cursor: pointer;" id="mobileWeightLiftedTitle" title="Double-click to set custom title">Weight Lifted</h2>
            <canvas id="mobileWeightLiftedChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWeightLiftedReps">Show Reps Instead</button>
+           <button class="ghost hidden" id="mobileToggleWeightLiftedReps">Show Reps Instead</button>
            <div style="text-align: center; margin: 10px 0;">
              <button class="primary" id="mobileShowWeightLiftedWorkouts">Show Workouts</button>
            </div>
@@ -817,6 +817,7 @@
              <br>
              <div style="text-align: center; margin: 10px 0;">
                <button class="primary" id="mobileAddWorkoutsBtnAlways">Add Workouts</button>
+               <button class="primary" id="mobileHideWorkoutsBtnAlways" style="margin-top: 8px;">Close</button>
              </div>
            </div>
            
@@ -826,7 +827,7 @@
            
            <h2>Weight Trajectory</h2>
            <canvas id="mobileWeightChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
+           <button class="ghost hidden" id="mobileToggleWeightFat">Show Fat Loss</button>
            <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
            
          </div>
@@ -1068,7 +1069,6 @@
          </div>
          <div class="user-actions">
            <button class="primary" id="submitDailyWeight">Submit</button>
-           <button class="ghost" id="maybeLaterWeight">Maybe Later</button>
            <button class="ghost" id="closeWeightModal">Close</button>
          </div>
          <div id="weightLoggingError" class="error-message hidden"></div>
@@ -1112,16 +1112,20 @@
              <p class="modal-subtitle">Select your workout type</p>
            </div>
          </div>
-         <div class="menu-grid" style="margin-bottom: 20px;">
-           <div class="menu-tile" id="mobileOpenTreadmill">
-             <div class="menu-emoji">🏃‍♂️</div>
-             <div>Treadmill</div>
-           </div>
-           <div class="menu-tile" id="mobileOpenStairs">
-             <div class="menu-emoji">🧗</div>
-             <div>Stair Master</div>
-           </div>
-         </div>
+        <div class="menu-grid" style="margin-bottom: 20px;">
+          <div class="menu-tile" id="mobileOpenTreadmill">
+            <div class="menu-emoji">🏃‍♂️</div>
+            <div>Treadmill</div>
+          </div>
+          <div class="menu-tile" id="mobileOpenStairs">
+            <div class="menu-emoji">🧗</div>
+            <div>Stair Master</div>
+          </div>
+          <div class="menu-tile" id="mobileOpenHiking">
+            <div class="menu-emoji">🥾</div>
+            <div>Hiking</div>
+          </div>
+        </div>
          <div class="user-actions">
            <button class="ghost" id="closeMobileWorkoutMenu">Close</button>
          </div>
@@ -1198,10 +1202,44 @@
            <button class="primary" id="mobileScalc">Log Calories</button>
            <button class="ghost" id="closeMobileStairs">Close</button>
          </div>
-       </div>
-     </div>
+      </div>
+    </div>
 
-     <!-- Mobile Food Menu Modal -->
+    <!-- Mobile Hiking Modal -->
+    <div id="mobileHikingModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-icon">🥾</div>
+          <div>
+            <h3 class="modal-title">Hiking Calories</h3>
+            <p class="modal-subtitle">Steps-Based Calculation</p>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="mobileHdate">Date</label>
+          <input id="mobileHdate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileHsteps">Steps</label>
+          <input id="mobileHsteps" type="number" placeholder="10000" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileHintensity">Intensity</label>
+          <select id="mobileHintensity">
+            <option value="flat">Flat walking · 0.00023</option>
+            <option value="moderate" selected>Moderate hiking · 0.00035</option>
+            <option value="steep">Steep hiking · 0.00045</option>
+          </select>
+        </div>
+        <div class="result" id="mobileHresult"></div>
+        <div class="user-actions">
+          <button class="primary" id="mobileHcalc">Log Calories</button>
+          <button class="ghost" id="closeMobileHiking">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Food Menu Modal -->
      <div id="mobileFoodModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
@@ -1424,14 +1462,14 @@
        <section class="card">
          <h2>Total Calories Burnt</h2>
          <canvas id="workoutChart" height="200"></canvas>
-         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="ghost hidden" id="toggleWorkoutFat">Show Fat Loss</button>
          <button class="primary" id="showWorkouts">Show Workouts</button>
          
          <!-- Weight Lifted Section (integrated) -->
          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
            <h2 style="margin-bottom: 16px; cursor: pointer;" id="weightLiftedTitle" title="Double-click to set custom title">Weight Lifted</h2>
            <canvas id="weightLiftedChart" height="200"></canvas>
-           <button class="ghost" id="toggleWeightLiftedReps">Show Reps Instead</button>
+           <button class="ghost hidden" id="toggleWeightLiftedReps">Show Reps Instead</button>
            <div style="text-align: center; margin: 10px 0;">
              <button class="primary" id="showWeightLiftedWorkouts">Show Workouts</button>
            </div>
@@ -1455,7 +1493,7 @@
          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
            <h2 style="margin-bottom: 16px;">Weight Trajectory</h2>
            <canvas id="weightChart" height="200"></canvas>
-           <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+           <button class="ghost hidden" id="toggleWeightFat">Show Fat Loss</button>
            <button class="primary" id="addWeightBtn">Add Weight</button>
          </div>
        </section>
@@ -1500,7 +1538,7 @@
                  <div class="result" id="tresult"></div>
          <button class="primary" id="tcalc">Log Calories</button>
          <canvas id="tchart" height="200"></canvas>
-         <button class="ghost" id="toggleTreadmillFat">Show Fat Loss</button>
+         <button class="ghost hidden" id="toggleTreadmillFat">Show Fat Loss</button>
          <button class="primary" id="backFromTreadmill">Back</button>
       </section>
 
@@ -1531,7 +1569,7 @@
                  <div class="result" id="sresult"></div>
          <button class="primary" id="scalc">Log Calories</button>
          <canvas id="schart" height="200"></canvas>
-         <button class="ghost" id="toggleStairsFat">Show Fat Loss</button>
+         <button class="ghost hidden" id="toggleStairsFat">Show Fat Loss</button>
                   <button class="primary" id="backFromStairs">Back</button>
        </section>
 
@@ -1580,6 +1618,7 @@
         'mobileWorkoutModal',
         'mobileTreadmillModal',
         'mobileStairsModal',
+        'mobileHikingModal',
         'mobileFoodModal',
         'mobileCustomFoodModal',
         'addWorkoutModal',
@@ -2010,10 +2049,6 @@
        }
      });
 
-     document.getElementById('maybeLaterWeight').addEventListener('click', () => {
-       hideWeightLoggingModal();
-     });
-
      document.getElementById('closeWeightModal').addEventListener('click', () => {
        const today = todayStr();
        weightLoggingClosed[today] = true;
@@ -2105,6 +2140,8 @@
            currentTheme = data.currentTheme || 'dark';
            customTitles = data.customTitles || {};
            lastTreadmillInputs = data.lastTreadmillInputs || {speed: 3.5, incline: 7.5, duration: 30};
+           lastStairsInputs = data.lastStairsInputs || {duration: 20, intensity: '8.8', customMet: null};
+           lastHikingInputs = data.lastHikingInputs || {steps: 10000, intensity: 'moderate'};
            
            // Apply custom titles
            applyCustomTitles();
@@ -2222,6 +2259,8 @@
            customTitles,
            streakData: streakDataForStorage,
            lastTreadmillInputs,
+           lastStairsInputs,
+           lastHikingInputs,
            lastUpdated: new Date()
          });
        } catch (error) {
@@ -2790,9 +2829,9 @@
        }, 0);
        
        // Load last saved inputs (speed, incline, duration) - date always defaults to today
-       document.getElementById('mobileTspeed').value = lastTreadmillInputs.speed || 3.5;
-       document.getElementById('mobileTgrade').value = lastTreadmillInputs.incline || 7.5;
-       document.getElementById('mobileTdur').value = lastTreadmillInputs.duration || 30;
+       document.getElementById('mobileTspeed').value = lastTreadmillInputs.speed ?? 3.5;
+       document.getElementById('mobileTgrade').value = lastTreadmillInputs.incline ?? 7.5;
+       document.getElementById('mobileTdur').value = lastTreadmillInputs.duration ?? 30;
        previewMobileTreadmill();
      }
 
@@ -2818,13 +2857,54 @@
          // Make the entire input clickable to open calendar
          setupDateInputClickable(mobileSdateInput);
        }, 0);
-       document.getElementById('mobileSdur').value = 20;
-       document.getElementById('mobileSintensity').value = '8.8';
+       
+       // Load last saved inputs (duration, intensity, customMet) - date always defaults to today
+       document.getElementById('mobileSdur').value = lastStairsInputs.duration ?? 20;
+       document.getElementById('mobileSintensity').value = lastStairsInputs.intensity ?? '8.8';
+       
+       // Handle custom MET if it was saved
+       if (lastStairsInputs.intensity === 'custom' && lastStairsInputs.customMet) {
+         document.getElementById('mobileSintensity').value = 'custom';
+         document.getElementById('mobileScustom').value = lastStairsInputs.customMet;
+         document.getElementById('mobileCustomMetField').classList.remove('hidden');
+       } else {
+         document.getElementById('mobileScustom').value = '';
+         document.getElementById('mobileCustomMetField').classList.add('hidden');
+       }
      }
 
      function hideMobileStairsModal() {
        const mobileStairsModal = document.getElementById('mobileStairsModal');
        mobileStairsModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showMobileHikingModal() {
+       const mobileHikingModal = document.getElementById('mobileHikingModal');
+       mobileHikingModal.classList.remove('hidden');
+       mobileHikingModal.style.zIndex = '2000';
+       
+       // Set default values - ensure value attribute is set
+       setTimeout(() => {
+         const mobileHdateInput = document.getElementById('mobileHdate');
+         const today = todayStr();
+         mobileHdateInput.value = today;
+         mobileHdateInput.setAttribute('value', today);
+         mobileHdateInput.type = 'date';
+         // Make the entire input clickable to open calendar
+         setupDateInputClickable(mobileHdateInput);
+       }, 0);
+       
+       // Load last saved inputs (steps, intensity) - date always defaults to today
+       document.getElementById('mobileHsteps').value = lastHikingInputs.steps ?? 10000;
+       document.getElementById('mobileHintensity').value = lastHikingInputs.intensity ?? 'moderate';
+       previewMobileHiking(); // Show preview with loaded value
+     }
+
+     function hideMobileHikingModal() {
+       const mobileHikingModal = document.getElementById('mobileHikingModal');
+       mobileHikingModal.classList.add('hidden');
        // Reset mobile container to prevent "pushed up" state
        resetMobileContainer();
      }
@@ -3231,7 +3311,7 @@
 
 
      function previewMobileTreadmill() {
-       const w = userProfile?.weight || 170;
+       const w = getMostRecentWeight(); // Use most recent weight from weight trajectory
        const s = +document.getElementById('mobileTspeed').value;
        const g = +document.getElementById('mobileTgrade').value;
        const m = +document.getElementById('mobileTdur').value;
@@ -3241,6 +3321,19 @@
          document.getElementById('mobileTresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
        } else {
          document.getElementById('mobileTresult').innerHTML = '';
+       }
+     }
+
+     function previewMobileHiking() {
+       const w = getMostRecentWeight(); // Use most recent weight from weight trajectory
+       const steps = +document.getElementById('mobileHsteps').value;
+       const intensity = document.getElementById('mobileHintensity').value;
+       
+       if (w > 0 && steps > 0) {
+         const total = calcHikingKcal(w, steps, intensity);
+         document.getElementById('mobileHresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+       } else {
+         document.getElementById('mobileHresult').innerHTML = '';
        }
      }
 
@@ -3260,6 +3353,35 @@
     function calcStairKcal(lbs, minutes, met){
       const kg=lbs/2.2046;const kcalPerMin=(met*3.5*kg)/200;return kcalPerMin*minutes;
     }
+    
+    // Get the most recent weight from weightByDate
+    function getMostRecentWeight() {
+      const weightDates = Object.keys(weightByDate)
+        .filter(d => typeof weightByDate[d] === 'number' && !isNaN(weightByDate[d]))
+        .sort();
+      
+      if (weightDates.length > 0) {
+        const mostRecentDate = weightDates[weightDates.length - 1];
+        return weightByDate[mostRecentDate];
+      }
+      
+      // Fall back to userProfile weight if no weight entries exist
+      return userProfile?.weight || 170;
+    }
+    
+    // Calculate hiking calories based on steps, weight, and intensity
+    // Flat walking: 0.00023 × steps × weight (lbs)
+    // Moderate hiking: 0.00035 × steps × weight (lbs)
+    // Steep hiking: 0.00045 × steps × weight (lbs)
+    function calcHikingKcal(lbs, steps, intensity = 'moderate') {
+      const multipliers = {
+        'flat': 0.00023,
+        'moderate': 0.00035,
+        'steep': 0.00045
+      };
+      const multiplier = multipliers[intensity] || multipliers['moderate'];
+      return steps * lbs * multiplier;
+    }
 
          // ===== State =====
      let bmr=0;
@@ -3273,6 +3395,8 @@
      let workoutMenuVisible=false; // whether workout menu should be visible
      let customTitles={}; // chart title -> custom title value
      let lastTreadmillInputs={speed: 3.5, incline: 7.5, duration: 30}; // last saved treadmill inputs
+     let lastStairsInputs={duration: 20, intensity: '8.8', customMet: null}; // last saved stairs inputs
+     let lastHikingInputs={steps: 10000, intensity: 'moderate'}; // last saved hiking inputs
      let foodDataByDate={};  // date -> food data for that date
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
@@ -3388,10 +3512,10 @@
        data:{labels:[],datasets:[
          {label:'Weight Lifted',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Weight (lbs)'}}}}
-     });
+      options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Reps'}}}}
+    });
 
-     let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
+    let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
      let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
        type:'line',
        data:{labels:[],datasets:[
@@ -3417,8 +3541,8 @@
        data:{labels:[],datasets:[
          {label:'Weight Lifted',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Weight (lbs)'}}}}
-     });
+      options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Reps'}}}}
+    });
 
                   function getAllDates(){
            // Get all existing dates from all data sources
@@ -4626,7 +4750,7 @@
     let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
 
          function treadmillInputs(){
-       return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
+       return {w:getMostRecentWeight(),s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
      }
 
      function saveTreadmillInputs() {
@@ -4650,9 +4774,9 @@
        setupDateInputClickable(tdateInput);
        
        // Load last saved inputs (speed, incline, duration) - date always defaults to today
-       tspeed.value = lastTreadmillInputs.speed || 3.5;
-       tgrade.value = lastTreadmillInputs.incline || 7.5;
-       tdur.value = lastTreadmillInputs.duration || 30;
+       tspeed.value = lastTreadmillInputs.speed ?? 3.5;
+       tgrade.value = lastTreadmillInputs.incline ?? 7.5;
+       tdur.value = lastTreadmillInputs.duration ?? 30;
        previewTreadmill();
      }
 
@@ -4790,6 +4914,16 @@
        const total=calcStairKcal(lbs, minutes, met);
        sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
        
+       // Save last inputs for next time (duration, intensity, customMet) - not date
+       const intensitySelect = document.getElementById('sintensity');
+       const customMetInput = document.getElementById('scustom');
+       lastStairsInputs = {
+         duration: minutes,
+         intensity: intensitySelect.value,
+         customMet: intensitySelect.value === 'custom' ? (customMetInput.value ? parseFloat(customMetInput.value) : null) : null
+       };
+       saveUserData();
+       
        // Get selected date from input, default to today
        const selectedDate = document.getElementById('sdate').value || todayStr();
        addActivityForToday(total, selectedDate);
@@ -4838,7 +4972,7 @@
        checkAndHideSwipeHint();
      }
          scalc.addEventListener('click',()=>{
-       const w=userProfile?.weight||170, m=+sdur.value;
+       const w=getMostRecentWeight(), m=+sdur.value; // Use most recent weight from weight trajectory
        let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
        if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
        renderStairs(w, m, met);
@@ -4886,6 +5020,21 @@
        sdateInput.type = 'date';
        // Make the entire input clickable to open calendar
        setupDateInputClickable(sdateInput);
+       
+       // Load last saved inputs (duration, intensity, customMet) - date always defaults to today
+       document.getElementById('sdur').value = lastStairsInputs.duration ?? 20;
+       document.getElementById('sintensity').value = lastStairsInputs.intensity ?? '8.8';
+       
+       // Handle custom MET if it was saved
+       if (lastStairsInputs.intensity === 'custom' && lastStairsInputs.customMet) {
+         document.getElementById('sintensity').value = 'custom';
+         document.getElementById('scustom').value = lastStairsInputs.customMet;
+         document.getElementById('customMetField').classList.remove('hidden');
+       } else {
+         document.getElementById('scustom').value = '';
+         document.getElementById('customMetField').classList.add('hidden');
+       }
+       
        loadStairsChart();
      });
          document.getElementById('backFromTreadmill').addEventListener('click',()=>{
@@ -5136,14 +5285,27 @@
        // Show mobile add workout modal
        showMobileAddWorkoutModal();
      });
+     document.getElementById('mobileHideWorkoutsBtnAlways').addEventListener('click', () => {
+       const mobileShowWorkoutsBtn = document.getElementById('mobileShowWeightLiftedWorkouts');
+       
+       // Hide the workout menu
+       workoutMenuVisible = false;
+       
+       // Update button text and show it again
+       mobileShowWorkoutsBtn.textContent = 'Show Workouts';
+       mobileShowWorkoutsBtn.classList.remove('hidden');
+       
+       // Update the UI
+       updateWorkoutMenu();
+     });
      document.getElementById('mobileShowWeightLiftedWorkouts').addEventListener('click', () => {
        const mobileShowWorkoutsBtn = document.getElementById('mobileShowWeightLiftedWorkouts');
        
-       // Toggle the workout menu visibility state
-       workoutMenuVisible = !workoutMenuVisible;
+       // Show the workout menu
+       workoutMenuVisible = true;
        
-       // Update button text
-       mobileShowWorkoutsBtn.textContent = workoutMenuVisible ? 'Hide Workouts' : 'Show Workouts';
+       // Hide the "Show Workouts" button immediately
+       mobileShowWorkoutsBtn.classList.add('hidden');
        
        // Update the UI
        updateWorkoutMenu();
@@ -5175,6 +5337,10 @@
        hideMobileWorkoutMenu();
        showMobileStairsModal();
      });
+     document.getElementById('mobileOpenHiking').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileHikingModal();
+     });
      
      // Mobile food menu event listeners
      document.getElementById('closeMobileFoodMenu').addEventListener('click', hideMobileFoodMenu);
@@ -5186,7 +5352,7 @@
      // Mobile treadmill event listeners
      document.getElementById('closeMobileTreadmill').addEventListener('click', hideMobileTreadmillModal);
      document.getElementById('mobileTcalc').addEventListener('click', () => {
-       const w = userProfile?.weight || 170;
+       const w = getMostRecentWeight(); // Use most recent weight from weight trajectory
        const s = +document.getElementById('mobileTspeed').value;
        const g = +document.getElementById('mobileTgrade').value;
        const m = +document.getElementById('mobileTdur').value;
@@ -5253,10 +5419,80 @@
        }, 2000);
      });
      
+     // Mobile hiking event listeners
+     document.getElementById('closeMobileHiking').addEventListener('click', hideMobileHikingModal);
+     document.getElementById('mobileHcalc').addEventListener('click', () => {
+       const w = getMostRecentWeight(); // Use most recent weight from weight trajectory
+       const steps = +document.getElementById('mobileHsteps').value;
+       
+       if (!w || !steps || steps <= 0) {
+         document.getElementById('mobileHresult').innerHTML = '<p>Please enter valid steps</p>';
+         return;
+       }
+       
+       // Get selected intensity
+       const intensity = document.getElementById('mobileHintensity').value;
+       
+       // Save last inputs for next time (steps, intensity - not date)
+       lastHikingInputs = {
+         steps: steps,
+         intensity: intensity
+       };
+       saveUserData();
+       
+       // Get selected date from input, default to today
+       const selectedDate = document.getElementById('mobileHdate').value || todayStr();
+       
+       const total = calcHikingKcal(w, steps, intensity);
+       document.getElementById('mobileHresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total, selectedDate);
+       
+       // Save workout data to Firebase for graphs
+       const today = selectedDate;
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       
+       // If there's already hiking data for today, add to it instead of replacing
+       if (workoutDataByDate[today].hiking) {
+         workoutDataByDate[today].hiking.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].hiking.workouts) {
+           workoutDataByDate[today].hiking.workouts = [];
+         }
+         workoutDataByDate[today].hiking.workouts.push({
+           w: w, steps: steps, intensity: intensity,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].hiking = {
+           w: w, steps: steps, intensity: intensity,
+           calories: Math.round(total),
+           workouts: [{
+             w: w, steps: steps, intensity: intensity,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       saveUserData();
+       
+       // Update charts
+       updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileHikingModal();
+       }, 2000);
+     });
+     
      // Mobile stairs event listeners
      document.getElementById('closeMobileStairs').addEventListener('click', hideMobileStairsModal);
      document.getElementById('mobileScalc').addEventListener('click', () => {
-       const w = userProfile?.weight || 170;
+       const w = getMostRecentWeight(); // Use most recent weight from weight trajectory
        const m = +document.getElementById('mobileSdur').value;
        let met = document.getElementById('mobileSintensity').value === 'custom' ? 
          +document.getElementById('mobileScustom').value : 
@@ -5266,6 +5502,16 @@
          document.getElementById('mobileSresult').innerHTML = '<p>Please enter all values</p>';
          return;
        }
+       
+       // Save last inputs for next time (duration, intensity, customMet) - not date
+       const intensitySelect = document.getElementById('mobileSintensity');
+       const customMetInput = document.getElementById('mobileScustom');
+       lastStairsInputs = {
+         duration: m,
+         intensity: intensitySelect.value,
+         customMet: intensitySelect.value === 'custom' ? (customMetInput.value ? parseFloat(customMetInput.value) : null) : null
+       };
+       saveUserData();
        
        // Get selected date from input, default to today
        const selectedDate = document.getElementById('mobileSdate').value || todayStr();
@@ -5329,7 +5575,11 @@
        document.getElementById('mobileCustomMetField').classList.toggle('hidden', !isCustom);
      });
      
-
+     // Mobile hiking input event listeners for preview
+     ['input', 'change'].forEach(evt => {
+       document.getElementById('mobileHsteps').addEventListener(evt, previewMobileHiking);
+       document.getElementById('mobileHintensity').addEventListener(evt, previewMobileHiking);
+     });
      
      // Mobile custom food event listeners
      document.getElementById('mobileCustomFoodCalc').addEventListener('click', () => {
