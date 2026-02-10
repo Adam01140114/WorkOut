@@ -790,7 +790,7 @@
        
          <div class="mobile-slide-content">
 
-           <h2>Total Calories Burnt</h2>
+           <h2>Calories Burnt</h2>
            <canvas id="mobileWorkoutChart" height="200"></canvas>
            <button class="ghost hidden" id="mobileToggleWorkoutFat">Show Fat Loss</button>
            <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
@@ -2416,13 +2416,22 @@
       const today = todayStr();
       console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
       
-      const workoutDates = Object.keys(workoutDataByDate).filter(date => {
+      // Calorie-burning workouts (treadmill, stairs)
+      const calorieWorkoutDates = Object.keys(workoutDataByDate).filter(date => {
         const day = workoutDataByDate[date];
         const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
         const hasStairs = day.stairs && day.stairs.calories > 0;
-        console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
         return hasTreadmill || hasStairs;
-      }).sort();
+      });
+      
+      // Weight lifted workouts
+      const weightLiftedDates = Object.keys(weightLiftedByDate || {}).filter(date => {
+        const day = weightLiftedByDate[date];
+        return day && Object.keys(day).length > 0;
+      });
+      
+      // Merge and sort - any workout type counts towards streak
+      const workoutDates = [...new Set([...calorieWorkoutDates, ...weightLiftedDates])].sort();
       
       console.log('Filtered workout dates:', workoutDates);
       
@@ -3163,7 +3172,7 @@
            workoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
-             <button class="primary open-btn" onclick="event.stopPropagation(); showWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; display: inline-block; margin: 4px auto;">Open</button>
+             <button class="primary open-btn" onclick="event.stopPropagation(); showWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 8px 16px; font-size: 24px; width: auto; min-width: 120px; display: inline-block; margin: 4px auto;">Open</button>
              <button class="delete-btn" onclick="event.stopPropagation(); deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
            `;
            
@@ -3198,7 +3207,7 @@
            mobileWorkoutBtn.innerHTML = `
              <div class="menu-emoji">${workout.icon}</div>
              <div>${workout.name}</div>
-             <button class="primary open-btn" onclick="event.stopPropagation(); showMobileWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 4px 8px; font-size: 12px; width: auto; min-width: 60px; display: inline-block; margin: 4px auto;">Open</button>
+             <button class="primary open-btn" onclick="event.stopPropagation(); showMobileWorkoutEntryModal('${workoutName}')" style="margin-top: 4px; padding: 8px 16px; font-size: 24px; width: auto; min-width: 120px; display: inline-block; margin: 4px auto;">Open</button>
              <button class="delete-btn" onclick="event.stopPropagation(); deleteWorkout('${workoutName}')" style="background: #f87171; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; margin-top: 4px;">Delete</button>
            `;
            
@@ -5772,18 +5781,22 @@
          date: today
        };
        
-       saveUserData();
-       updateCharts();
-       
-       document.getElementById('workoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideWorkoutEntryModal();
-       }, 2000);
-     });
-     
-     document.getElementById('cancelWorkoutEntry').addEventListener('click', hideWorkoutEntryModal);
+      saveUserData();
+      updateCharts();
+      
+      // Update streaks (weight lifted workouts count too)
+      calculateStreaks();
+      updateStreakDisplay();
+      
+      document.getElementById('workoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        hideWorkoutEntryModal();
+      }, 2000);
+    });
+    
+    document.getElementById('cancelWorkoutEntry').addEventListener('click', hideWorkoutEntryModal);
      
      // Mobile Add Workout Type Modal Event Listeners
      document.getElementById('mobileAddWorkoutSubmit').addEventListener('click', () => {
@@ -5859,18 +5872,22 @@
          date: today
        };
        
-       saveUserData();
-       updateCharts();
-       
-       document.getElementById('mobileWorkoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideMobileWorkoutEntryModal();
-       }, 2000);
-     });
-     
-     document.getElementById('mobileCancelWorkoutEntry').addEventListener('click', hideMobileWorkoutEntryModal);
+      saveUserData();
+      updateCharts();
+      
+      // Update streaks (weight lifted workouts count too)
+      calculateStreaks();
+      updateStreakDisplay();
+      
+      document.getElementById('mobileWorkoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        hideMobileWorkoutEntryModal();
+      }, 2000);
+    });
+    
+    document.getElementById('mobileCancelWorkoutEntry').addEventListener('click', hideMobileWorkoutEntryModal);
      
      // Input event listeners for emoji matching
      document.getElementById('workoutName').addEventListener('input', updateWorkoutIcon);
