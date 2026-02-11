@@ -1126,6 +1126,10 @@
             <div class="menu-emoji">🥾</div>
             <div>Hiking</div>
           </div>
+          <div class="menu-tile" id="mobileOpenMountainBiking">
+            <div class="menu-emoji">🚵</div>
+            <div>Mountain Biking</div>
+          </div>
         </div>
          <div class="user-actions">
            <button class="ghost" id="closeMobileWorkoutMenu">Close</button>
@@ -1236,6 +1240,46 @@
         <div class="user-actions">
           <button class="primary" id="mobileHcalc">Log Calories</button>
           <button class="ghost" id="closeMobileHiking">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Mountain Biking Modal -->
+    <div id="mobileMountainBikingModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-icon">🚵</div>
+          <div>
+            <h3 class="modal-title">Mountain Biking Calories</h3>
+            <p class="modal-subtitle">MET Method</p>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="mobileMbdate">Date</label>
+          <input id="mobileMbdate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileMbdur">Duration (min)</label>
+          <input id="mobileMbdur" type="number" placeholder="45" />
+        </div>
+        <div class="field">
+          <label class="label" for="mobileMbintensity">Intensity</label>
+          <select id="mobileMbintensity">
+            <option value="6">Easy · 6 MET</option>
+            <option value="8" selected>Moderate · 8 MET</option>
+            <option value="10">Hard · 10 MET</option>
+            <option value="12">Vigorous · 12 MET</option>
+            <option value="custom">Custom MET</option>
+          </select>
+        </div>
+        <div class="field hidden" id="mobileMbCustomMetField">
+          <label class="label" for="mobileMbscustom">Custom MET</label>
+          <input id="mobileMbscustom" type="number" step="0.1" placeholder="9" />
+        </div>
+        <div class="result" id="mobileMbresult"></div>
+        <div class="user-actions">
+          <button class="primary" id="mobileMbcalc">Log Calories</button>
+          <button class="ghost" id="closeMobileMountainBiking">Close</button>
         </div>
       </div>
     </div>
@@ -1511,6 +1555,10 @@
             <div class="menu-emoji">🧗</div>
             <div>Stair Master</div>
           </div>
+          <div class="menu-tile" id="openMountainBiking">
+            <div class="menu-emoji">🚵</div>
+            <div>Mountain Biking</div>
+          </div>
         </div>
         <button class="ghost" id="hideWorkouts">Hide Workouts</button>
       </section>
@@ -1574,6 +1622,36 @@
                   <button class="primary" id="backFromStairs">Back</button>
        </section>
 
+      <!-- Mountain Biking Section -->
+      <section class="card hidden" id="mountainBikingSection">
+        <h2>Mountain Biking Calories · MET Method</h2>
+        <div class="field">
+          <label class="label" for="mbdate">Date</label>
+          <input id="mbdate" type="date" />
+        </div>
+        <div class="field">
+          <label class="label" for="mbdur">Duration (min)</label>
+          <input id="mbdur" type="number" placeholder="45" />
+        </div>
+        <div class="field">
+          <label class="label" for="mbintensity">Intensity</label>
+          <select id="mbintensity">
+            <option value="6">Easy · 6 MET</option>
+            <option value="8" selected>Moderate · 8 MET</option>
+            <option value="10">Hard · 10 MET</option>
+            <option value="12">Vigorous · 12 MET</option>
+            <option value="custom">Custom MET</option>
+          </select>
+        </div>
+        <div class="field hidden" id="mbCustomMetField">
+          <label class="label" for="mbscustom">Custom MET</label>
+          <input id="mbscustom" type="number" step="0.1" placeholder="9" />
+        </div>
+        <div class="result" id="mbresult"></div>
+        <button class="primary" id="mbcalc">Log Calories</button>
+        <button class="primary" id="backFromMountainBiking">Back</button>
+      </section>
+
        <!-- Settings and Logout Section -->
        <section class="card">
 
@@ -1620,6 +1698,7 @@
         'mobileTreadmillModal',
         'mobileStairsModal',
         'mobileHikingModal',
+        'mobileMountainBikingModal',
         'mobileFoodModal',
         'mobileCustomFoodModal',
         'addWorkoutModal',
@@ -2143,6 +2222,7 @@
            lastTreadmillInputs = data.lastTreadmillInputs || {speed: 3.5, incline: 7.5, duration: 30};
            lastStairsInputs = data.lastStairsInputs || {duration: 20, intensity: '8.8', customMet: null};
            lastHikingInputs = data.lastHikingInputs || {steps: 10000, intensity: 'moderate'};
+           lastMountainBikingInputs = data.lastMountainBikingInputs || {duration: 45, intensity: '8', customMet: null};
            
            // Apply custom titles
            applyCustomTitles();
@@ -2261,7 +2341,8 @@
            streakData: streakDataForStorage,
            lastTreadmillInputs,
            lastStairsInputs,
-           lastHikingInputs,
+             lastHikingInputs,
+             lastMountainBikingInputs,
            lastUpdated: new Date()
          });
        } catch (error) {
@@ -2423,7 +2504,8 @@
         const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
         const hasStairs = day.stairs && day.stairs.calories > 0;
         const hasHiking = day.hiking && day.hiking.calories > 0;
-        return hasTreadmill || hasStairs || hasHiking;
+        const hasMountainBiking = day.mountainBiking && day.mountainBiking.calories > 0;
+        return hasTreadmill || hasStairs || hasHiking || hasMountainBiking;
       });
       
       // Weight lifted workouts
@@ -2920,6 +3002,39 @@
        resetMobileContainer();
      }
 
+     function showMobileMountainBikingModal() {
+       const mobileMountainBikingModal = document.getElementById('mobileMountainBikingModal');
+       mobileMountainBikingModal.classList.remove('hidden');
+       mobileMountainBikingModal.style.zIndex = '2000';
+       
+       setTimeout(() => {
+         const mobileMbdateInput = document.getElementById('mobileMbdate');
+         const today = todayStr();
+         mobileMbdateInput.value = today;
+         mobileMbdateInput.setAttribute('value', today);
+         mobileMbdateInput.type = 'date';
+         setupDateInputClickable(mobileMbdateInput);
+       }, 0);
+       
+       document.getElementById('mobileMbdur').value = lastMountainBikingInputs.duration ?? 45;
+       document.getElementById('mobileMbintensity').value = lastMountainBikingInputs.intensity ?? '8';
+       if (lastMountainBikingInputs.intensity === 'custom' && lastMountainBikingInputs.customMet) {
+         document.getElementById('mobileMbintensity').value = 'custom';
+         document.getElementById('mobileMbscustom').value = lastMountainBikingInputs.customMet;
+         document.getElementById('mobileMbCustomMetField').classList.remove('hidden');
+       } else {
+         document.getElementById('mobileMbscustom').value = '';
+         document.getElementById('mobileMbCustomMetField').classList.add('hidden');
+       }
+       previewMobileMountainBiking();
+     }
+
+     function hideMobileMountainBikingModal() {
+       const mobileMountainBikingModal = document.getElementById('mobileMountainBikingModal');
+       mobileMountainBikingModal.classList.add('hidden');
+       resetMobileContainer();
+     }
+
      function showMobileFoodMenu() {
        const mobileFoodModal = document.getElementById('mobileFoodModal');
        mobileFoodModal.classList.remove('hidden');
@@ -3348,6 +3463,21 @@
        }
      }
 
+     function previewMobileMountainBiking() {
+       const w = getMostRecentWeight();
+       const m = +document.getElementById('mobileMbdur').value;
+       let met = document.getElementById('mobileMbintensity').value === 'custom' ?
+         +document.getElementById('mobileMbscustom').value :
+         +document.getElementById('mobileMbintensity').value;
+       
+       if (w > 0 && m > 0 && met > 0) {
+         const total = calcStairKcal(w, m, met);
+         document.getElementById('mobileMbresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+       } else {
+         document.getElementById('mobileMbresult').innerHTML = '';
+       }
+     }
+
      function addWeightForDate(weight, date) {
        weightByDate[date] = weight;
        console.log('Weight added for date:', date, 'weight:', weight);
@@ -3408,6 +3538,7 @@
      let lastTreadmillInputs={speed: 3.5, incline: 7.5, duration: 30}; // last saved treadmill inputs
      let lastStairsInputs={duration: 20, intensity: '8.8', customMet: null}; // last saved stairs inputs
      let lastHikingInputs={steps: 10000, intensity: 'moderate'}; // last saved hiking inputs
+    let lastMountainBikingInputs={duration: 45, intensity: '8', customMet: null}; // last saved mountain biking inputs
      let foodDataByDate={};  // date -> food data for that date
      let customFoods={};     // custom food name -> {name, calories, icon}
      let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
@@ -4524,6 +4655,7 @@
              if (w?.treadmill?.calories) t += w.treadmill.calories;
              if (w?.stairs?.calories)    t += w.stairs.calories;
              if (w?.hiking?.calories)    t += w.hiking.calories;
+             if (w?.mountainBiking?.calories) t += w.mountainBiking.calories;
              return t;
            });
 
@@ -4995,6 +5127,51 @@
        renderStairs(w, m, met);
      });
 
+    // ===== Mountain Biking =====
+    const mbintensity = document.getElementById('mbintensity');
+    const mbscustom = document.getElementById('mbscustom');
+    mbintensity.addEventListener('change',()=>{
+      const isCustom = mbintensity.value==='custom';
+      document.getElementById('mbCustomMetField').classList.toggle('hidden', !isCustom);
+    });
+    document.getElementById('mbcalc').addEventListener('click',()=>{
+      const w = getMostRecentWeight();
+      const m = +document.getElementById('mbdur').value;
+      let met = mbintensity.value==='custom' ? +mbscustom.value : +mbintensity.value;
+      if(!w||!m||!met){document.getElementById('mbresult').innerHTML='<p>Please enter all values</p>';return;}
+      const total = calcStairKcal(w, m, met);
+      document.getElementById('mbresult').innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+      
+      lastMountainBikingInputs = {
+        duration: m,
+        intensity: mbintensity.value,
+        customMet: mbintensity.value === 'custom' ? (mbscustom.value ? parseFloat(mbscustom.value) : null) : null
+      };
+      saveUserData();
+      
+      const selectedDate = document.getElementById('mbdate').value || todayStr();
+      addActivityForToday(total, selectedDate);
+      
+      const today = selectedDate;
+      if (!workoutDataByDate[today]) workoutDataByDate[today] = {};
+      
+      if (workoutDataByDate[today].mountainBiking) {
+        workoutDataByDate[today].mountainBiking.calories += Math.round(total);
+        if (!workoutDataByDate[today].mountainBiking.workouts) workoutDataByDate[today].mountainBiking.workouts = [];
+        workoutDataByDate[today].mountainBiking.workouts.push({ w: w, m: m, met: met, calories: Math.round(total) });
+      } else {
+        workoutDataByDate[today].mountainBiking = {
+          w: w, m: m, met: met, calories: Math.round(total),
+          workouts: [{ w: w, m: m, met: met, calories: Math.round(total) }]
+        };
+      }
+      saveUserData();
+      updateCharts();
+      calculateStreaks();
+      updateStreakDisplay();
+      checkAndHideSwipeHint();
+    });
+
     // ===== Workouts Menu Show/Hide =====
     const workoutMenu=document.getElementById('workoutMenu');
     const showBtn=document.getElementById('showWorkouts');
@@ -5054,6 +5231,27 @@
        
        loadStairsChart();
      });
+         document.getElementById('openMountainBiking').addEventListener('click',()=>{
+       setMenuVisible(false);
+       document.getElementById('mountainBikingSection').classList.remove('hidden');
+       setShowBtnVisible(false);
+       const mbdateInput = document.getElementById('mbdate');
+       const today = todayStr();
+       mbdateInput.value = today;
+       mbdateInput.setAttribute('value', today);
+       mbdateInput.type = 'date';
+       setupDateInputClickable(mbdateInput);
+       document.getElementById('mbdur').value = lastMountainBikingInputs.duration ?? 45;
+       document.getElementById('mbintensity').value = lastMountainBikingInputs.intensity ?? '8';
+       if (lastMountainBikingInputs.intensity === 'custom' && lastMountainBikingInputs.customMet) {
+         document.getElementById('mbintensity').value = 'custom';
+         document.getElementById('mbscustom').value = lastMountainBikingInputs.customMet;
+         document.getElementById('mbCustomMetField').classList.remove('hidden');
+       } else {
+         document.getElementById('mbscustom').value = '';
+         document.getElementById('mbCustomMetField').classList.add('hidden');
+       }
+     });
          document.getElementById('backFromTreadmill').addEventListener('click',()=>{
        document.getElementById('treadmillSection').classList.add('hidden');
        setMenuVisible(true);
@@ -5062,6 +5260,12 @@
      });
      document.getElementById('backFromStairs').addEventListener('click',()=>{
        document.getElementById('stairSection').classList.add('hidden');
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+       showBtn.textContent='Hide Workouts';
+     });
+     document.getElementById('backFromMountainBiking').addEventListener('click',()=>{
+       document.getElementById('mountainBikingSection').classList.add('hidden');
        setMenuVisible(true);
        setShowBtnVisible(false);
        showBtn.textContent='Hide Workouts';
@@ -5368,6 +5572,10 @@
        hideMobileWorkoutMenu();
        showMobileHikingModal();
      });
+     document.getElementById('mobileOpenMountainBiking').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileMountainBikingModal();
+     });
      
      // Mobile food menu event listeners
      document.getElementById('closeMobileFoodMenu').addEventListener('click', hideMobileFoodMenu);
@@ -5514,6 +5722,63 @@
        setTimeout(() => {
          hideMobileHikingModal();
        }, 2000);
+     });
+     
+     // Mobile mountain biking event listeners
+     document.getElementById('closeMobileMountainBiking').addEventListener('click', hideMobileMountainBikingModal);
+     document.getElementById('mobileMbcalc').addEventListener('click', () => {
+       const w = getMostRecentWeight();
+       const m = +document.getElementById('mobileMbdur').value;
+       let met = document.getElementById('mobileMbintensity').value === 'custom' ?
+         +document.getElementById('mobileMbscustom').value :
+         +document.getElementById('mobileMbintensity').value;
+       
+       if (!w || !m || !met || m <= 0) {
+         document.getElementById('mobileMbresult').innerHTML = '<p>Please enter valid values</p>';
+         return;
+       }
+       
+       lastMountainBikingInputs = {
+         duration: m,
+         intensity: document.getElementById('mobileMbintensity').value,
+         customMet: document.getElementById('mobileMbintensity').value === 'custom' ?
+           (document.getElementById('mobileMbscustom').value ? parseFloat(document.getElementById('mobileMbscustom').value) : null) : null
+       };
+       saveUserData();
+       
+       const selectedDate = document.getElementById('mobileMbdate').value || todayStr();
+       const total = calcStairKcal(w, m, met);
+       document.getElementById('mobileMbresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total, selectedDate);
+       
+       const today = selectedDate;
+       if (!workoutDataByDate[today]) workoutDataByDate[today] = {};
+       
+       if (workoutDataByDate[today].mountainBiking) {
+         workoutDataByDate[today].mountainBiking.calories += Math.round(total);
+         if (!workoutDataByDate[today].mountainBiking.workouts) workoutDataByDate[today].mountainBiking.workouts = [];
+         workoutDataByDate[today].mountainBiking.workouts.push({ w: w, m: m, met: met, calories: Math.round(total) });
+       } else {
+         workoutDataByDate[today].mountainBiking = {
+           w: w, m: m, met: met, calories: Math.round(total),
+           workouts: [{ w: w, m: m, met: met, calories: Math.round(total) }]
+         };
+       }
+       saveUserData();
+       updateCharts();
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       setTimeout(() => hideMobileMountainBikingModal(), 2000);
+     });
+     document.getElementById('mobileMbintensity').addEventListener('change', () => {
+       const isCustom = document.getElementById('mobileMbintensity').value === 'custom';
+       document.getElementById('mobileMbCustomMetField').classList.toggle('hidden', !isCustom);
+     });
+     ['input', 'change'].forEach(evt => {
+       document.getElementById('mobileMbdur').addEventListener(evt, previewMobileMountainBiking);
+       document.getElementById('mobileMbintensity').addEventListener(evt, previewMobileMountainBiking);
+       document.getElementById('mobileMbscustom').addEventListener(evt, previewMobileMountainBiking);
      });
      
      // Mobile stairs event listeners
