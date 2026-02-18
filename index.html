@@ -1739,10 +1739,14 @@
         origin,
         colors: ['#ff69b4', '#ff1493', '#ffc0cb', '#db7093', '#ffb6c1']
       });
-      // Confetti canvas must be on top - set max z-index
+      // Confetti canvas must be on top, transparent so content shows through
       requestAnimationFrame(() => {
         document.querySelectorAll('body > canvas').forEach(c => {
-          if (getComputedStyle(c).position === 'fixed') c.style.zIndex = '2147483647';
+          if (getComputedStyle(c).position === 'fixed') {
+            c.style.zIndex = '2147483647';
+            c.style.background = 'transparent';
+            c.style.pointerEvents = 'none';
+          }
         });
       });
     }
