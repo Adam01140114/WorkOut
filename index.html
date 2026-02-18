@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
      <title>WorkSmart - Calorie Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -1720,6 +1721,31 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    // ===== Gamification: Workout celebration =====
+    function triggerWorkoutConfetti(buttonElement) {
+      if (typeof confetti !== 'function') return;
+      let origin = { y: 0.6 };
+      if (buttonElement && buttonElement.getBoundingClientRect) {
+        const rect = buttonElement.getBoundingClientRect();
+        origin = {
+          x: (rect.left + rect.width / 2) / window.innerWidth,
+          y: (rect.top + rect.height / 2) / window.innerHeight
+        };
+      }
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin,
+        colors: ['#ff69b4', '#ff1493', '#ffc0cb', '#db7093', '#ffb6c1']
+      });
+      // Confetti canvas must be on top - set max z-index
+      requestAnimationFrame(() => {
+        document.querySelectorAll('body > canvas').forEach(c => {
+          if (getComputedStyle(c).position === 'fixed') c.style.zIndex = '2147483647';
+        });
+      });
+    }
 
          // ===== Modal Management =====
     function liftModalsToBody() {
@@ -5069,6 +5095,7 @@
          function renderTreadmill(lbs,mph,gradePct,minutes){
        const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
        tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       triggerWorkoutConfetti(document.getElementById('tcalc'));
        
        // Save last inputs for next time (speed, incline, duration only - not date)
        lastTreadmillInputs = {
@@ -5156,6 +5183,7 @@
          function renderStairs(lbs, minutes, met){
        const total=calcStairKcal(lbs, minutes, met);
        sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       triggerWorkoutConfetti(document.getElementById('scalc'));
        
        // Save last inputs for next time (duration, intensity, customMet) - not date
        const intensitySelect = document.getElementById('sintensity');
@@ -5235,6 +5263,7 @@
       if(!w||!m||!met){document.getElementById('mbresult').innerHTML='<p>Please enter all values</p>';return;}
       const total = calcStairKcal(w, m, met);
       document.getElementById('mbresult').innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+      triggerWorkoutConfetti(document.getElementById('mbcalc'));
       
       lastMountainBikingInputs = {
         duration: m,
@@ -5718,6 +5747,7 @@
        
        const total = calcTreadmillKcal(w, s, g, m);
        document.getElementById('mobileTresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       triggerWorkoutConfetti(document.getElementById('mobileTcalc'));
        addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
@@ -5788,6 +5818,7 @@
        
        const total = calcHikingKcal(w, steps, intensity);
        document.getElementById('mobileHresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       triggerWorkoutConfetti(document.getElementById('mobileHcalc'));
        addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
@@ -5857,6 +5888,7 @@
        const selectedDate = document.getElementById('mobileMbdate').value || todayStr();
        const total = calcStairKcal(w, m, met);
        document.getElementById('mobileMbresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       triggerWorkoutConfetti(document.getElementById('mobileMbcalc'));
        addActivityForToday(total, selectedDate);
        
        const today = selectedDate;
@@ -5918,6 +5950,7 @@
        
        const total = calcStairKcal(w, m, met);
        document.getElementById('mobileSresult').innerHTML = `<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       triggerWorkoutConfetti(document.getElementById('mobileScalc'));
        addActivityForToday(total, selectedDate);
        
        // Save workout data to Firebase for graphs
@@ -6180,6 +6213,7 @@
       updateStreakDisplay();
       
       document.getElementById('workoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+      triggerWorkoutConfetti(document.getElementById('workoutEntrySubmit'));
       
       // Close modal after a short delay
       setTimeout(() => {
@@ -6271,6 +6305,7 @@
       updateStreakDisplay();
       
       document.getElementById('mobileWorkoutEntryResult').innerHTML = `<div class='math'>Logged: ${weight} lbs × ${reps} reps</div>`;
+      triggerWorkoutConfetti(document.getElementById('mobileWorkoutEntrySubmit'));
       
       // Close modal after a short delay
       setTimeout(() => {
