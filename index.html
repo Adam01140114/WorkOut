@@ -848,7 +848,7 @@
              </div>
              <br>
              <div style="text-align: center; margin: 10px 0;">
-               <button class="primary" id="mobileAddWorkoutsBtnAlways" style="padding: 14px 20px; font-size: 16px;">Add Workouts</button>
+               <button class="primary" id="mobileAddWorkoutsBtnAlways" style="padding: 12px 18px; font-size: 15px;">Add Workouts</button>
                <button class="primary" id="mobileHideWorkoutsBtnAlways" style="margin-top: 12px; padding: 14px 20px; font-size: 16px;">Close</button>
              </div>
            </div>
@@ -1196,8 +1196,8 @@
          </div>
          <div class="result" id="mobileTresult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileTcalc" style="padding: 14px 20px; font-size: 16px;">Log Calories</button>
-           <button class="ghost" id="closeMobileTreadmill" style="padding: 14px 20px; font-size: 16px;">Close</button>
+           <button class="primary" id="mobileTcalc" style="padding: 12px 18px; font-size: 15px;">Log Calories</button>
+           <button class="ghost" id="closeMobileTreadmill" style="padding: 12px 18px; font-size: 15px;">Close</button>
          </div>
        </div>
      </div>
@@ -1235,8 +1235,8 @@
          </div>
          <div class="result" id="mobileSresult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileScalc" style="padding: 14px 20px; font-size: 16px;">Log Calories</button>
-           <button class="ghost" id="closeMobileStairs" style="padding: 14px 20px; font-size: 16px;">Close</button>
+           <button class="primary" id="mobileScalc" style="padding: 12px 18px; font-size: 15px;">Log Calories</button>
+           <button class="ghost" id="closeMobileStairs" style="padding: 12px 18px; font-size: 15px;">Close</button>
          </div>
       </div>
     </div>
@@ -1269,8 +1269,8 @@
         </div>
         <div class="result" id="mobileHresult"></div>
         <div class="user-actions">
-          <button class="primary" id="mobileHcalc" style="padding: 14px 20px; font-size: 16px;">Log Calories</button>
-          <button class="ghost" id="closeMobileHiking" style="padding: 14px 20px; font-size: 16px;">Close</button>
+          <button class="primary" id="mobileHcalc" style="padding: 12px 18px; font-size: 15px;">Log Calories</button>
+          <button class="ghost" id="closeMobileHiking" style="padding: 12px 18px; font-size: 15px;">Close</button>
         </div>
       </div>
     </div>
@@ -1309,8 +1309,8 @@
         </div>
         <div class="result" id="mobileMbresult"></div>
         <div class="user-actions">
-          <button class="primary" id="mobileMbcalc" style="padding: 14px 20px; font-size: 16px;">Log Calories</button>
-          <button class="ghost" id="closeMobileMountainBiking" style="padding: 14px 20px; font-size: 16px;">Close</button>
+          <button class="primary" id="mobileMbcalc" style="padding: 12px 18px; font-size: 15px;">Log Calories</button>
+          <button class="ghost" id="closeMobileMountainBiking" style="padding: 12px 18px; font-size: 15px;">Close</button>
         </div>
       </div>
     </div>
@@ -1468,8 +1468,8 @@
          </div>
          <div class="result" id="mobileWorkoutEntryResult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileWorkoutEntrySubmit" style="padding: 16px 24px; font-size: 18px;">Log Workout</button>
-           <button class="ghost" id="mobileCancelWorkoutEntry" style="padding: 16px 24px; font-size: 18px;">Cancel</button>
+           <button class="primary" id="mobileWorkoutEntrySubmit" style="padding: 12px 18px; font-size: 15px;">Log Workout</button>
+           <button class="ghost" id="mobileCancelWorkoutEntry" style="padding: 12px 18px; font-size: 15px;">Cancel</button>
          </div>
        </div>
      </div>
@@ -3239,16 +3239,22 @@
      // Double-tap detection helper (works on both desktop and mobile)
      let lastTapTime = 0;
      let lastTappedElement = null;
-     const DOUBLE_TAP_DELAY = 1000; // 1 second
+     let lastTappedIdentifier = null; // Used when single-tap recreates DOM (e.g. workout tiles)
+     const DOUBLE_TAP_DELAY = 600; // 600ms - works on mobile where tap is two separate clicks
      
-     function handleDoubleTap(element, doubleTapCallback, singleClickCallback) {
+     function handleDoubleTap(element, doubleTapCallback, singleClickCallback, identifier) {
        const currentTime = Date.now();
-       const isDoubleTap = (currentTime - lastTapTime < DOUBLE_TAP_DELAY) && (element === lastTappedElement);
+       // Use identifier when provided - critical for workout tiles where single-tap calls updateWorkoutMenu() and recreates DOM
+       const tapMatches = identifier !== undefined 
+         ? (identifier === lastTappedIdentifier) 
+         : (element === lastTappedElement);
+       const isDoubleTap = (currentTime - lastTapTime < DOUBLE_TAP_DELAY) && tapMatches;
        
        if (isDoubleTap) {
          // Double tap detected - clear tracking and call callback
          lastTapTime = 0;
          lastTappedElement = null;
+         lastTappedIdentifier = null;
          doubleTapCallback();
        } else {
          // First tap - execute single-click immediately, but track for potential double-tap
@@ -3259,12 +3265,14 @@
          // Track this tap for potential double-tap detection
          lastTapTime = currentTime;
          lastTappedElement = element;
+         lastTappedIdentifier = identifier !== undefined ? identifier : null;
          
          // Reset tracking after delay if no second tap
          setTimeout(() => {
            if (Date.now() - lastTapTime >= DOUBLE_TAP_DELAY) {
              lastTapTime = 0;
              lastTappedElement = null;
+             lastTappedIdentifier = null;
            }
          }, DOUBLE_TAP_DELAY);
        }
@@ -3328,7 +3336,7 @@
            workoutBtn.addEventListener('click', (e) => {
              if (e.target.classList.contains('delete-btn') || e.target.classList.contains('open-btn') || e.target.closest('.delete-btn') || e.target.closest('.open-btn')) return; // Don't filter on button clicks
              
-             // Check for double-tap
+             // Check for double-tap (use workoutName as identifier - single-tap recreates DOM via filterWorkout)
              handleDoubleTap(
                workoutBtn, 
                () => {
@@ -3338,7 +3346,8 @@
                () => {
                  // Single tap - filter workout
                  filterWorkout(workoutName);
-               }
+               },
+               workoutName
              );
            });
            
@@ -3363,7 +3372,7 @@
            mobileWorkoutBtn.addEventListener('click', (e) => {
              if (e.target.classList.contains('delete-btn') || e.target.classList.contains('open-btn') || e.target.closest('.delete-btn') || e.target.closest('.open-btn')) return; // Don't filter on button clicks
              
-             // Check for double-tap
+             // Check for double-tap (use workoutName as identifier - single-tap recreates DOM via filterWorkout)
              handleDoubleTap(
                mobileWorkoutBtn, 
                () => {
@@ -3373,7 +3382,8 @@
                () => {
                  // Single tap - filter workout
                  filterWorkout(workoutName);
-               }
+               },
+               workoutName
              );
            });
            
@@ -5422,6 +5432,10 @@
        mobileWeightLiftedChart.options.scales.y.title={display:true,text: isReps ? 'Weight (lbs)' : 'Reps'};
        updateCharts();
      });
+     document.getElementById('mobileWeightLiftedChart').addEventListener('dblclick', () => {
+       filteredWorkout = null;
+       updateCharts();
+     });
 
      document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
        const isDetailed = mobileFoodChart.data.datasets.length > 1;
@@ -5488,6 +5502,10 @@
      document.getElementById('toggleWeightLiftedReps').addEventListener('click',()=>{
        const isReps=weightLiftedChart.options.scales.y.title?.text==='Reps';
        weightLiftedChart.options.scales.y.title={display:true,text: isReps ? 'Weight (lbs)' : 'Reps'};
+       updateCharts();
+     });
+     document.getElementById('weightLiftedChart').addEventListener('dblclick', () => {
+       filteredWorkout = null;
        updateCharts();
      });
 
