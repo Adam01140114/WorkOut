@@ -861,7 +861,7 @@
            <h2>Weight Trajectory</h2>
            <canvas id="mobileWeightChart" height="200"></canvas>
            <button class="ghost hidden" id="mobileToggleWeightFat">Show Fat Loss</button>
-           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
+           <button class="primary" id="mobileAddWeightBtn" style="padding: 12px 18px; font-size: 15px;">Edit Weight</button>
            
          </div>
        </div>
@@ -5472,9 +5472,15 @@
        mobileWeightLiftedChart.options.scales.y.title={display:true,text: isReps ? 'Weight (lbs)' : 'Reps'};
        updateCharts();
      });
-     document.getElementById('mobileWeightLiftedChart').addEventListener('dblclick', () => {
-       filteredWorkout = null;
-       updateCharts();
+     document.getElementById('mobileWeightLiftedChart').addEventListener('click', (e) => {
+       handleDoubleTap(
+         e.currentTarget,
+         () => {
+           filteredWorkout = null;
+           updateCharts();
+         },
+         null // No single-tap action - only double-tap resets
+       );
      });
 
      document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
