@@ -30,6 +30,7 @@
     .label{font-size:14px;color:var(--muted);margin-bottom:4px;display:block;text-align:left}
     input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0e141b;color:var(--text)}
     #mobileHintensity,#mobileMbintensity{min-height:4.8em;padding:24px 12px;font-size:16px}
+    #mobileWorkoutDate,#mobileWorkoutWeight,#mobileWorkoutReps{min-height:3.2em;padding:18px 14px;font-size:18px}
     input[type="date"]{cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none}
     input[type="date"]::-webkit-calendar-picker-indicator{cursor:pointer;opacity:1}
     button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;display:block;margin:8px auto}
@@ -1122,6 +1123,10 @@
            <input id="weightAmount" type="number" step="0.1" placeholder="Enter your weight" />
          </div>
          <div class="field">
+           <label class="label" for="weightGoal">Weight Goal (lb)</label>
+           <input id="weightGoal" type="number" step="0.1" placeholder="Enter target weight" />
+         </div>
+         <div class="field">
            <label class="label" for="weightDate">Date</label>
            <input id="weightDate" type="date" />
          </div>
@@ -2170,6 +2175,18 @@
      // ===== Add Weight Modal Event Listeners =====
      document.getElementById('addWeightBtn').addEventListener('click', showAddWeightModal);
      document.getElementById('cancelAddWeight').addEventListener('click', hideAddWeightModal);
+     document.getElementById('weightGoal').addEventListener('change', () => {
+       const goalVal = document.getElementById('weightGoal').value;
+       if (goalVal && !isNaN(parseFloat(goalVal))) {
+         weightGoal = parseFloat(goalVal);
+         saveUserData();
+         updateCharts();
+       } else if (goalVal === '') {
+         weightGoal = null;
+         saveUserData();
+         updateCharts();
+       }
+     });
      document.getElementById('submitAddWeight').addEventListener('click', async () => {
        const weight = Number(document.getElementById('weightAmount').value);
        const date = document.getElementById('weightDate').value;
@@ -2188,6 +2205,16 @@
          errorDiv.classList.remove('hidden');
          successDiv.classList.add('hidden');
          return;
+       }
+       
+       // Save weight goal if entered
+       const goalVal = document.getElementById('weightGoal').value;
+       if (goalVal && !isNaN(parseFloat(goalVal))) {
+         weightGoal = parseFloat(goalVal);
+         saveUserData();
+       } else if (goalVal === '') {
+         weightGoal = null;
+         saveUserData();
        }
        
        try {
@@ -2242,6 +2269,7 @@
            basalByDate = data.basalByDate || {};
            activityByDate = data.activityByDate || {};
            weightByDate = data.weightByDate || {};
+           weightGoal = data.weightGoal ?? null;
            workoutDataByDate = data.workoutDataByDate || {};
            weightLiftedByDate = data.weightLiftedByDate || {};
            workoutTypes = data.workoutTypes || {};
@@ -2360,8 +2388,9 @@
          await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
            basalByDate,
            activityByDate,
-           weightByDate,
-           workoutDataByDate,
+          weightByDate,
+          weightGoal,
+          workoutDataByDate,
            weightLiftedByDate,
            workoutTypes,
            foodDataByDate,
@@ -2906,6 +2935,7 @@
        const today = todayStr();
        document.getElementById('weightDate').value = today;
        document.getElementById('weightAmount').value = '';
+       document.getElementById('weightGoal').value = weightGoal ?? '';
        
        // Clear any previous messages
        document.getElementById('addWeightError').classList.add('hidden');
@@ -3570,6 +3600,7 @@
      let basalByDate={};     // date -> BMR for that date
      let activityByDate={};  // date -> sum of activity kcal for that date
      let weightByDate={};    // date -> weight for that date
+    let weightGoal=null;    // target weight goal (lbs), persisted to Firebase
      let workoutDataByDate={}; // date -> workout data for that date
      let weightLiftedByDate={}; // date -> weight lifted data for that date
      let workoutTypes={}; // workout name -> {name, icon, lastEntry: {weight, reps, date}}
@@ -4905,13 +4936,22 @@
              const { labels: wLabelsMobile, actual: wActualMobile, projected: wProjectedMobile } =
                computeWeightSeries(weightByDate, 7);
 
-             // Calculate Y-axis range based on weight data (use mobile range for both for consistency)
+             // Calculate Y-axis range based on weight data and goal (y-min = goal - 10 when goal set)
              const allWeightValues = [...wActualMobile, ...wProjectedMobile].filter(w => w !== null && !isNaN(w));
+             let yMin, yMax;
              if (allWeightValues.length > 0) {
                const minWeight = Math.min(...allWeightValues);
                const maxWeight = Math.max(...allWeightValues);
-               const yMin = minWeight - 5;
-               const yMax = maxWeight + 5;
+               yMin = (weightGoal != null && !isNaN(weightGoal)) ? (weightGoal - 10) : (minWeight - 5);
+               yMax = Math.max(maxWeight + 5, yMin + 20); // Ensure chart has sensible range
+             } else if (weightGoal != null && !isNaN(weightGoal)) {
+               yMin = weightGoal - 10;
+               yMax = weightGoal + 10;
+             } else {
+               yMin = 0;
+               yMax = 200;
+             }
+             if (allWeightValues.length > 0 || (weightGoal != null && !isNaN(weightGoal))) {
                
                // Set Y-axis range for both desktop and mobile weight charts
                weightChart.options.scales.y.min = yMin;
